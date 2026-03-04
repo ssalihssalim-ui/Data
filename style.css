@@ -1,34 +1,21 @@
-/* Reset et style général reste identique à l’ancien CSS */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
-    background-color: #121212;
-    color: #fff;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+    background: #121212;
+    color: white;
+    font-family: Arial, sans-serif;
 }
 
+/* NAVBAR */
 .navbar {
     display: flex;
     justify-content: space-between;
-    align-items: center;
     padding: 1rem 2rem;
-    background-color: #1e1e1e;
-    border-bottom: 1px solid #333;
-    position: relative;
-    z-index: 10;
-}
-
-.navbar .logo {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #fff;
+    background: #1e1e1e;
 }
 
 .menu-btn {
@@ -36,208 +23,94 @@ body {
     cursor: pointer;
 }
 
+/* MENU */
 .menu-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0,0,0,0.85);
-    display: flex;
-    flex-direction: column;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    display: none;
     justify-content: center;
     align-items: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
     z-index: 1000;
 }
 
 .menu-overlay.show {
-    opacity: 1;
-    pointer-events: all;
+    display: flex;
 }
 
-.menu-overlay .menu-items {
+.menu-items {
     list-style: none;
     text-align: center;
 }
 
-.menu-overlay .menu-items li {
+.menu-items li {
     margin: 1rem 0;
 }
 
-.menu-overlay .menu-items li a {
-    color: #fff;
-    font-size: 2rem;
+.menu-items a {
+    color: white;
     text-decoration: none;
-    transition: color 0.2s;
-}
-
-.menu-overlay .menu-items li a:hover {
-    color: #00ffcc;
+    font-size: 2rem;
 }
 
 .close-btn {
     position: absolute;
-    top: 1.5rem;
-    right: 2rem;
-    font-size: 2.5rem;
-    cursor: pointer;
-    color: #fff;
-    transition: transform 0.3s;
-}
-
-.close-btn:hover {
-    transform: rotate(90deg);
-}
-
-.content {
-    flex: 1;
-    padding: 2rem;
-}
-
-.content h1 {
+    top: 20px;
+    right: 30px;
     font-size: 2rem;
-    margin-bottom: 1rem;
+    cursor: pointer;
 }
 
-.content p {
-    font-size: 1rem;
-    color: #ccc;
-}
-
-@media (min-width: 769px) {
-    .menu-btn {
-        display: none;
-    }
-}
-
-/* ================= CATEGORY MODAL ================= */
+/* MODALS */
 .category-modal {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.85);
+    inset: 0;
+    background: rgba(0,0,0,0.85);
     display: none;
     justify-content: center;
     align-items: center;
     z-index: 2000;
 }
 
+.category-modal.show {
+    display: flex;
+}
+
 .category-box {
-    background-color: #1e1e1e;
-    padding: 25px;
-    width: 400px;
-    border-radius: 8px;
-    border: 1px solid #333;
-    animation: fadeIn 0.3s ease;
+    background: #1e1e1e;
+    padding: 20px;
+    width: 350px;
+    border-radius: 6px;
 }
 
-.category-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.category-header h2 {
-    font-size: 1.5rem;
-}
-
-.close-category {
-    cursor: pointer;
-    color: red;
-    font-size: 1.5rem;
-    font-weight: bold;
-}
-
-#categoryName {
+.category-box input {
     width: 100%;
-    padding: 10px;
-    margin-top: 15px;
+    padding: 8px;
+    margin-top: 10px;
     background: #2c2c2c;
-    border: 1px solid #444;
+    border: none;
     color: white;
-    border-radius: 4px;
-    font-size: 1rem;
 }
 
-#saveCategory, #downloadCategory {
+.category-box button {
     width: 100%;
-    padding: 10px;
+    padding: 8px;
     margin-top: 10px;
-    background-color: #00ffcc;
-    border: none;
-    color: black;
-    font-weight: bold;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-#saveCategory:hover, #downloadCategory:hover {
-    background-color: #00ccaa;
-}
-
-/* Liste avec hauteur fixe pour 4 catégories par page */
-#categoryList {
-    list-style: none;
-    margin-top: 15px;
-    padding: 0;
-    max-height: 4 * 46px; /* approx 4 categories */
-    overflow: hidden;
-}
-
-#categoryList li {
-    background: #2c2c2c;
-    padding: 10px 8px;
-    margin-top: 6px;
-    border-radius: 4px;
-    font-size: 0.95rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.delete-btn {
-    background: red;
-    color: white;
-    border: none;
-    padding: 4px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.delete-btn:hover {
-    opacity: 0.8;
-}
-
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 10px;
-}
-
-.pagination button {
-    padding: 5px 10px;
-    margin: 0 5px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
     background: #00ffcc;
-    color: black;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
 }
 
-.pagination button:hover {
-    background: #00ccaa;
+ul {
+    list-style: none;
+    margin-top: 10px;
 }
 
-/* Animation */
-@keyframes fadeIn {
-    from {opacity: 0; transform: scale(0.9);}
-    to {opacity: 1; transform: scale(1);}
+li {
+    background: #2c2c2c;
+    padding: 6px;
+    margin-top: 5px;
+    display: flex;
+    justify-content: space-between;
 }
