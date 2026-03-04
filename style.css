@@ -1,4 +1,4 @@
-/* Reset */
+/* Reset et style général reste identique à l’ancien CSS */
 * {
     margin: 0;
     padding: 0;
@@ -14,7 +14,6 @@ body {
     flex-direction: column;
 }
 
-/* Navbar */
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -37,7 +36,6 @@ body {
     cursor: pointer;
 }
 
-/* Fullscreen Menu */
 .menu-overlay {
     position: fixed;
     top: 0;
@@ -80,7 +78,6 @@ body {
     color: #00ffcc;
 }
 
-/* Close button */
 .close-btn {
     position: absolute;
     top: 1.5rem;
@@ -95,7 +92,6 @@ body {
     transform: rotate(90deg);
 }
 
-/* Main content */
 .content {
     flex: 1;
     padding: 2rem;
@@ -111,7 +107,6 @@ body {
     color: #ccc;
 }
 
-/* Hide hamburger on desktop if needed */
 @media (min-width: 769px) {
     .menu-btn {
         display: none;
@@ -158,7 +153,6 @@ body {
     font-weight: bold;
 }
 
-/* Input */
 #categoryName {
     width: 100%;
     padding: 10px;
@@ -170,8 +164,7 @@ body {
     font-size: 1rem;
 }
 
-/* Save button */
-#saveCategory {
+#saveCategory, #downloadCategory {
     width: 100%;
     padding: 10px;
     margin-top: 10px;
@@ -184,39 +177,22 @@ body {
     transition: 0.3s;
 }
 
-#saveCategory:hover {
+#saveCategory:hover, #downloadCategory:hover {
     background-color: #00ccaa;
 }
 
-/* Download JSON button */
-#categoryList + button {
-    display: block;
-    width: 100%;
-    margin-top: 10px;
-    padding: 10px;
-    background-color: #00ffcc;
-    border: none;
-    color: black;
-    font-weight: bold;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-#categoryList + button:hover {
-    background-color: #00ccaa;
-}
-
-/* Category list */
+/* Liste avec hauteur fixe pour 4 catégories par page */
 #categoryList {
     list-style: none;
     margin-top: 15px;
     padding: 0;
+    max-height: 4 * 46px; /* approx 4 categories */
+    overflow: hidden;
 }
 
 #categoryList li {
     background: #2c2c2c;
-    padding: 10px 8px; /* padding top pour espace */
+    padding: 10px 8px;
     margin-top: 6px;
     border-radius: 4px;
     font-size: 0.95rem;
@@ -225,7 +201,6 @@ body {
     align-items: center;
 }
 
-/* Delete button */
 .delete-btn {
     background: red;
     color: white;
@@ -237,6 +212,28 @@ body {
 
 .delete-btn:hover {
     opacity: 0.8;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.pagination button {
+    padding: 5px 10px;
+    margin: 0 5px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    background: #00ffcc;
+    color: black;
+}
+
+.pagination button:hover {
+    background: #00ccaa;
 }
 
 /* Animation */
