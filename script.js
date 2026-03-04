@@ -1,25 +1,17 @@
-document.addEventListener('DOMContentLoaded', () => {
+ document.addEventListener('DOMContentLoaded', () => {
 
-    /* ================= MENU ================= */
+    /* --- MENU --- */
     const menuBtn = document.getElementById('menu-btn');
     const closeBtn = document.getElementById('close-btn');
     const menuOverlay = document.getElementById('menu');
 
-    menuBtn.addEventListener('click', () => {
-        menuOverlay.classList.add('show');
-    });
+    menuBtn.addEventListener('click', () => menuOverlay.classList.add('show'));
+    closeBtn.addEventListener('click', () => menuOverlay.classList.remove('show'));
+    menuOverlay.addEventListener('click', (e) => { if(e.target===menuOverlay) menuOverlay.classList.remove('show'); });
 
-    closeBtn.addEventListener('click', () => {
-        menuOverlay.classList.remove('show');
-    });
-
-    menuOverlay.addEventListener('click', (e) => {
-        if (e.target === menuOverlay) menuOverlay.classList.remove('show');
-    });
-
-    /* ================= CATEGORY MODAL ================= */
+    /* ================= CATEGORY LOGIC ================= */
     const openCategoryBtn = document.getElementById('openCategory');
-    const modal = document.getElementById('categoryModal');
+    const modalCat = document.getElementById('categoryModal');
     const closeCategoryBtn = document.getElementById('closeCategory');
     const saveCategoryBtn = document.getElementById('saveCategory');
     const downloadCategoryBtn = document.getElementById('downloadCategory');
@@ -29,120 +21,198 @@ document.addEventListener('DOMContentLoaded', () => {
     const prevPageBtn = document.getElementById('prevPage');
     const nextPageBtn = document.getElementById('nextPage');
     const pageInfo = document.getElementById('pageInfo');
-
     const ITEMS_PER_PAGE = 4;
-    let currentPage = 1;
+    let currentCatPage = 1;
 
-    /* --- Open modal --- */
-    openCategoryBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        modal.style.display = 'flex';
-        menuOverlay.classList.remove('show');
-        currentPage = 1;
-        loadCategories();
-    });
+    openCategoryBtn.addEventListener('click', (e)=>{e.preventDefault(); modalCat.style.display='flex'; menuOverlay.classList.remove('show'); currentCatPage=1; loadCategories();});
+    closeCategoryBtn.addEventListener('click',()=>modalCat.style.display='none');
+    modalCat.addEventListener('click',(e)=>{if(e.target===modalCat) modalCat.style.display='none';});
 
-    /* --- Close modal --- */
-    closeCategoryBtn.addEventListener('click', () => modal.style.display = 'none');
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) modal.style.display = 'none';
-    });
-
-    /* --- Save category --- */
-    saveCategoryBtn.addEventListener('click', () => {
+    saveCategoryBtn.addEventListener('click',()=>{
         const name = categoryInput.value.trim();
-        if (!name) return alert('Enter category name');
-
-        let categories = JSON.parse(localStorage.getItem('categories')) || [];
-        const newCategory = {
-            id: Date.now(),
-            category_name: name,
-            created_at: new Date().toISOString()
-        };
-        categories.push(newCategory);
-        localStorage.setItem('categories', JSON.stringify(categories));
-        categoryInput.value = '';
-        currentPage = Math.ceil(categories.length / ITEMS_PER_PAGE);
+        if(!name) return alert('Enter category name');
+        let categories = JSON.parse(localStorage.getItem('categories'))||[];
+        categories.push({id:Date.now(),category_name:name,created_at:new Date().toISOString()});
+        localStorage.setItem('categories',JSON.stringify(categories));
+        categoryInput.value='';
+        currentCatPage=Math.ceil(categories.length/ITEMS_PER_PAGE);
         loadCategories();
     });
 
-    /* --- Download JSON --- */
-    downloadCategoryBtn.addEventListener('click', () => {
-        const categories = JSON.parse(localStorage.getItem('categories')) || [];
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(categories, null, 2));
-        const dlAnchor = document.createElement('a');
-        dlAnchor.setAttribute("href", dataStr);
-        dlAnchor.setAttribute("download", "category.json");
+    downloadCategoryBtn.addEventListener('click',()=>{
+        const categories = JSON.parse(localStorage.getItem('categories'))||[];
+        const dataStr="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(categories,null,2));
+        const dlAnchor=document.createElement('a');
+        dlAnchor.setAttribute("href",dataStr);
+        dlAnchor.setAttribute("download","category.json");
         dlAnchor.click();
     });
 
-    /* --- Import JSON --- */
-    importCategoryInput.addEventListener('change', (e) => {
+    importCategoryInput.addEventListener('change',(e)=>{
         const file = e.target.files[0];
-        if (!file) return;
+        if(!file) return;
         const reader = new FileReader();
-        reader.onload = function(event) {
-            try {
+        reader.onload=function(event){
+            try{
                 const imported = JSON.parse(event.target.result);
-                if (!Array.isArray(imported)) throw "Invalid JSON";
-                let categories = JSON.parse(localStorage.getItem('categories')) || [];
-                imported.forEach(cat => {
-                    if(cat.id && cat.category_name && cat.created_at) categories.push(cat);
-                });
-                localStorage.setItem('categories', JSON.stringify(categories));
-                currentPage = 1;
+                if(!Array.isArray(imported)) throw "Invalid JSON";
+                let categories = JSON.parse(localStorage.getItem('categories'))||[];
+                imported.forEach(cat=>{if(cat.id && cat.category_name && cat.created_at) categories.push(cat);});
+                localStorage.setItem('categories',JSON.stringify(categories));
+                currentCatPage=1;
                 loadCategories();
-            } catch(err) {
-                alert('Invalid JSON file!');
-            }
+            }catch(err){alert('Invalid JSON file!');}
         };
         reader.readAsText(file);
-        e.target.value = ""; // reset file input
+        e.target.value="";
     });
 
-    /* --- Pagination --- */
-    prevPageBtn.addEventListener('click', () => {
-        if (currentPage > 1) currentPage--;
+    prevPageBtn.addEventListener('click',()=>{if(currentCatPage>1) currentCatPage--; loadCategories();});
+    nextPageBtn.addEventListener('click',()=>{
+        let categories=JSON.parse(localStorage.getItem('categories'))||[];
+        if(currentCatPage<Math.ceil(categories.length/ITEMS_PER_PAGE)) currentCatPage++;
         loadCategories();
     });
 
-    nextPageBtn.addEventListener('click', () => {
-        let categories = JSON.parse(localStorage.getItem('categories')) || [];
-        if (currentPage < Math.ceil(categories.length / ITEMS_PER_PAGE)) currentPage++;
-        loadCategories();
-    });
-
-    /* --- Load categories --- */
-    function loadCategories() {
-        const categories = JSON.parse(localStorage.getItem('categories')) || [];
-        const totalPages = Math.max(Math.ceil(categories.length / ITEMS_PER_PAGE),1);
-        const start = (currentPage-1)*ITEMS_PER_PAGE;
-        const pageItems = categories.slice(start, start + ITEMS_PER_PAGE);
-
-        categoryList.innerHTML = '';
-        pageItems.forEach((cat,index) => {
-            const li = document.createElement('li');
-            li.innerHTML = `
-                <span>
-                    <strong>${cat.category_name}</strong><br>
-                    ID: ${cat.id}<br>
-                    ${new Date(cat.created_at).toLocaleString()}
-                </span>
-                <button class="delete-btn">X</button>
-            `;
-            li.querySelector('.delete-btn').addEventListener('click', () => {
-                const globalIndex = start + index;
-                categories.splice(globalIndex,1);
-                localStorage.setItem('categories', JSON.stringify(categories));
-                if(currentPage > Math.ceil(categories.length / ITEMS_PER_PAGE)) currentPage--;
+    function loadCategories(){
+        const categories=JSON.parse(localStorage.getItem('categories'))||[];
+        const totalPages=Math.max(Math.ceil(categories.length/ITEMS_PER_PAGE),1);
+        const start=(currentCatPage-1)*ITEMS_PER_PAGE;
+        const pageItems=categories.slice(start,start+ITEMS_PER_PAGE);
+        categoryList.innerHTML='';
+        pageItems.forEach((cat,index)=>{
+            const li=document.createElement('li');
+            li.innerHTML=`<span><strong>${cat.category_name}</strong><br>ID:${cat.id}<br>${new Date(cat.created_at).toLocaleString()}</span><button class="delete-btn">X</button>`;
+            li.querySelector('.delete-btn').addEventListener('click',()=>{
+                categories.splice(start+index,1);
+                localStorage.setItem('categories',JSON.stringify(categories));
+                if(currentCatPage>Math.ceil(categories.length/ITEMS_PER_PAGE)) currentCatPage--;
                 loadCategories();
             });
             categoryList.appendChild(li);
         });
+        pageInfo.textContent=`Page ${currentCatPage} / ${totalPages}`;
+        prevPageBtn.disabled=currentCatPage===1;
+        nextPageBtn.disabled=currentCatPage===totalPages;
+    }
 
-        pageInfo.textContent = `Page ${currentPage} / ${totalPages}`;
-        prevPageBtn.disabled = currentPage === 1;
-        nextPageBtn.disabled = currentPage === totalPages;
+    /* ================= PRODUCT LOGIC ================= */
+    const openProductBtn = document.getElementById('openProduct');
+    const modalProd = document.getElementById('productModal');
+    const closeProductBtn = document.getElementById('closeProduct');
+    const saveProductBtn = document.getElementById('saveProduct');
+    const downloadProductBtn = document.getElementById('downloadProduct');
+    const importProductInput = document.getElementById('importProduct');
+
+    const productNameInput = document.getElementById('productName');
+    const quantityInput = document.getElementById('quantity');
+    const unitPriceInput = document.getElementById('unitPrice');
+    const boxPriceInput = document.getElementById('boxPrice');
+    const sellPriceInput = document.getElementById('sellPrice');
+    const stockInput = document.getElementById('stock');
+    const stockSoldInput = document.getElementById('stockSold');
+    const productionDateInput = document.getElementById('productionDate');
+    const expirationDateInput = document.getElementById('expirationDate');
+
+    const productList = document.getElementById('productList');
+    const prevProdPageBtn = document.getElementById('prevProdPage');
+    const nextProdPageBtn = document.getElementById('nextProdPage');
+    const prodPageInfo = document.getElementById('prodPageInfo');
+
+    let currentProdPage = 1;
+
+    openProductBtn.addEventListener('click',(e)=>{e.preventDefault(); modalProd.style.display='flex'; menuOverlay.classList.remove('show'); currentProdPage=1; loadProducts();});
+    closeProductBtn.addEventListener('click',()=>modalProd.style.display='none');
+    modalProd.addEventListener('click',(e)=>{if(e.target===modalProd) modalProd.style.display='none';});
+
+    saveProductBtn.addEventListener('click',()=>{
+        const name = productNameInput.value.trim();
+        const quantity = parseFloat(quantityInput.value)||0;
+        const unitPrice = parseFloat(unitPriceInput.value)||0;
+        const boxPrice = parseFloat(boxPriceInput.value)||0;
+        const sellPrice = parseFloat(sellPriceInput.value)||0;
+        const stock = parseInt(stockInput.value)||0;
+        const stockSold = parseInt(stockSoldInput.value)||0;
+        const prodDate = productionDateInput.value||'';
+        const expDate = expirationDateInput.value||'';
+
+        if(!name) return alert('Enter product name');
+
+        const profit = sellPrice - unitPrice;
+        let products = JSON.parse(localStorage.getItem('products'))||[];
+        products.push({id:Date.now(),product_name:name,quantity,unit_price:unitPrice,box_price:boxPrice,sell_price:sellPrice,profit,stock,stock_sold:stockSold,production_date:prodDate,expiration_date:expDate});
+        localStorage.setItem('products',JSON.stringify(products));
+
+        // reset inputs
+        [productNameInput,quantityInput,unitPriceInput,boxPriceInput,sellPriceInput,stockInput,stockSoldInput,productionDateInput,expirationDateInput].forEach(input=>input.value='');
+        currentProdPage=Math.ceil(products.length/ITEMS_PER_PAGE);
+        loadProducts();
+    });
+
+    downloadProductBtn.addEventListener('click',()=>{
+        const products=JSON.parse(localStorage.getItem('products'))||[];
+        const dataStr="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(products,null,2));
+        const dlAnchor=document.createElement('a');
+        dlAnchor.setAttribute("href",dataStr);
+        dlAnchor.setAttribute("download","products.json");
+        dlAnchor.click();
+    });
+
+    importProductInput.addEventListener('change',(e)=>{
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload=function(event){
+            try{
+                const imported = JSON.parse(event.target.result);
+                if(!Array.isArray(imported)) throw "Invalid JSON";
+                let products = JSON.parse(localStorage.getItem('products'))||[];
+                imported.forEach(p=>{if(p.id && p.product_name) products.push(p);});
+                localStorage.setItem('products',JSON.stringify(products));
+                currentProdPage=1;
+                loadProducts();
+            }catch(err){alert('Invalid JSON file!');}
+        };
+        reader.readAsText(file);
+        e.target.value="";
+    });
+
+    prevProdPageBtn.addEventListener('click',()=>{if(currentProdPage>1) currentProdPage--; loadProducts();});
+    nextProdPageBtn.addEventListener('click',()=>{
+        let products = JSON.parse(localStorage.getItem('products'))||[];
+        if(currentProdPage<Math.ceil(products.length/ITEMS_PER_PAGE)) currentProdPage++;
+        loadProducts();
+    });
+
+    function loadProducts(){
+        const products = JSON.parse(localStorage.getItem('products'))||[];
+        const totalPages = Math.max(Math.ceil(products.length/ITEMS_PER_PAGE),1);
+        const start = (currentProdPage-1)*ITEMS_PER_PAGE;
+        const pageItems = products.slice(start,start+ITEMS_PER_PAGE);
+
+        productList.innerHTML='';
+        pageItems.forEach((p,index)=>{
+            const li=document.createElement('li');
+            li.innerHTML=`<span>
+                <strong>${p.product_name}</strong><br>
+                ID:${p.id}<br>
+                Qty:${p.quantity} Unit:${p.unit_price} Box:${p.box_price} Sell:${p.sell_price} Profit:${p.profit}<br>
+                Stock:${p.stock} Sold:${p.stock_sold}<br>
+                Prod:${p.production_date} Exp:${p.expiration_date}
+            </span>
+            <button class="delete-btn">X</button>`;
+            li.querySelector('.delete-btn').addEventListener('click',()=>{
+                products.splice(start+index,1);
+                localStorage.setItem('products',JSON.stringify(products));
+                if(currentProdPage>Math.ceil(products.length/ITEMS_PER_PAGE)) currentProdPage--;
+                loadProducts();
+            });
+            productList.appendChild(li);
+        });
+
+        prodPageInfo.textContent=`Page ${currentProdPage} / ${totalPages}`;
+        prevProdPageBtn.disabled=currentProdPage===1;
+        nextProdPageBtn.disabled=currentProdPage===totalPages;
     }
 
 });
