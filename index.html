@@ -8,25 +8,19 @@
 </head>
 <body>
 
-<!-- NAVBAR -->
 <nav class="navbar">
     <div class="logo">MiniMarket</div>
     <div class="menu-btn" id="menu-btn">☰</div>
 </nav>
 
-<!-- MENU -->
 <div class="menu-overlay" id="menu">
     <div class="close-btn" id="close-btn">✕</div>
     <ul class="menu-items">
         <li><a href="#" id="openCategory">CATEGORIE</a></li>
         <li><a href="#" id="openProduct">PRODUCTS</a></li>
-        <li><a href="#">CLIENT</a></li>
-        <li><a href="#">SUPPLIERS</a></li>
-        <li><a href="#">STATISTICS</a></li>
     </ul>
 </div>
 
-<!-- CONTENT -->
 <div class="content">
     <h1>DATA</h1>
     <p>Manage categories and products.</p>
@@ -42,9 +36,7 @@
 
         <input type="text" id="categoryName" placeholder="Enter category name">
         <button id="saveCategory">Save Category</button>
-        <button id="downloadCategory">Download JSON</button>
 
-        <h3>Categories List</h3>
         <ul id="categoryList"></ul>
     </div>
 </div>
@@ -52,7 +44,6 @@
 <!-- PRODUCT MODAL -->
 <div class="category-modal" id="productModal">
     <div class="category-box">
-
         <div class="category-header">
             <h2>Add Product</h2>
             <span id="closeProduct" class="close-category">✖</span>
@@ -63,9 +54,7 @@
         <input type="number" id="sellPrice" placeholder="Sell Price">
 
         <button id="saveProduct">Save Product</button>
-        <button id="downloadProduct">Download JSON</button>
 
-        <h3>Products List</h3>
         <ul id="productList"></ul>
     </div>
 </div>
