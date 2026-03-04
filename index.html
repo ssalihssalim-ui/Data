@@ -19,7 +19,7 @@
     <div class="close-btn" id="close-btn">✕</div>
     <ul class="menu-items">
         <li><a href="#" id="openCategory">CATEGORIE</a></li>
-        <li><a href="#">PRODUCTS</a></li>
+        <li><a href="#" id="openProduct">PRODUCTS</a></li>
         <li><a href="#">CLIENT</a></li>
         <li><a href="#">SUPPLIERS</a></li>
         <li><a href="#">STATISTICS</a></li>
@@ -29,7 +29,7 @@
 <!-- Main content -->
 <div class="content">
     <h1>DATA</h1>
-    <p>Here you can manage categories, products, clients, suppliers and statistics.</p>
+    <p>Manage categories and products.</p>
 </div>
 
 <!-- ================= CATEGORY MODAL ================= -->
@@ -56,7 +56,40 @@
 
     </div>
 </div>
-<!-- ================================================== -->
+
+<!-- ================= PRODUCT MODAL ================= -->
+<div class="category-modal" id="productModal">
+    <div class="category-box">
+
+        <div class="category-header">
+            <h2>Add Product</h2>
+            <span id="closeProduct" class="close-category">✖</span>
+        </div>
+
+        <input type="text" id="productName" placeholder="Product Name">
+        <input type="number" id="quantity" placeholder="Quantity">
+        <input type="number" step="0.01" id="unitPrice" placeholder="Unit Price">
+        <input type="number" step="0.01" id="boxPrice" placeholder="Box Price">
+        <input type="number" step="0.01" id="sellPrice" placeholder="Sell Price">
+        <input type="number" id="stock" placeholder="Stock">
+        <input type="number" id="stockSold" placeholder="Stock Sold">
+        <input type="date" id="productionDate" placeholder="Production Date">
+        <input type="date" id="expirationDate" placeholder="Expiration Date">
+
+        <button id="saveProduct">Save Product</button>
+        <input type="file" id="importProduct" accept=".json" style="margin-top:10px;"/>
+        <button id="downloadProduct">Download JSON</button>
+
+        <h3>Products List</h3>
+        <ul id="productList"></ul>
+        <div class="pagination">
+            <button id="prevProdPage">&lt;</button>
+            <span id="prodPageInfo"></span>
+            <button id="nextProdPage">&gt;</button>
+        </div>
+
+    </div>
+</div>
 
 <script src="script.js"></script>
 </body>
