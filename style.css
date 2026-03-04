@@ -29,6 +29,7 @@ body {
 .navbar .logo {
     font-size: 1.5rem;
     font-weight: bold;
+    color: #fff;
 }
 
 .menu-btn {
@@ -43,7 +44,7 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(0,0,0,0.9);
+    background-color: rgba(0,0,0,0.85);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -86,6 +87,8 @@ body {
     right: 2rem;
     font-size: 2.5rem;
     cursor: pointer;
+    color: #fff;
+    transition: transform 0.3s;
 }
 
 .close-btn:hover {
@@ -104,7 +107,15 @@ body {
 }
 
 .content p {
+    font-size: 1rem;
     color: #ccc;
+}
+
+/* Hide hamburger on desktop if needed */
+@media (min-width: 769px) {
+    .menu-btn {
+        display: none;
+    }
 }
 
 /* ================= CATEGORY MODAL ================= */
@@ -115,7 +126,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.8);
+    background-color: rgba(0,0,0,0.85);
     display: none;
     justify-content: center;
     align-items: center;
@@ -123,7 +134,7 @@ body {
 }
 
 .category-box {
-    background: #1e1e1e;
+    background-color: #1e1e1e;
     padding: 25px;
     width: 400px;
     border-radius: 8px;
@@ -137,10 +148,14 @@ body {
     align-items: center;
 }
 
+.category-header h2 {
+    font-size: 1.5rem;
+}
+
 .close-category {
     cursor: pointer;
     color: red;
-    font-size: 20px;
+    font-size: 1.5rem;
     font-weight: bold;
 }
 
@@ -152,27 +167,30 @@ body {
     border: 1px solid #444;
     color: white;
     border-radius: 4px;
+    font-size: 1rem;
 }
 
 #saveCategory {
     width: 100%;
     padding: 10px;
     margin-top: 10px;
-    background: #00ffcc;
+    background-color: #00ffcc;
     border: none;
     color: black;
     font-weight: bold;
     border-radius: 4px;
     cursor: pointer;
+    transition: 0.3s;
 }
 
 #saveCategory:hover {
-    background: #00ccaa;
+    background-color: #00ccaa;
 }
 
 #categoryList {
     list-style: none;
     margin-top: 15px;
+    padding: 0;
 }
 
 #categoryList li {
@@ -180,7 +198,7 @@ body {
     padding: 8px;
     margin-top: 6px;
     border-radius: 4px;
-    font-size: 14px;
+    font-size: 0.95rem;
 }
 
 /* Animation */
