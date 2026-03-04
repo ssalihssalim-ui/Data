@@ -119,7 +119,6 @@ body {
 }
 
 /* ================= CATEGORY MODAL ================= */
-
 .category-modal {
     position: fixed;
     top: 0;
@@ -159,6 +158,7 @@ body {
     font-weight: bold;
 }
 
+/* Input */
 #categoryName {
     width: 100%;
     padding: 10px;
@@ -170,6 +170,7 @@ body {
     font-size: 1rem;
 }
 
+/* Save button */
 #saveCategory {
     width: 100%;
     padding: 10px;
@@ -187,6 +188,26 @@ body {
     background-color: #00ccaa;
 }
 
+/* Download JSON button */
+#categoryList + button {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #00ffcc;
+    border: none;
+    color: black;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#categoryList + button:hover {
+    background-color: #00ccaa;
+}
+
+/* Category list */
 #categoryList {
     list-style: none;
     margin-top: 15px;
@@ -195,10 +216,27 @@ body {
 
 #categoryList li {
     background: #2c2c2c;
-    padding: 8px;
+    padding: 10px 8px; /* padding top pour espace */
     margin-top: 6px;
     border-radius: 4px;
     font-size: 0.95rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Delete button */
+.delete-btn {
+    background: red;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.delete-btn:hover {
+    opacity: 0.8;
 }
 
 /* Animation */
