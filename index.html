@@ -42,11 +42,17 @@
         </div>
 
         <input type="text" id="categoryName" placeholder="Enter category name">
-
         <button id="saveCategory">Save Category</button>
+        <input type="file" id="importCategory" accept=".json" style="margin-top:10px;"/>
+        <button id="downloadCategory">Download JSON</button>
 
         <h3>Categories List</h3>
         <ul id="categoryList"></ul>
+        <div class="pagination">
+            <button id="prevPage">&lt;</button>
+            <span id="pageInfo"></span>
+            <button id="nextPage">&gt;</button>
+        </div>
 
     </div>
 </div>
