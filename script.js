@@ -1,218 +1,101 @@
- document.addEventListener('DOMContentLoaded', () => {
+ document.addEventListener("DOMContentLoaded", () => {
 
-    /* --- MENU --- */
-    const menuBtn = document.getElementById('menu-btn');
-    const closeBtn = document.getElementById('close-btn');
-    const menuOverlay = document.getElementById('menu');
+    // MENU
+    const menuBtn = document.getElementById("menu-btn");
+    const closeBtn = document.getElementById("close-btn");
+    const menu = document.getElementById("menu");
 
-    menuBtn.addEventListener('click', () => menuOverlay.classList.add('show'));
-    closeBtn.addEventListener('click', () => menuOverlay.classList.remove('show'));
-    menuOverlay.addEventListener('click', (e) => { if(e.target===menuOverlay) menuOverlay.classList.remove('show'); });
+    menuBtn.onclick = () => menu.classList.add("show");
+    closeBtn.onclick = () => menu.classList.remove("show");
 
-    /* ================= CATEGORY LOGIC ================= */
-    const openCategoryBtn = document.getElementById('openCategory');
-    const modalCat = document.getElementById('categoryModal');
-    const closeCategoryBtn = document.getElementById('closeCategory');
-    const saveCategoryBtn = document.getElementById('saveCategory');
-    const downloadCategoryBtn = document.getElementById('downloadCategory');
-    const importCategoryInput = document.getElementById('importCategory');
-    const categoryInput = document.getElementById('categoryName');
-    const categoryList = document.getElementById('categoryList');
-    const prevPageBtn = document.getElementById('prevPage');
-    const nextPageBtn = document.getElementById('nextPage');
-    const pageInfo = document.getElementById('pageInfo');
-    const ITEMS_PER_PAGE = 4;
-    let currentCatPage = 1;
+    // CATEGORY
+    const openCategory = document.getElementById("openCategory");
+    const categoryModal = document.getElementById("categoryModal");
+    const closeCategory = document.getElementById("closeCategory");
+    const saveCategory = document.getElementById("saveCategory");
+    const categoryList = document.getElementById("categoryList");
 
-    openCategoryBtn.addEventListener('click', (e)=>{e.preventDefault(); modalCat.style.display='flex'; menuOverlay.classList.remove('show'); currentCatPage=1; loadCategories();});
-    closeCategoryBtn.addEventListener('click',()=>modalCat.style.display='none');
-    modalCat.addEventListener('click',(e)=>{if(e.target===modalCat) modalCat.style.display='none';});
-
-    saveCategoryBtn.addEventListener('click',()=>{
-        const name = categoryInput.value.trim();
-        if(!name) return alert('Enter category name');
-        let categories = JSON.parse(localStorage.getItem('categories'))||[];
-        categories.push({id:Date.now(),category_name:name,created_at:new Date().toISOString()});
-        localStorage.setItem('categories',JSON.stringify(categories));
-        categoryInput.value='';
-        currentCatPage=Math.ceil(categories.length/ITEMS_PER_PAGE);
+    openCategory.onclick = (e) => {
+        e.preventDefault();
+        menu.classList.remove("show");
+        categoryModal.classList.add("show");
         loadCategories();
-    });
+    };
 
-    downloadCategoryBtn.addEventListener('click',()=>{
-        const categories = JSON.parse(localStorage.getItem('categories'))||[];
-        const dataStr="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(categories,null,2));
-        const dlAnchor=document.createElement('a');
-        dlAnchor.setAttribute("href",dataStr);
-        dlAnchor.setAttribute("download","category.json");
-        dlAnchor.click();
-    });
+    closeCategory.onclick = () => categoryModal.classList.remove("show");
 
-    importCategoryInput.addEventListener('change',(e)=>{
-        const file = e.target.files[0];
-        if(!file) return;
-        const reader = new FileReader();
-        reader.onload=function(event){
-            try{
-                const imported = JSON.parse(event.target.result);
-                if(!Array.isArray(imported)) throw "Invalid JSON";
-                let categories = JSON.parse(localStorage.getItem('categories'))||[];
-                imported.forEach(cat=>{if(cat.id && cat.category_name && cat.created_at) categories.push(cat);});
-                localStorage.setItem('categories',JSON.stringify(categories));
-                currentCatPage=1;
-                loadCategories();
-            }catch(err){alert('Invalid JSON file!');}
-        };
-        reader.readAsText(file);
-        e.target.value="";
-    });
+    saveCategory.onclick = () => {
+        const name = document.getElementById("categoryName").value.trim();
+        if (!name) return alert("Enter category name");
 
-    prevPageBtn.addEventListener('click',()=>{if(currentCatPage>1) currentCatPage--; loadCategories();});
-    nextPageBtn.addEventListener('click',()=>{
-        let categories=JSON.parse(localStorage.getItem('categories'))||[];
-        if(currentCatPage<Math.ceil(categories.length/ITEMS_PER_PAGE)) currentCatPage++;
+        let categories = JSON.parse(localStorage.getItem("categories")) || [];
+        categories.push({ id: Date.now(), name });
+        localStorage.setItem("categories", JSON.stringify(categories));
         loadCategories();
-    });
+    };
 
-    function loadCategories(){
-        const categories=JSON.parse(localStorage.getItem('categories'))||[];
-        const totalPages=Math.max(Math.ceil(categories.length/ITEMS_PER_PAGE),1);
-        const start=(currentCatPage-1)*ITEMS_PER_PAGE;
-        const pageItems=categories.slice(start,start+ITEMS_PER_PAGE);
-        categoryList.innerHTML='';
-        pageItems.forEach((cat,index)=>{
-            const li=document.createElement('li');
-            li.innerHTML=`<span><strong>${cat.category_name}</strong><br>ID:${cat.id}<br>${new Date(cat.created_at).toLocaleString()}</span><button class="delete-btn">X</button>`;
-            li.querySelector('.delete-btn').addEventListener('click',()=>{
-                categories.splice(start+index,1);
-                localStorage.setItem('categories',JSON.stringify(categories));
-                if(currentCatPage>Math.ceil(categories.length/ITEMS_PER_PAGE)) currentCatPage--;
-                loadCategories();
-            });
+    function loadCategories() {
+        const categories = JSON.parse(localStorage.getItem("categories")) || [];
+        categoryList.innerHTML = "";
+        categories.forEach(cat => {
+            const li = document.createElement("li");
+            li.innerHTML = `${cat.name} <button onclick="deleteCategory(${cat.id})">X</button>`;
             categoryList.appendChild(li);
         });
-        pageInfo.textContent=`Page ${currentCatPage} / ${totalPages}`;
-        prevPageBtn.disabled=currentCatPage===1;
-        nextPageBtn.disabled=currentCatPage===totalPages;
     }
 
-    /* ================= PRODUCT LOGIC ================= */
-    const openProductBtn = document.getElementById('openProduct');
-    const modalProd = document.getElementById('productModal');
-    const closeProductBtn = document.getElementById('closeProduct');
-    const saveProductBtn = document.getElementById('saveProduct');
-    const downloadProductBtn = document.getElementById('downloadProduct');
-    const importProductInput = document.getElementById('importProduct');
+    window.deleteCategory = function(id) {
+        let categories = JSON.parse(localStorage.getItem("categories")) || [];
+        categories = categories.filter(cat => cat.id !== id);
+        localStorage.setItem("categories", JSON.stringify(categories));
+        loadCategories();
+    }
 
-    const productNameInput = document.getElementById('productName');
-    const quantityInput = document.getElementById('quantity');
-    const unitPriceInput = document.getElementById('unitPrice');
-    const boxPriceInput = document.getElementById('boxPrice');
-    const sellPriceInput = document.getElementById('sellPrice');
-    const stockInput = document.getElementById('stock');
-    const stockSoldInput = document.getElementById('stockSold');
-    const productionDateInput = document.getElementById('productionDate');
-    const expirationDateInput = document.getElementById('expirationDate');
+    // PRODUCT
+    const openProduct = document.getElementById("openProduct");
+    const productModal = document.getElementById("productModal");
+    const closeProduct = document.getElementById("closeProduct");
+    const saveProduct = document.getElementById("saveProduct");
+    const productList = document.getElementById("productList");
 
-    const productList = document.getElementById('productList');
-    const prevProdPageBtn = document.getElementById('prevProdPage');
-    const nextProdPageBtn = document.getElementById('nextProdPage');
-    const prodPageInfo = document.getElementById('prodPageInfo');
+    openProduct.onclick = (e) => {
+        e.preventDefault();
+        menu.classList.remove("show");
+        productModal.classList.add("show");
+        loadProducts();
+    };
 
-    let currentProdPage = 1;
+    closeProduct.onclick = () => productModal.classList.remove("show");
 
-    openProductBtn.addEventListener('click',(e)=>{e.preventDefault(); modalProd.style.display='flex'; menuOverlay.classList.remove('show'); currentProdPage=1; loadProducts();});
-    closeProductBtn.addEventListener('click',()=>modalProd.style.display='none');
-    modalProd.addEventListener('click',(e)=>{if(e.target===modalProd) modalProd.style.display='none';});
-
-    saveProductBtn.addEventListener('click',()=>{
-        const name = productNameInput.value.trim();
-        const quantity = parseFloat(quantityInput.value)||0;
-        const unitPrice = parseFloat(unitPriceInput.value)||0;
-        const boxPrice = parseFloat(boxPriceInput.value)||0;
-        const sellPrice = parseFloat(sellPriceInput.value)||0;
-        const stock = parseInt(stockInput.value)||0;
-        const stockSold = parseInt(stockSoldInput.value)||0;
-        const prodDate = productionDateInput.value||'';
-        const expDate = expirationDateInput.value||'';
-
-        if(!name) return alert('Enter product name');
-
+    saveProduct.onclick = () => {
+        const name = document.getElementById("productName").value.trim();
+        const unitPrice = parseFloat(document.getElementById("unitPrice").value) || 0;
+        const sellPrice = parseFloat(document.getElementById("sellPrice").value) || 0;
         const profit = sellPrice - unitPrice;
-        let products = JSON.parse(localStorage.getItem('products'))||[];
-        products.push({id:Date.now(),product_name:name,quantity,unit_price:unitPrice,box_price:boxPrice,sell_price:sellPrice,profit,stock,stock_sold:stockSold,production_date:prodDate,expiration_date:expDate});
-        localStorage.setItem('products',JSON.stringify(products));
 
-        // reset inputs
-        [productNameInput,quantityInput,unitPriceInput,boxPriceInput,sellPriceInput,stockInput,stockSoldInput,productionDateInput,expirationDateInput].forEach(input=>input.value='');
-        currentProdPage=Math.ceil(products.length/ITEMS_PER_PAGE);
+        if (!name) return alert("Enter product name");
+
+        let products = JSON.parse(localStorage.getItem("products")) || [];
+        products.push({ id: Date.now(), name, unitPrice, sellPrice, profit });
+        localStorage.setItem("products", JSON.stringify(products));
         loadProducts();
-    });
+    };
 
-    downloadProductBtn.addEventListener('click',()=>{
-        const products=JSON.parse(localStorage.getItem('products'))||[];
-        const dataStr="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(products,null,2));
-        const dlAnchor=document.createElement('a');
-        dlAnchor.setAttribute("href",dataStr);
-        dlAnchor.setAttribute("download","products.json");
-        dlAnchor.click();
-    });
-
-    importProductInput.addEventListener('change',(e)=>{
-        const file = e.target.files[0];
-        if(!file) return;
-        const reader = new FileReader();
-        reader.onload=function(event){
-            try{
-                const imported = JSON.parse(event.target.result);
-                if(!Array.isArray(imported)) throw "Invalid JSON";
-                let products = JSON.parse(localStorage.getItem('products'))||[];
-                imported.forEach(p=>{if(p.id && p.product_name) products.push(p);});
-                localStorage.setItem('products',JSON.stringify(products));
-                currentProdPage=1;
-                loadProducts();
-            }catch(err){alert('Invalid JSON file!');}
-        };
-        reader.readAsText(file);
-        e.target.value="";
-    });
-
-    prevProdPageBtn.addEventListener('click',()=>{if(currentProdPage>1) currentProdPage--; loadProducts();});
-    nextProdPageBtn.addEventListener('click',()=>{
-        let products = JSON.parse(localStorage.getItem('products'))||[];
-        if(currentProdPage<Math.ceil(products.length/ITEMS_PER_PAGE)) currentProdPage++;
-        loadProducts();
-    });
-
-    function loadProducts(){
-        const products = JSON.parse(localStorage.getItem('products'))||[];
-        const totalPages = Math.max(Math.ceil(products.length/ITEMS_PER_PAGE),1);
-        const start = (currentProdPage-1)*ITEMS_PER_PAGE;
-        const pageItems = products.slice(start,start+ITEMS_PER_PAGE);
-
-        productList.innerHTML='';
-        pageItems.forEach((p,index)=>{
-            const li=document.createElement('li');
-            li.innerHTML=`<span>
-                <strong>${p.product_name}</strong><br>
-                ID:${p.id}<br>
-                Qty:${p.quantity} Unit:${p.unit_price} Box:${p.box_price} Sell:${p.sell_price} Profit:${p.profit}<br>
-                Stock:${p.stock} Sold:${p.stock_sold}<br>
-                Prod:${p.production_date} Exp:${p.expiration_date}
-            </span>
-            <button class="delete-btn">X</button>`;
-            li.querySelector('.delete-btn').addEventListener('click',()=>{
-                products.splice(start+index,1);
-                localStorage.setItem('products',JSON.stringify(products));
-                if(currentProdPage>Math.ceil(products.length/ITEMS_PER_PAGE)) currentProdPage--;
-                loadProducts();
-            });
+    function loadProducts() {
+        const products = JSON.parse(localStorage.getItem("products")) || [];
+        productList.innerHTML = "";
+        products.forEach(p => {
+            const li = document.createElement("li");
+            li.innerHTML = `${p.name} | Profit: ${p.profit} <button onclick="deleteProduct(${p.id})">X</button>`;
             productList.appendChild(li);
         });
+    }
 
-        prodPageInfo.textContent=`Page ${currentProdPage} / ${totalPages}`;
-        prevProdPageBtn.disabled=currentProdPage===1;
-        nextProdPageBtn.disabled=currentProdPage===totalPages;
+    window.deleteProduct = function(id) {
+        let products = JSON.parse(localStorage.getItem("products")) || [];
+        products = products.filter(p => p.id !== id);
+        localStorage.setItem("products", JSON.stringify(products));
+        loadProducts();
     }
 
 });
