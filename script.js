@@ -1,74 +1,84 @@
-/* ===== MENU TOGGLE ===== */
-const menuBtn = document.getElementById("menu-btn");
-const menu = document.getElementById("menu");
-const closeMenuBtn = document.getElementById("close-btn");
+document.addEventListener('DOMContentLoaded', () => {
 
-menuBtn.addEventListener("click", () => {
-    menu.classList.add("active");
-});
+    /* MENU LOGIC */
+    const menuBtn = document.getElementById('menu-btn');
+    const closeBtn = document.getElementById('close-btn');
+    const menuOverlay = document.getElementById('menu');
 
-closeMenuBtn.addEventListener("click", () => {
-    menu.classList.remove("active");
-});
+    menuBtn.addEventListener('click', () => {
+        menuOverlay.classList.add('show');
+    });
 
-/* ===== CATEGORY MODAL ===== */
-const openBtn = document.getElementById("openCategory");
-const modal = document.getElementById("categoryModal");
-const closeBtn = document.getElementById("closeCategory");
-const saveBtn = document.getElementById("saveCategory");
-const categoryInput = document.getElementById("categoryName");
-const categoryList = document.getElementById("categoryList");
+    closeBtn.addEventListener('click', () => {
+        menuOverlay.classList.remove('show');
+    });
 
-// Open modal
-openBtn.addEventListener("click", () => {
-    modal.style.display = "flex";
-    loadCategories();
-});
+    menuOverlay.addEventListener('click', (e) => {
+        if (e.target === menuOverlay) {
+            menuOverlay.classList.remove('show');
+        }
+    });
 
-// Close modal
-closeBtn.addEventListener("click", () => {
-    modal.style.display = "none";
-});
+    /* CATEGORY MODAL */
+    const openCategoryBtn = document.getElementById('openCategory');
+    const modal = document.getElementById('categoryModal');
+    const closeCategoryBtn = document.getElementById('closeCategory');
+    const saveCategoryBtn = document.getElementById('saveCategory');
+    const categoryInput = document.getElementById('categoryName');
+    const categoryList = document.getElementById('categoryList');
 
-// Save category
-saveBtn.addEventListener("click", () => {
-    const name = categoryInput.value.trim();
+    openCategoryBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        modal.style.display = 'flex';
+        menuOverlay.classList.remove('show');
+        loadCategories();
+    });
 
-    if (!name) {
-        alert("Enter category name");
-        return;
+    closeCategoryBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    saveCategoryBtn.addEventListener('click', () => {
+        const name = categoryInput.value.trim();
+        if (!name) {
+            alert('Enter category name');
+            return;
+        }
+
+        let categories = JSON.parse(localStorage.getItem('categories')) || [];
+
+        const newCategory = {
+            id: Date.now(),
+            category_name: name,
+            created_at: new Date().toISOString()
+        };
+
+        categories.push(newCategory);
+        localStorage.setItem('categories', JSON.stringify(categories));
+
+        categoryInput.value = '';
+        loadCategories();
+    });
+
+    function loadCategories() {
+        categoryList.innerHTML = '';
+        let categories = JSON.parse(localStorage.getItem('categories')) || [];
+
+        categories.forEach(cat => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <strong>${cat.category_name}</strong><br>
+                ID: ${cat.id}<br>
+                ${new Date(cat.created_at).toLocaleString()}
+            `;
+            categoryList.appendChild(li);
+        });
     }
 
-    let categories = JSON.parse(localStorage.getItem("categories")) || [];
-
-    const newCategory = {
-        id: Date.now(),
-        category_name: name,
-        created_at: new Date().toISOString()
-    };
-
-    categories.push(newCategory);
-    localStorage.setItem("categories", JSON.stringify(categories));
-
-    categoryInput.value = "";
-    loadCategories();
 });
-
-// Load categories
-function loadCategories() {
-    categoryList.innerHTML = "";
-
-    let categories = JSON.parse(localStorage.getItem("categories")) || [];
-
-    categories.forEach(cat => {
-        const li = document.createElement("li");
-
-        li.innerHTML = `
-            <strong>${cat.category_name}</strong><br>
-            ID: ${cat.id}<br>
-            Date: ${new Date(cat.created_at).toLocaleString()}
-        `;
-
-        categoryList.appendChild(li);
-    });
-}
