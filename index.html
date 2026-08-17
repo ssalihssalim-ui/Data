@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LUNA · Joaillerie</title>
+  <title>JEWELRIX · Joaillerie</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:opsz,wght@14..32,300;400;500;600&display=swap" rel="stylesheet" />
@@ -12,7 +12,7 @@
 </head>
 <body>
 
-  <!-- ========== HEADER ========== -->
+  <!-- HEADER -->
   <header class="header">
     <div class="header-inner">
       <div class="header-left">
@@ -20,8 +20,8 @@
           <i class="fas fa-bars"></i>
         </button>
         <div class="logo" id="logoLink">
-          <span class="logo-icon">✦</span>
-          <span>LUNA</span>
+          <span class="logo-icon">◆</span>
+          <span>JEWELRIX</span>
         </div>
       </div>
       <div class="header-right">
@@ -48,7 +48,7 @@
     </div>
   </header>
 
-  <!-- ========== MENU LATÉRAL ========== -->
+  <!-- MENU LATÉRAL -->
   <div class="menu-overlay" id="menuOverlay"></div>
   <nav class="side-menu" id="sideMenu">
     <div class="side-menu-header">
@@ -62,48 +62,54 @@
     </ul>
     <div class="side-menu-categories">
       <p>CATÉGORIES</p>
-      <a href="#" data-category="Earrings">Boucles d'oreilles</a>
-      <a href="#" data-category="Necklaces">Colliers</a>
-      <a href="#" data-category="Rings">Bagues</a>
+      <a href="#" data-category="Necklaces">Necklaces</a>
+      <a href="#" data-category="Rings">Rings</a>
       <a href="#" data-category="Bracelets">Bracelets</a>
+      <a href="#" data-category="Watches">Watches</a>
+      <a href="#" data-category="Sets">Jewelry Sets</a>
     </div>
   </nav>
 
-  <!-- ========== VUES ========== -->
+  <!-- VUES -->
   <main id="appViews">
 
     <!-- ACCUEIL -->
     <section class="view active" id="view-home">
-      <!-- Hero -->
+      <!-- HERO -->
       <div class="hero">
         <div class="container hero-content">
           <div class="hero-text">
-            <span class="hero-tag">18K SOLID GOLD</span>
-            <h1>LUNA</h1>
-            <p class="hero-sub">Brand New 18k Solid Gold Collection</p>
-            <a href="#" data-view="products" class="btn btn-primary">SHOP NOW</a>
+            <span class="hero-tag">Jewelry Store</span>
+            <h1>JEWELRIX</h1>
+            <p class="hero-sub">Shopify Theme · Custom design</p>
+            <p class="hero-quote">Turn your life into Reality</p>
+            <a href="#" data-view="products" class="btn btn-primary">EXPLORE</a>
           </div>
           <div class="hero-visual">
-            <div class="hero-placeholder">✦ 18K ✦</div>
+            <div class="hero-placeholder">✦ ✦ ✦</div>
           </div>
         </div>
       </div>
 
-      <!-- Catégories -->
+      <!-- CATÉGORIES (icônes) -->
       <section class="categories-section">
         <div class="container">
           <div class="categories-grid">
-            <div class="category-item" data-category="Earrings">
-              <i class="fas fa-gem"></i>
-              <span>Earrings</span>
-            </div>
             <div class="category-item" data-category="Necklaces">
-              <i class="fas fa-circle"></i>
+              <i class="fas fa-gem"></i>
               <span>Necklaces</span>
             </div>
             <div class="category-item" data-category="Rings">
               <i class="fas fa-ring"></i>
               <span>Rings</span>
+            </div>
+            <div class="category-item" data-category="Sets">
+              <i class="fas fa-crown"></i>
+              <span>Jewelry Sets</span>
+            </div>
+            <div class="category-item" data-category="Watches">
+              <i class="fas fa-clock"></i>
+              <span>Watches</span>
             </div>
             <div class="category-item" data-category="Bracelets">
               <i class="fas fa-bolt"></i>
@@ -113,31 +119,31 @@
         </div>
       </section>
 
-      <!-- Best Sellers -->
-      <section class="section-products" id="bestSellers">
+      <!-- FEATURED PRODUCTS -->
+      <section class="section-products" id="featured">
         <div class="container">
           <div class="section-header">
-            <span class="section-tag">✦ LUNA ✦</span>
-            <h2>BEST SELLERS</h2>
-            <p>Popular New and Contemporary Gold Pieces</p>
+            <span class="section-tag">✦ JEWELRIX ✦</span>
+            <h2>Featured Products</h2>
+            <p>Our handpicked selection of luxury pieces</p>
           </div>
-          <div class="products-grid" id="bestSellersGrid"></div>
+          <div class="products-grid" id="featuredGrid"></div>
         </div>
       </section>
 
-      <!-- New Arrivals -->
+      <!-- NEW ARRIVALS -->
       <section class="section-products" id="newArrivals">
         <div class="container">
           <div class="section-header">
             <span class="section-tag">✦ NEW ✦</span>
-            <h2>NEW ARRIVALS</h2>
-            <p>Fresh from the Atelier</p>
+            <h2>New Arrivals</h2>
+            <p>Fresh from our atelier</p>
           </div>
           <div class="products-grid" id="newArrivalsGrid"></div>
         </div>
       </section>
 
-      <!-- Newsletter -->
+      <!-- NEWSLETTER + CONTACT -->
       <section class="newsletter">
         <div class="container newsletter-content">
           <h2>Subscribe</h2>
@@ -146,6 +152,10 @@
             <input type="email" placeholder="Enter your email" required />
             <button type="submit" class="btn btn-primary">→</button>
           </form>
+          <div class="contact-info">
+            <span><i class="fas fa-phone-alt"></i> +3800 2345-6789</span>
+            <span><i class="fas fa-globe"></i> www.jewellrix.com</span>
+          </div>
         </div>
       </section>
     </section>
@@ -154,7 +164,7 @@
     <section class="view" id="view-products">
       <div class="container" style="padding: 60px 0;">
         <h2 style="font-weight:300; font-size:2.8rem; letter-spacing:-1px; margin-bottom:12px;">Toute la collection</h2>
-        <p style="color:var(--mid-gray); margin-bottom:32px;">10K &amp; 18K Gold, Silver Plated</p>
+        <p style="color:var(--mid-gray); margin-bottom:32px;">Des pièces uniques pour chaque occasion</p>
         <div class="products-grid" id="allProductsGrid"></div>
       </div>
     </section>
@@ -162,9 +172,9 @@
     <!-- À PROPOS -->
     <section class="view" id="view-about">
       <div class="container" style="padding: 80px 0; max-width:720px;">
-        <h2 style="font-weight:300; font-size:3rem; letter-spacing:-1px;">À propos de LUNA</h2>
-        <p style="color:var(--mid-gray); margin-top:20px; font-size:1.1rem;">LUNA est une maison de joaillerie qui allie l'élégance intemporelle à l'artisanat contemporain. Chaque pièce est façonnée en or 18K massif ou en argent plaqué or, pour une brillance durable.</p>
-        <p style="color:var(--mid-gray); margin-top:12px;">Notre collection s'inspire de la lumière lunaire et des formes organiques, pour des bijoux qui racontent une histoire.</p>
+        <h2 style="font-weight:300; font-size:3rem; letter-spacing:-1px;">À propos de JEWELRIX</h2>
+        <p style="color:var(--mid-gray); margin-top:20px; font-size:1.1rem;">JEWELRIX est une maison de joaillerie qui mêle l'artisanat traditionnel à un design contemporain. Chaque pièce est imaginée pour célébrer les moments précieux de la vie.</p>
+        <p style="color:var(--mid-gray); margin-top:12px;">Notre engagement : une qualité irréprochable, des matériaux nobles (or 18K, argent, pierres fines) et un service personnalisé.</p>
       </div>
     </section>
 
@@ -226,10 +236,10 @@
 
   </main>
 
-  <!-- ========== FOOTER ========== -->
+  <!-- FOOTER -->
   <footer class="footer">
     <div class="container footer-inner">
-      <p>&copy; 2026 LUNA Joaillerie. All rights reserved.</p>
+      <p>&copy; 2026 JEWELRIX. All rights reserved.</p>
       <div class="social-icons">
         <a href="#"><i class="fab fa-instagram"></i></a>
         <a href="#"><i class="fab fa-pinterest"></i></a>
@@ -238,7 +248,7 @@
     </div>
   </footer>
 
-  <!-- ========== PANIER ========== -->
+  <!-- PANIER -->
   <div class="cart-overlay" id="cartOverlay"></div>
   <aside class="cart-sidebar" id="cartSidebar">
     <div class="cart-header">
@@ -257,7 +267,7 @@
     </div>
   </aside>
 
-  <!-- ========== FIREBASE + SCRIPT ========== -->
+  <!-- FIREBASE + SCRIPT -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
