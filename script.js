@@ -15,21 +15,21 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 // ============================================================
-// 2. DONNÉES MOCKÉES (fallback)
+// 2. DONNÉES MOCKÉES (bijouterie)
 // ============================================================
 const MOCK_PRODUCTS = [
-  { id: 'mock1', name: 'Typewriter', price: 9.99, image: 'https://picsum.photos/seed/type/400/400', description: 'Vintage' },
-  { id: 'mock2', name: 'Vintage Camera', price: 9.99, image: 'https://picsum.photos/seed/camera/400/400', description: 'Analog' },
-  { id: 'mock3', name: 'Coffee Mug', price: 0.00, image: 'https://picsum.photos/seed/mug/400/400', description: 'Ceramic' },
-  { id: 'mock4', name: 'Journal', price: 5.99, image: 'https://picsum.photos/seed/journal/400/400', description: 'Notebook' },
-  { id: 'mock5', name: 'Minimalist Clock', price: 14.99, image: 'https://picsum.photos/seed/clock/400/400', description: 'Wall' },
-  { id: 'mock6', name: 'Desk Lamp', price: 19.99, image: 'https://picsum.photos/seed/lamp/400/400', description: 'LED' },
-  { id: 'mock7', name: 'Art Print', price: 12.00, image: 'https://picsum.photos/seed/print/400/400', description: 'Abstract' },
-  { id: 'mock8', name: 'Plant Pot', price: 8.50, image: 'https://picsum.photos/seed/pot/400/400', description: 'Terracotta' }
+  { id: 'mock1', name: 'Luna Earrings', price: 199.00, image: 'https://picsum.photos/seed/earrings/400/400', description: '18K Gold' },
+  { id: 'mock2', name: 'Celestial Necklace', price: 299.00, image: 'https://picsum.photos/seed/necklace/400/400', description: '18K Gold' },
+  { id: 'mock3', name: 'Sol Ring', price: 159.00, image: 'https://picsum.photos/seed/ring/400/400', description: '14K Gold' },
+  { id: 'mock4', name: 'Stellar Bracelet', price: 249.00, image: 'https://picsum.photos/seed/bracelet/400/400', description: 'Silver Plated' },
+  { id: 'mock5', name: 'Aurora Pendant', price: 189.00, image: 'https://picsum.photos/seed/pendant/400/400', description: '18K Gold' },
+  { id: 'mock6', name: 'Nova Cuff', price: 219.00, image: 'https://picsum.photos/seed/cuff/400/400', description: 'Silver Plated' },
+  { id: 'mock7', name: 'Eclipse Hoops', price: 179.00, image: 'https://picsum.photos/seed/hoops/400/400', description: '14K Gold' },
+  { id: 'mock8', name: 'Comet Chain', price: 259.00, image: 'https://picsum.photos/seed/chain/400/400', description: '18K Gold' }
 ];
 
 // ============================================================
-// 3. DOM
+// 3. DOM (identique à la version précédente)
 // ============================================================
 // Menu latéral
 const menuToggle = document.getElementById('menuToggle');
@@ -41,6 +41,7 @@ const sideMenu = document.getElementById('sideMenu');
 const views = document.querySelectorAll('.view');
 const navLinks = document.querySelectorAll('[data-view]');
 const sideMenuLinks = document.querySelectorAll('.side-menu-links a');
+const categoryItems = document.querySelectorAll('.category-item');
 
 // Auth
 const authButtons = document.getElementById('authButtons');
@@ -76,7 +77,7 @@ const loginError = document.getElementById('loginError');
 const registerError = document.getElementById('registerError');
 
 // ============================================================
-// 4. MENU LATERAL (gauche)
+// 4. MENU LATÉRAL
 // ============================================================
 function openMenu() {
   sideMenu.classList.add('open');
@@ -92,7 +93,6 @@ menuToggle.addEventListener('click', openMenu);
 closeMenuBtn.addEventListener('click', closeMenu);
 menuOverlay.addEventListener('click', closeMenu);
 
-// Clic sur un lien du menu → fermer et naviguer
 sideMenuLinks.forEach(link => {
   link.addEventListener('click', (e) => {
     e.preventDefault();
@@ -106,8 +106,27 @@ sideMenuLinks.forEach(link => {
   });
 });
 
+// Catégories (filtrage simulé)
+categoryItems.forEach(item => {
+  item.addEventListener('click', () => {
+    const cat = item.dataset.category;
+    showView('products');
+    // On filtre les produits affichés (si déjà chargés)
+    const allProducts = document.querySelectorAll('#allProductsGrid .product-card');
+    allProducts.forEach(card => {
+      const desc = card.querySelector('.product-desc')?.textContent || '';
+      if (desc.toLowerCase().includes(cat.toLowerCase()) || cat === 'Tous') {
+        card.style.display = 'flex';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+    closeMenu();
+  });
+});
+
 // ============================================================
-// 5. AUTHENTIFICATION
+// 5. AUTH
 // ============================================================
 auth.onAuthStateChanged(user => {
   if (user) {
@@ -181,11 +200,9 @@ function showView(viewId) {
   views.forEach(v => v.classList.remove('active'));
   const target = document.getElementById(`view-${viewId}`);
   if (target) target.classList.add('active');
-  // Mise à jour des liens actifs (menu latéral + liens data-view)
   document.querySelectorAll('[data-view]').forEach(link => {
     link.classList.toggle('active', link.dataset.view === viewId);
   });
-  // Si on est sur login/register et connecté, rediriger vers home
   if ((viewId === 'login' || viewId === 'register') && auth.currentUser) {
     showView('home');
   }
@@ -194,7 +211,6 @@ function showView(viewId) {
   }
 }
 
-// Clic sur les liens de navigation (hors menu latéral)
 navLinks.forEach(link => {
   link.addEventListener('click', (e) => {
     e.preventDefault();
@@ -212,17 +228,17 @@ loginBtn.addEventListener('click', () => showView('login'));
 registerBtn.addEventListener('click', () => showView('register'));
 
 // ============================================================
-// 7. PANIER (localStorage)
+// 7. PANIER
 // ============================================================
 let cart = [];
 
 function loadCart() {
-  const stored = localStorage.getItem('white_cart');
+  const stored = localStorage.getItem('luna_cart');
   cart = stored ? JSON.parse(stored) : [];
   updateCartUI();
 }
 function saveCart() {
-  localStorage.setItem('white_cart', JSON.stringify(cart));
+  localStorage.setItem('luna_cart', JSON.stringify(cart));
   updateCartUI();
 }
 
@@ -368,4 +384,4 @@ loadCart();
 fetchProducts();
 showView('home');
 
-console.log('✨ White Artistry Pro — Prêt !');
+console.log('✨ LUNA — Prêt !');
