@@ -15,7 +15,6 @@
     --dark-gray: #333333;
     --black: #111111;
     --border: #eeeeee;
-    --radius: 0px; /* épuré, sans arrondi */
     --shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
     --transition: 0.25s ease;
     --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -173,7 +172,7 @@ img {
 }
 
 /* ============================================================
-   HERO – WHITE ARTISTRY
+   HERO
    ============================================================ */
 .hero {
     padding: 60px 0 80px;
@@ -235,7 +234,6 @@ img {
     padding: 80px 0 60px;
     border-bottom: 1px solid var(--border);
 }
-
 .section-products:last-of-type {
     border-bottom: none;
 }
@@ -264,7 +262,6 @@ img {
     margin-top: 4px;
 }
 
-/* Grille produits (carrés) */
 .products-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -281,7 +278,6 @@ img {
     font-size: 2rem;
 }
 
-/* Carte produit */
 .product-card {
     background: var(--white);
     border: 1px solid var(--border);
@@ -429,7 +425,7 @@ img {
 }
 
 /* ============================================================
-   PANIER SIDEBAR (identique au précédent, gardé)
+   PANIER SIDEBAR
    ============================================================ */
 .cart-overlay {
     position: fixed;
