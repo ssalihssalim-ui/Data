@@ -1,6 +1,3 @@
-/* ============================================================
-   RESET & BASE – LUNA
-   ============================================================ */
 * {
   margin: 0;
   padding: 0;
@@ -9,16 +6,16 @@
 
 :root {
   --white: #ffffff;
-  --off-white: #f8f6f2;
-  --light-gray: #eae7e0;
-  --mid-gray: #999999;
-  --dark-gray: #2a2a2a;
-  --black: #111111;
-  --gold: #c9a84c;
-  --gold-light: #e8d5a3;
+  --off-white: #f7f5f0;
+  --light-gray: #e8e4dc;
+  --mid-gray: #a0a0a0;
+  --dark-gray: #222222;
+  --black: #0f0f0f;
+  --gold: #b8943c;
+  --gold-light: #d4b87a;
   --border: #e0dbd2;
-  --shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
-  --shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.06);
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.02);
+  --shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.08);
   --transition: 0.3s ease;
   --font-serif: 'Playfair Display', serif;
   --font-sans: 'Inter', sans-serif;
@@ -56,12 +53,10 @@ img {
   padding: 0 24px;
 }
 
-/* ============================================================
-   BOUTONS
-   ============================================================ */
+/* BOUTONS */
 .btn {
   display: inline-block;
-  padding: 14px 36px;
+  padding: 14px 40px;
   font-weight: 500;
   font-size: 0.7rem;
   letter-spacing: 2.5px;
@@ -92,12 +87,11 @@ img {
   background: transparent;
   color: var(--black);
   border: 1px solid var(--black);
-  padding: 4px 12px;
+  padding: 4px 14px;
   font-size: 0.55rem;
   font-weight: 500;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  transition: var(--transition);
 }
 .btn-outline-small:hover {
   background: var(--black);
@@ -107,21 +101,18 @@ img {
   background: var(--black);
   color: var(--white);
   border: 1px solid var(--black);
-  padding: 4px 12px;
+  padding: 4px 14px;
   font-size: 0.55rem;
   font-weight: 500;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  transition: var(--transition);
 }
 .btn-primary-small:hover {
   background: var(--gold);
   border-color: var(--gold);
 }
 
-/* ============================================================
-   HEADER
-   ============================================================ */
+/* HEADER */
 .header {
   position: sticky;
   top: 0;
@@ -135,7 +126,7 @@ img {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 64px;
+  height: 68px;
   padding: 0 24px;
 }
 .header-left {
@@ -156,7 +147,7 @@ img {
 }
 .logo {
   font-family: var(--font-serif);
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: 3px;
   text-transform: uppercase;
@@ -181,7 +172,6 @@ img {
 .header-right button:hover {
   color: var(--gold);
 }
-
 .cart-btn {
   position: relative;
 }
@@ -245,9 +235,7 @@ img {
   background: var(--off-white);
 }
 
-/* ============================================================
-   MENU LATÉRAL
-   ============================================================ */
+/* MENU LATÉRAL */
 .menu-overlay {
   position: fixed;
   inset: 0;
@@ -342,9 +330,7 @@ img {
   padding-left: 8px;
 }
 
-/* ============================================================
-   VUES (SPA)
-   ============================================================ */
+/* VUES */
 .view {
   display: none;
   animation: fadeIn 0.4s ease;
@@ -357,9 +343,7 @@ img {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ============================================================
-   FORMULAIRES
-   ============================================================ */
+/* FORMULAIRES */
 .form-group {
   margin-bottom: 18px;
 }
@@ -385,9 +369,7 @@ img {
   border-color: var(--gold);
 }
 
-/* ============================================================
-   HERO
-   ============================================================ */
+/* HERO */
 .hero {
   padding: 60px 0 80px;
   background: var(--white);
@@ -408,22 +390,29 @@ img {
   border: 1px solid var(--gold);
   padding: 4px 14px;
   display: inline-block;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 .hero-text h1 {
   font-family: var(--font-serif);
-  font-size: 5rem;
+  font-size: 4.8rem;
   font-weight: 400;
   letter-spacing: -2px;
   line-height: 1;
   color: var(--black);
 }
 .hero-text .hero-sub {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--mid-gray);
-  margin: 16px 0 32px;
+  margin: 12px 0 6px;
+}
+.hero-text .hero-quote {
+  font-size: 1rem;
+  font-style: italic;
+  color: var(--dark-gray);
+  margin-bottom: 28px;
+  letter-spacing: 0.5px;
 }
 .hero-placeholder {
   width: 100%;
@@ -434,14 +423,12 @@ img {
   align-items: center;
   justify-content: center;
   font-family: var(--font-serif);
-  font-size: 3rem;
+  font-size: 2.5rem;
   color: var(--gold);
   letter-spacing: 8px;
 }
 
-/* ============================================================
-   CATÉGORIES
-   ============================================================ */
+/* CATÉGORIES */
 .categories-section {
   padding: 40px 0 60px;
   background: var(--white);
@@ -449,7 +436,7 @@ img {
 }
 .categories-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 20px;
   text-align: center;
 }
@@ -464,7 +451,7 @@ img {
   box-shadow: var(--shadow-hover);
 }
 .category-item i {
-  font-size: 2rem;
+  font-size: 2.2rem;
   color: var(--gold);
   display: block;
   margin-bottom: 8px;
@@ -476,9 +463,7 @@ img {
   color: var(--dark-gray);
 }
 
-/* ============================================================
-   SECTIONS PRODUITS
-   ============================================================ */
+/* SECTIONS PRODUITS */
 .section-products {
   padding: 80px 0 60px;
   border-bottom: 1px solid var(--border);
@@ -578,9 +563,7 @@ img {
   color: var(--white);
 }
 
-/* ============================================================
-   NEWSLETTER
-   ============================================================ */
+/* NEWSLETTER */
 .newsletter {
   padding: 80px 0;
   background: var(--off-white);
@@ -589,7 +572,7 @@ img {
 }
 .newsletter-content {
   text-align: center;
-  max-width: 480px;
+  max-width: 580px;
   margin: 0 auto;
 }
 .newsletter-content h2 {
@@ -633,9 +616,20 @@ img {
   color: var(--gold);
 }
 
-/* ============================================================
-   FOOTER
-   ============================================================ */
+.contact-info {
+  margin-top: 28px;
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  font-size: 0.85rem;
+  color: var(--dark-gray);
+}
+.contact-info i {
+  color: var(--gold);
+  margin-right: 6px;
+}
+
+/* FOOTER */
 .footer {
   padding: 28px 0;
   background: var(--white);
@@ -661,9 +655,7 @@ img {
   color: var(--gold);
 }
 
-/* ============================================================
-   PANIER SIDEBAR
-   ============================================================ */
+/* PANIER */
 .cart-overlay {
   position: fixed;
   inset: 0;
@@ -784,11 +776,12 @@ img {
   color: var(--gold);
 }
 
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
+/* RESPONSIVE */
 @media (max-width: 1024px) {
   .products-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .categories-grid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
@@ -829,5 +822,9 @@ img {
   }
   .header-right {
     gap: 8px;
+  }
+  .contact-info {
+    flex-direction: column;
+    gap: 6px;
   }
 }
