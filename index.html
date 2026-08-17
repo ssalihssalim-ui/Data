@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>White Artistry · Pro</title>
+  <title>LUNA · Joaillerie</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:opsz,wght@14..32,300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -16,13 +16,12 @@
   <header class="header">
     <div class="header-inner">
       <div class="header-left">
-        <!-- Bouton hamburger (menu gauche) -->
-        <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu">
+        <button class="menu-toggle" id="menuToggle" aria-label="Menu">
           <i class="fas fa-bars"></i>
         </button>
         <div class="logo" id="logoLink">
-          <i class="fas fa-feather-alt"></i>
-          <span>WHITE</span> Artistry
+          <span class="logo-icon">✦</span>
+          <span>LUNA</span>
         </div>
       </div>
       <div class="header-right">
@@ -49,7 +48,7 @@
     </div>
   </header>
 
-  <!-- ========== MENU LATERAL GAUCHE ========== -->
+  <!-- ========== MENU LATÉRAL ========== -->
   <div class="menu-overlay" id="menuOverlay"></div>
   <nav class="side-menu" id="sideMenu">
     <div class="side-menu-header">
@@ -57,56 +56,92 @@
     </div>
     <ul class="side-menu-links">
       <li><a href="#" data-view="home" class="active">Accueil</a></li>
-      <li><a href="#" data-view="products">Boutique</a></li>
+      <li><a href="#" data-view="products">Collection</a></li>
       <li><a href="#" data-view="about">À propos</a></li>
       <li><a href="#" data-view="profile">Mon profil</a></li>
     </ul>
+    <div class="side-menu-categories">
+      <p>CATÉGORIES</p>
+      <a href="#" data-category="Earrings">Boucles d'oreilles</a>
+      <a href="#" data-category="Necklaces">Colliers</a>
+      <a href="#" data-category="Rings">Bagues</a>
+      <a href="#" data-category="Bracelets">Bracelets</a>
+    </div>
   </nav>
 
-  <!-- ========== VUES PRINCIPALES ========== -->
+  <!-- ========== VUES ========== -->
   <main id="appViews">
 
-    <!-- VUE ACCUEIL -->
+    <!-- ACCUEIL -->
     <section class="view active" id="view-home">
+      <!-- Hero -->
       <div class="hero">
         <div class="container hero-content">
           <div class="hero-text">
-            <h1>WHITE <br />Artistry</h1>
-            <p class="hero-sub">CHECK OUT OUR <strong>Best Sellers</strong></p>
+            <span class="hero-tag">18K SOLID GOLD</span>
+            <h1>LUNA</h1>
+            <p class="hero-sub">Brand New 18k Solid Gold Collection</p>
             <a href="#" data-view="products" class="btn btn-primary">SHOP NOW</a>
           </div>
           <div class="hero-visual">
-            <div class="hero-placeholder"></div>
+            <div class="hero-placeholder">✦ 18K ✦</div>
           </div>
         </div>
       </div>
+
+      <!-- Catégories -->
+      <section class="categories-section">
+        <div class="container">
+          <div class="categories-grid">
+            <div class="category-item" data-category="Earrings">
+              <i class="fas fa-gem"></i>
+              <span>Earrings</span>
+            </div>
+            <div class="category-item" data-category="Necklaces">
+              <i class="fas fa-circle"></i>
+              <span>Necklaces</span>
+            </div>
+            <div class="category-item" data-category="Rings">
+              <i class="fas fa-ring"></i>
+              <span>Rings</span>
+            </div>
+            <div class="category-item" data-category="Bracelets">
+              <i class="fas fa-bolt"></i>
+              <span>Bracelets</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Best Sellers -->
       <section class="section-products" id="bestSellers">
         <div class="container">
           <div class="section-header">
-            <span class="section-tag">WHITE Artistry</span>
+            <span class="section-tag">✦ LUNA ✦</span>
             <h2>BEST SELLERS</h2>
-            <p>Popular New and Contemporary Art Prints Featured</p>
+            <p>Popular New and Contemporary Gold Pieces</p>
           </div>
           <div class="products-grid" id="bestSellersGrid"></div>
         </div>
       </section>
+
       <!-- New Arrivals -->
       <section class="section-products" id="newArrivals">
         <div class="container">
           <div class="section-header">
-            <span class="section-tag">Everything New and Fresh!</span>
+            <span class="section-tag">✦ NEW ✦</span>
             <h2>NEW ARRIVALS</h2>
-            <p>Stocked Items</p>
+            <p>Fresh from the Atelier</p>
           </div>
           <div class="products-grid" id="newArrivalsGrid"></div>
         </div>
       </section>
+
       <!-- Newsletter -->
       <section class="newsletter">
         <div class="container newsletter-content">
           <h2>Subscribe</h2>
-          <p>TO OUR EMAILS</p>
+          <p>TO OUR EMAILS &amp; EXCLUSIVE OFFERS</p>
           <form id="newsletterForm">
             <input type="email" placeholder="Enter your email" required />
             <button type="submit" class="btn btn-primary">→</button>
@@ -115,27 +150,28 @@
       </section>
     </section>
 
-    <!-- VUE BOUTIQUE -->
+    <!-- COLLECTION -->
     <section class="view" id="view-products">
       <div class="container" style="padding: 60px 0;">
-        <h2 style="font-weight:300; font-size:2.5rem; margin-bottom:20px;">Tous nos produits</h2>
+        <h2 style="font-weight:300; font-size:2.8rem; letter-spacing:-1px; margin-bottom:12px;">Toute la collection</h2>
+        <p style="color:var(--mid-gray); margin-bottom:32px;">10K &amp; 18K Gold, Silver Plated</p>
         <div class="products-grid" id="allProductsGrid"></div>
       </div>
     </section>
 
-    <!-- VUE À PROPOS -->
+    <!-- À PROPOS -->
     <section class="view" id="view-about">
       <div class="container" style="padding: 80px 0; max-width:720px;">
-        <h2 style="font-weight:300; font-size:2.8rem;">À propos</h2>
-        <p style="color:var(--mid-gray); margin-top:20px; font-size:1.1rem;">White Artistry est une marque qui célèbre la simplicité et l’élégance intemporelle. Chaque pièce est conçue avec soin pour apporter une touche de pureté à votre quotidien.</p>
-        <p style="color:var(--mid-gray); margin-top:12px;">Nous croyons en la beauté des espaces épurés et en l’harmonie des contrastes.</p>
+        <h2 style="font-weight:300; font-size:3rem; letter-spacing:-1px;">À propos de LUNA</h2>
+        <p style="color:var(--mid-gray); margin-top:20px; font-size:1.1rem;">LUNA est une maison de joaillerie qui allie l'élégance intemporelle à l'artisanat contemporain. Chaque pièce est façonnée en or 18K massif ou en argent plaqué or, pour une brillance durable.</p>
+        <p style="color:var(--mid-gray); margin-top:12px;">Notre collection s'inspire de la lumière lunaire et des formes organiques, pour des bijoux qui racontent une histoire.</p>
       </div>
     </section>
 
-    <!-- VUE PROFIL -->
+    <!-- PROFIL -->
     <section class="view" id="view-profile">
       <div class="container" style="padding: 60px 0; max-width:600px;">
-        <h2 style="font-weight:300; font-size:2.5rem;">Mon profil</h2>
+        <h2 style="font-weight:300; font-size:2.8rem;">Mon profil</h2>
         <div style="background:var(--off-white); padding:30px; border:1px solid var(--border); margin-top:20px;">
           <p><strong>Email :</strong> <span id="profileEmail">—</span></p>
           <p><strong>UID :</strong> <span id="profileUid">—</span></p>
@@ -144,7 +180,7 @@
       </div>
     </section>
 
-    <!-- VUE CONNEXION -->
+    <!-- CONNEXION -->
     <section class="view" id="view-login">
       <div class="container" style="padding: 60px 0; max-width:400px; margin:0 auto;">
         <h2 style="font-weight:300; text-align:center;">Connexion</h2>
@@ -159,14 +195,14 @@
           </div>
           <button type="submit" class="btn btn-primary btn-block">Se connecter</button>
           <p style="text-align:center; margin-top:16px; font-size:0.9rem; color:var(--mid-gray);">
-            Pas encore de compte ? <a href="#" data-view="register" style="color:var(--black); font-weight:600;">Inscrivez-vous</a>
+            Pas encore de compte ? <a href="#" data-view="register" style="color:var(--gold); font-weight:600;">Inscrivez-vous</a>
           </p>
         </form>
         <div id="loginError" style="color:#b00020; margin-top:12px; text-align:center;"></div>
       </div>
     </section>
 
-    <!-- VUE INSCRIPTION -->
+    <!-- INSCRIPTION -->
     <section class="view" id="view-register">
       <div class="container" style="padding: 60px 0; max-width:400px; margin:0 auto;">
         <h2 style="font-weight:300; text-align:center;">Inscription</h2>
@@ -181,7 +217,7 @@
           </div>
           <button type="submit" class="btn btn-primary btn-block">Créer mon compte</button>
           <p style="text-align:center; margin-top:16px; font-size:0.9rem; color:var(--mid-gray);">
-            Déjà inscrit ? <a href="#" data-view="login" style="color:var(--black); font-weight:600;">Connectez-vous</a>
+            Déjà inscrit ? <a href="#" data-view="login" style="color:var(--gold); font-weight:600;">Connectez-vous</a>
           </p>
         </form>
         <div id="registerError" style="color:#b00020; margin-top:12px; text-align:center;"></div>
@@ -193,7 +229,7 @@
   <!-- ========== FOOTER ========== -->
   <footer class="footer">
     <div class="container footer-inner">
-      <p>&copy; 2026 White Artistry. All rights reserved.</p>
+      <p>&copy; 2026 LUNA Joaillerie. All rights reserved.</p>
       <div class="social-icons">
         <a href="#"><i class="fab fa-instagram"></i></a>
         <a href="#"><i class="fab fa-pinterest"></i></a>
@@ -202,7 +238,7 @@
     </div>
   </footer>
 
-  <!-- ========== PANIER SIDEBAR ========== -->
+  <!-- ========== PANIER ========== -->
   <div class="cart-overlay" id="cartOverlay"></div>
   <aside class="cart-sidebar" id="cartSidebar">
     <div class="cart-header">
