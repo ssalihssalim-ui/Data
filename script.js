@@ -1,5 +1,5 @@
 // ============================================================
-// 1. FIREBASE CONFIG (remplacer par vos clés)
+// 1. CONFIGURATION FIREBASE (À REMPLACER)
 // ============================================================
 const firebaseConfig = {
     apiKey: "VOTRE_API_KEY",
@@ -10,11 +10,26 @@ const firebaseConfig = {
     appId: "VOTRE_APP_ID"
 };
 
+// Initialisation
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 // ============================================================
-// 2. DOM
+// 2. DONNÉES DE DÉMONSTRATION (fallback si Firestore vide)
+// ============================================================
+const MOCK_PRODUCTS = [
+    { id: 'mock1', name: 'Typewriter', price: 9.99, image: 'https://picsum.photos/seed/type/400/400', description: 'Vintage' },
+    { id: 'mock2', name: 'Vintage Camera', price: 9.99, image: 'https://picsum.photos/seed/camera/400/400', description: 'Analog' },
+    { id: 'mock3', name: 'Coffee Mug', price: 0.00, image: 'https://picsum.photos/seed/mug/400/400', description: 'Ceramic' },
+    { id: 'mock4', name: 'Journal', price: 5.99, image: 'https://picsum.photos/seed/journal/400/400', description: 'Notebook' },
+    { id: 'mock5', name: 'Minimalist Clock', price: 14.99, image: 'https://picsum.photos/seed/clock/400/400', description: 'Wall' },
+    { id: 'mock6', name: 'Desk Lamp', price: 19.99, image: 'https://picsum.photos/seed/lamp/400/400', description: 'LED' },
+    { id: 'mock7', name: 'Art Print', price: 12.00, image: 'https://picsum.photos/seed/print/400/400', description: 'Abstract' },
+    { id: 'mock8', name: 'Plant Pot', price: 8.50, image: 'https://picsum.photos/seed/pot/400/400', description: 'Terracotta' }
+];
+
+// ============================================================
+// 3. DOM
 // ============================================================
 const bestSellersGrid = document.getElementById('bestSellersGrid');
 const newArrivalsGrid = document.getElementById('newArrivalsGrid');
@@ -27,7 +42,7 @@ const openCartBtn = document.getElementById('openCartBtn');
 const closeCartBtn = document.getElementById('closeCartBtn');
 
 // ============================================================
-// 3. PANIER (localStorage)
+// 4. PANIER (localStorage)
 // ============================================================
 let cart = [];
 
@@ -42,40 +57,11 @@ function saveCart() {
 }
 
 // ============================================================
-// 4. RÉCUPÉRATION DES PRODUITS FIRESTORE
+// 5. AFFICHAGE DES PRODUITS
 // ============================================================
-async function fetchProducts() {
-    try {
-        const snapshot = await db.collection('products').get();
-        const products = [];
-        snapshot.forEach(doc => {
-            products.push({ id: doc.id, ...doc.data() });
-        });
-
-        if (products.length === 0) {
-            const emptyMsg = `<div style="grid-column:1/-1; text-align:center; padding:30px; color:var(--mid-gray);">Aucun produit en base. Ajoutez-en dans Firestore.</div>`;
-            bestSellersGrid.innerHTML = emptyMsg;
-            newArrivalsGrid.innerHTML = emptyMsg;
-            return;
-        }
-
-        // On affiche les 4 premiers en Best Sellers, les suivants en New Arrivals
-        const best = products.slice(0, 4);
-        const newItems = products.slice(4, 8);
-
-        renderProducts(bestSellersGrid, best);
-        renderProducts(newArrivalsGrid, newItems);
-    } catch (error) {
-        console.error("Firestore error:", error);
-        const errMsg = `<div style="grid-column:1/-1; text-align:center; padding:30px; color:#999;">⚠️ Erreur de chargement. Vérifiez votre configuration.</div>`;
-        bestSellersGrid.innerHTML = errMsg;
-        newArrivalsGrid.innerHTML = errMsg;
-    }
-}
-
 function renderProducts(container, products) {
     if (!products || products.length === 0) {
-        container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:20px; color:var(--mid-gray); font-size:0.8rem;">Aucun produit dans cette catégorie.</div>`;
+        container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:30px; color:var(--mid-gray);">Aucun produit disponible.</div>`;
         return;
     }
 
@@ -120,8 +106,41 @@ function renderProducts(container, products) {
     });
 }
 
+function displayProducts(products) {
+    // On prend les 4 premiers pour Best Sellers, les 4 suivants pour New Arrivals
+    const best = products.slice(0, 4);
+    const newItems = products.slice(4, 8);
+    renderProducts(bestSellersGrid, best);
+    renderProducts(newArrivalsGrid, newItems);
+}
+
 // ============================================================
-// 5. FONCTIONS PANIER (identiques)
+// 6. RÉCUPÉRATION FIRESTORE + FALLBACK
+// ============================================================
+async function fetchProducts() {
+    try {
+        const snapshot = await db.collection('products').get();
+        if (snapshot.empty) {
+            // Si Firestore est vide, on utilise les données mockées
+            console.warn('Firestore vide, utilisation des données de démonstration.');
+            displayProducts(MOCK_PRODUCTS);
+            return;
+        }
+
+        const products = [];
+        snapshot.forEach(doc => {
+            products.push({ id: doc.id, ...doc.data() });
+        });
+        displayProducts(products);
+    } catch (error) {
+        console.error('Erreur Firestore :', error);
+        // En cas d'erreur (configuration manquante), on utilise les mock
+        displayProducts(MOCK_PRODUCTS);
+    }
+}
+
+// ============================================================
+// 7. FONCTIONS PANIER
 // ============================================================
 function addToCart(product) {
     const existing = cart.find(item => item.id === product.id);
@@ -131,6 +150,7 @@ function addToCart(product) {
         cart.push({ ...product, quantity: 1 });
     }
     saveCart();
+    // Animation du badge
     cartBadge.style.transform = 'scale(1.3)';
     setTimeout(() => cartBadge.style.transform = 'scale(1)', 200);
 }
@@ -182,7 +202,7 @@ function renderCartItems() {
 }
 
 // ============================================================
-// 6. OUVERTURE / FERMETURE PANIER
+// 8. OUVERTURE / FERMETURE PANIER
 // ============================================================
 function openCart() {
     cartSidebar.classList.add('open');
@@ -200,9 +220,9 @@ closeCartBtn.addEventListener('click', closeCart);
 cartOverlay.addEventListener('click', closeCart);
 
 // ============================================================
-// 7. INIT
+// 9. INITIALISATION
 // ============================================================
 loadCart();
 fetchProducts();
 
-console.log('✨ White Artistry – Firestore connecté.');
+console.log('✨ White Artistry — Prêt !');
