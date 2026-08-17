@@ -1,5 +1,5 @@
 // ============================================================
-// 1. FIREBASE CONFIG (À REMPLACER)
+// FIREBASE CONFIG (À REMPLACER)
 // ============================================================
 const firebaseConfig = {
   apiKey: "VOTRE_API_KEY",
@@ -15,35 +15,32 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 // ============================================================
-// 2. DONNÉES MOCKÉES (bijouterie)
+// DONNÉES MOCKÉES (bijouterie)
 // ============================================================
 const MOCK_PRODUCTS = [
-  { id: 'mock1', name: 'Luna Earrings', price: 199.00, image: 'https://picsum.photos/seed/earrings/400/400', description: '18K Gold' },
-  { id: 'mock2', name: 'Celestial Necklace', price: 299.00, image: 'https://picsum.photos/seed/necklace/400/400', description: '18K Gold' },
-  { id: 'mock3', name: 'Sol Ring', price: 159.00, image: 'https://picsum.photos/seed/ring/400/400', description: '14K Gold' },
-  { id: 'mock4', name: 'Stellar Bracelet', price: 249.00, image: 'https://picsum.photos/seed/bracelet/400/400', description: 'Silver Plated' },
-  { id: 'mock5', name: 'Aurora Pendant', price: 189.00, image: 'https://picsum.photos/seed/pendant/400/400', description: '18K Gold' },
-  { id: 'mock6', name: 'Nova Cuff', price: 219.00, image: 'https://picsum.photos/seed/cuff/400/400', description: 'Silver Plated' },
-  { id: 'mock7', name: 'Eclipse Hoops', price: 179.00, image: 'https://picsum.photos/seed/hoops/400/400', description: '14K Gold' },
-  { id: 'mock8', name: 'Comet Chain', price: 259.00, image: 'https://picsum.photos/seed/chain/400/400', description: '18K Gold' }
+  { id: 'mock1', name: 'Celestial Necklace', price: 299.00, image: 'https://picsum.photos/seed/necklace1/400/400', description: '18K Gold' },
+  { id: 'mock2', name: 'Solitaire Ring', price: 159.00, image: 'https://picsum.photos/seed/ring1/400/400', description: '14K Gold' },
+  { id: 'mock3', name: 'Stellar Bracelet', price: 249.00, image: 'https://picsum.photos/seed/bracelet1/400/400', description: 'Silver Plated' },
+  { id: 'mock4', name: 'Luna Watch', price: 399.00, image: 'https://picsum.photos/seed/watch1/400/400', description: 'Gold Plated' },
+  { id: 'mock5', name: 'Aurora Pendant', price: 189.00, image: 'https://picsum.photos/seed/pendant1/400/400', description: '18K Gold' },
+  { id: 'mock6', name: 'Nova Cuff', price: 219.00, image: 'https://picsum.photos/seed/cuff1/400/400', description: 'Silver Plated' },
+  { id: 'mock7', name: 'Eclipse Hoops', price: 179.00, image: 'https://picsum.photos/seed/hoops1/400/400', description: '14K Gold' },
+  { id: 'mock8', name: 'Comet Chain', price: 259.00, image: 'https://picsum.photos/seed/chain1/400/400', description: '18K Gold' }
 ];
 
 // ============================================================
-// 3. DOM (identique à la version précédente)
+// DOM
 // ============================================================
-// Menu latéral
 const menuToggle = document.getElementById('menuToggle');
 const closeMenuBtn = document.getElementById('closeMenuBtn');
 const menuOverlay = document.getElementById('menuOverlay');
 const sideMenu = document.getElementById('sideMenu');
 
-// Navigation
 const views = document.querySelectorAll('.view');
 const navLinks = document.querySelectorAll('[data-view]');
 const sideMenuLinks = document.querySelectorAll('.side-menu-links a');
 const categoryItems = document.querySelectorAll('.category-item');
 
-// Auth
 const authButtons = document.getElementById('authButtons');
 const userMenu = document.getElementById('userMenu');
 const userNameDisplay = document.getElementById('userNameDisplay');
@@ -56,12 +53,10 @@ const logoutBtnProfile = document.getElementById('logoutBtnProfile');
 const profileEmail = document.getElementById('profileEmail');
 const profileUid = document.getElementById('profileUid');
 
-// Produits
-const bestSellersGrid = document.getElementById('bestSellersGrid');
+const featuredGrid = document.getElementById('featuredGrid');
 const newArrivalsGrid = document.getElementById('newArrivalsGrid');
 const allProductsGrid = document.getElementById('allProductsGrid');
 
-// Panier
 const cartBadge = document.getElementById('cartBadge');
 const cartSidebar = document.getElementById('cartSidebar');
 const cartOverlay = document.getElementById('cartOverlay');
@@ -70,14 +65,13 @@ const cartTotalPrice = document.getElementById('cartTotalPrice');
 const openCartBtn = document.getElementById('openCartBtn');
 const closeCartBtn = document.getElementById('closeCartBtn');
 
-// Formulaires
 const loginForm = document.getElementById('loginForm');
 const registerForm = document.getElementById('registerForm');
 const loginError = document.getElementById('loginError');
 const registerError = document.getElementById('registerError');
 
 // ============================================================
-// 4. MENU LATÉRAL
+// MENU LATÉRAL
 // ============================================================
 function openMenu() {
   sideMenu.classList.add('open');
@@ -106,14 +100,12 @@ sideMenuLinks.forEach(link => {
   });
 });
 
-// Catégories (filtrage simulé)
 categoryItems.forEach(item => {
   item.addEventListener('click', () => {
     const cat = item.dataset.category;
     showView('products');
-    // On filtre les produits affichés (si déjà chargés)
-    const allProducts = document.querySelectorAll('#allProductsGrid .product-card');
-    allProducts.forEach(card => {
+    const allCards = document.querySelectorAll('#allProductsGrid .product-card');
+    allCards.forEach(card => {
       const desc = card.querySelector('.product-desc')?.textContent || '';
       if (desc.toLowerCase().includes(cat.toLowerCase()) || cat === 'Tous') {
         card.style.display = 'flex';
@@ -126,7 +118,7 @@ categoryItems.forEach(item => {
 });
 
 // ============================================================
-// 5. AUTH
+// AUTH
 // ============================================================
 auth.onAuthStateChanged(user => {
   if (user) {
@@ -194,7 +186,7 @@ document.addEventListener('click', () => {
 });
 
 // ============================================================
-// 6. NAVIGATION SPA
+// NAVIGATION SPA
 // ============================================================
 function showView(viewId) {
   views.forEach(v => v.classList.remove('active'));
@@ -228,17 +220,17 @@ loginBtn.addEventListener('click', () => showView('login'));
 registerBtn.addEventListener('click', () => showView('register'));
 
 // ============================================================
-// 7. PANIER
+// PANIER
 // ============================================================
 let cart = [];
 
 function loadCart() {
-  const stored = localStorage.getItem('luna_cart');
+  const stored = localStorage.getItem('jewelrix_cart');
   cart = stored ? JSON.parse(stored) : [];
   updateCartUI();
 }
 function saveCart() {
-  localStorage.setItem('luna_cart', JSON.stringify(cart));
+  localStorage.setItem('jewelrix_cart', JSON.stringify(cart));
   updateCartUI();
 }
 
@@ -312,7 +304,7 @@ closeCartBtn.addEventListener('click', closeCart);
 cartOverlay.addEventListener('click', closeCart);
 
 // ============================================================
-// 8. PRODUITS (Firestore + fallback)
+// PRODUITS (Firestore + fallback)
 // ============================================================
 function renderProducts(container, products) {
   if (!products || products.length === 0) {
@@ -353,8 +345,11 @@ function renderProducts(container, products) {
 }
 
 function displayProducts(products) {
-  renderProducts(bestSellersGrid, products.slice(0, 4));
+  // Featured : 4 premiers
+  renderProducts(featuredGrid, products.slice(0, 4));
+  // New arrivals : 4 suivants
   renderProducts(newArrivalsGrid, products.slice(4, 8));
+  // Tous
   renderProducts(allProductsGrid, products);
 }
 
@@ -378,10 +373,10 @@ async function fetchProducts() {
 }
 
 // ============================================================
-// 9. INIT
+// INIT
 // ============================================================
 loadCart();
 fetchProducts();
 showView('home');
 
-console.log('✨ LUNA — Prêt !');
+console.log('✨ JEWELRIX — Prêt !');
