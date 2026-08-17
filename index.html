@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NOIR | Boutique Minimaliste</title>
-    
-    <!-- Google Fonts (Inter pour un rendu moderne) -->
+    <title>White Artistry · Boutique minimaliste</title>
+
+    <!-- Google Fonts : Inter + une touche plus légère -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
-    
-    <!-- Font Awesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
     <!-- Notre CSS -->
@@ -18,21 +18,19 @@
 </head>
 <body>
 
-    <!-- ===================== HEADER ===================== -->
+    <!-- ========== HEADER ========== -->
     <header class="header">
         <div class="container header-inner">
             <div class="logo">
-                <i class="fas fa-crown"></i>
-                <span>NOIR</span>
+                <i class="fas fa-feather-alt"></i>
+                <span>WHITE</span> Artistry
             </div>
-
             <nav class="nav-links">
-                <a href="#">Nouveautés</a>
-                <a href="#">Homme</a>
-                <a href="#">Femme</a>
-                <a href="#">Accessoires</a>
+                <a href="#">New Arrivals</a>
+                <a href="#">Best Sellers</a>
+                <a href="#">On Sale</a>
+                <a href="#">About</a>
             </nav>
-
             <div class="header-actions">
                 <button class="search-btn" aria-label="Rechercher">
                     <i class="fas fa-search"></i>
@@ -45,42 +43,75 @@
         </div>
     </header>
 
-    <!-- ===================== HERO ===================== -->
+    <!-- ========== HERO (inspirée du moodboard) ========== -->
     <section class="hero">
         <div class="container hero-content">
             <div class="hero-text">
-                <span class="hero-subtitle">ÉDITION LIMITÉE</span>
-                <h1>L'élégance <br />en noir & blanc.</h1>
-                <p>Des pièces intemporelles, conçues pour durer. La simplicité absolue.</p>
-                <a href="#products" class="btn btn-primary">Découvrir la collection</a>
+                <h1>WHITE <br />Artistry</h1>
+                <p class="hero-sub">CHECK OUT OUR <strong>Best Sellers</strong></p>
+                <a href="#products" class="btn btn-primary">SHOP NOW</a>
             </div>
-            <div class="hero-image">
-                <!-- Image d'ambiance (remplacée par un dégradé stylé) -->
+            <div class="hero-visual">
+                <!-- Grand espace blanc avec une ligne élégante -->
                 <div class="hero-placeholder"></div>
             </div>
         </div>
     </section>
 
-    <!-- ===================== PRODUITS (Firestore) ===================== -->
-    <section class="products-section" id="products">
+    <!-- ========== BEST SELLERS ========== -->
+    <section class="section-products" id="bestSellers">
         <div class="container">
             <div class="section-header">
-                <h2>Nos pièces <span class="highlight">noires</span></h2>
-                <p>Chaque produit est une œuvre d'art minimaliste.</p>
+                <span class="section-tag">WHITE Artistry</span>
+                <h2>BEST SELLERS</h2>
+                <p>Popular New and Contemporary Art Prints Featured</p>
             </div>
-
-            <!-- Grille des produits -->
-            <div class="products-grid" id="productsGrid">
-                <!-- Les produits seront injectés ici par JavaScript -->
-                <div class="loading-spinner">
-                    <i class="fas fa-circle-notch fa-spin"></i>
-                    <p>Chargement des produits...</p>
-                </div>
+            <div class="products-grid" id="bestSellersGrid">
+                <!-- Injeté par JS -->
+                <div class="loading-spinner"><i class="fas fa-circle-notch fa-spin"></i></div>
             </div>
         </div>
     </section>
 
-    <!-- ===================== PANIER (Sidebar) ===================== -->
+    <!-- ========== NEW ARRIVALS ========== -->
+    <section class="section-products" id="newArrivals">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">Everything New and Fresh!</span>
+                <h2>NEW ARRIVALS</h2>
+                <p>Stocked Items</p>
+            </div>
+            <div class="products-grid" id="newArrivalsGrid">
+                <div class="loading-spinner"><i class="fas fa-circle-notch fa-spin"></i></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== NEWSLETTER ========== -->
+    <section class="newsletter">
+        <div class="container newsletter-content">
+            <h2>Subscribe</h2>
+            <p>TO OUR EMAILS</p>
+            <form id="newsletterForm">
+                <input type="email" placeholder="Enter your email" required />
+                <button type="submit" class="btn btn-primary">→</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- ========== FOOTER minimal ========== -->
+    <footer class="footer">
+        <div class="container footer-inner">
+            <p>&copy; 2026 White Artistry. All rights reserved.</p>
+            <div class="social-icons">
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-pinterest"></i></a>
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ========== PANIER SIDEBAR ========== -->
     <div class="cart-overlay" id="cartOverlay"></div>
     <aside class="cart-sidebar" id="cartSidebar">
         <div class="cart-header">
@@ -88,7 +119,6 @@
             <button class="close-cart" id="closeCartBtn"><i class="fas fa-times"></i></button>
         </div>
         <div class="cart-items" id="cartItems">
-            <!-- Éléments du panier -->
             <p class="empty-cart-msg">Votre panier est vide.</p>
         </div>
         <div class="cart-footer">
@@ -100,12 +130,9 @@
         </div>
     </aside>
 
-    <!-- ===================== SCRIPTS ===================== -->
-    <!-- Firebase (Compat) -->
+    <!-- ========== SCRIPTS ========== -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
-    <!-- Notre JavaScript -->
     <script src="app.js"></script>
 </body>
 </html>
