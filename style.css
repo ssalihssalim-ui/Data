@@ -1,5 +1,5 @@
 /* ============================================================
-   RESET & BASE – WHITE ARTISTRY
+   RESET & BASE
    ============================================================ */
 * {
     margin: 0;
@@ -152,6 +152,9 @@ img {
     color: var(--black);
 }
 
+.cart-btn {
+    position: relative;
+}
 .cart-btn .cart-badge {
     position: absolute;
     top: -8px;
@@ -166,9 +169,6 @@ img {
     display: flex;
     align-items: center;
     justify-content: center;
-}
-.cart-btn {
-    position: relative;
 }
 
 /* ============================================================
@@ -194,10 +194,6 @@ img {
     line-height: 1;
     color: var(--black);
 }
-.hero-text h1 span {
-    font-weight: 600;
-}
-
 .hero-sub {
     font-size: 0.8rem;
     letter-spacing: 3px;
@@ -262,6 +258,7 @@ img {
     margin-top: 4px;
 }
 
+/* Grille */
 .products-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -271,13 +268,14 @@ img {
 .loading-spinner {
     grid-column: 1 / -1;
     text-align: center;
-    padding: 40px 0;
+    padding: 60px 0;
     color: var(--mid-gray);
 }
 .loading-spinner i {
     font-size: 2rem;
 }
 
+/* Carte produit */
 .product-card {
     background: var(--white);
     border: 1px solid var(--border);
@@ -311,7 +309,6 @@ img {
     margin-bottom: 2px;
     color: var(--black);
 }
-
 .product-card .product-desc {
     font-size: 0.7rem;
     color: var(--mid-gray);
@@ -319,7 +316,6 @@ img {
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
-
 .product-card .product-price {
     font-size: 1rem;
     font-weight: 500;
