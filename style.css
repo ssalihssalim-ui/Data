@@ -6,16 +6,16 @@
 
 :root {
   --white: #ffffff;
-  --off-white: #f7f5f0;
-  --light-gray: #e8e4dc;
-  --mid-gray: #a0a0a0;
-  --dark-gray: #222222;
-  --black: #0f0f0f;
+  --off-white: #f5f2ed;
+  --light-gray: #e8e2d8;
+  --mid-gray: #a8a09a;
+  --dark-gray: #2a2826;
+  --black: #141412;
   --gold: #b8943c;
   --gold-light: #d4b87a;
   --border: #e0dbd2;
   --shadow: 0 4px 24px rgba(0, 0, 0, 0.02);
-  --shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.08);
+  --shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.06);
   --transition: 0.3s ease;
   --font-serif: 'Playfair Display', serif;
   --font-sans: 'Inter', sans-serif;
@@ -77,6 +77,15 @@ img {
   background: var(--gold);
   color: var(--white);
   border-color: var(--gold);
+}
+.btn-outline {
+  background: transparent;
+  color: var(--black);
+  border-color: var(--black);
+}
+.btn-outline:hover {
+  background: var(--black);
+  color: var(--white);
 }
 .btn-block {
   width: 100%;
@@ -394,29 +403,21 @@ img {
 }
 .hero-text h1 {
   font-family: var(--font-serif);
-  font-size: 4.8rem;
+  font-size: 4.2rem;
   font-weight: 400;
   letter-spacing: -2px;
-  line-height: 1;
+  line-height: 1.1;
   color: var(--black);
 }
 .hero-text .hero-sub {
-  font-size: 0.8rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
+  font-size: 0.9rem;
   color: var(--mid-gray);
-  margin: 12px 0 6px;
-}
-.hero-text .hero-quote {
-  font-size: 1rem;
-  font-style: italic;
-  color: var(--dark-gray);
-  margin-bottom: 28px;
-  letter-spacing: 0.5px;
+  margin: 16px 0 32px;
+  max-width: 400px;
 }
 .hero-placeholder {
   width: 100%;
-  height: 320px;
+  height: 340px;
   background: var(--off-white);
   border: 1px solid var(--border);
   display: flex;
@@ -428,39 +429,67 @@ img {
   letter-spacing: 8px;
 }
 
-/* CATÉGORIES */
-.categories-section {
-  padding: 40px 0 60px;
+/* OUR DESIGN */
+.our-design {
+  padding: 80px 0;
+  background: var(--off-white);
+  border-bottom: 1px solid var(--border);
+}
+.design-content {
+  max-width: 820px;
+  margin: 0 auto;
+  text-align: center;
+}
+.design-content h2 {
+  font-family: var(--font-serif);
+  font-size: 2.2rem;
+  font-weight: 400;
+  letter-spacing: 2px;
+  color: var(--black);
+  margin-bottom: 24px;
+}
+.design-content p {
+  color: var(--dark-gray);
+  font-size: 0.95rem;
+  line-height: 1.8;
+  margin-bottom: 28px;
+}
+
+/* PROMOS */
+.promo-section {
+  padding: 60px 0;
   background: var(--white);
   border-bottom: 1px solid var(--border);
 }
-.categories-grid {
+.promo-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 20px;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.promo-card {
+  padding: 40px 30px;
   text-align: center;
-}
-.category-item {
-  padding: 20px 10px;
   border: 1px solid var(--border);
+  background: var(--white);
   transition: var(--transition);
-  cursor: pointer;
 }
-.category-item:hover {
-  border-color: var(--gold);
+.promo-card:hover {
   box-shadow: var(--shadow-hover);
 }
-.category-item i {
-  font-size: 2.2rem;
-  color: var(--gold);
+.promo-card span {
   display: block;
-  margin-bottom: 8px;
+  font-family: var(--font-serif);
+  font-size: 1.6rem;
+  font-weight: 400;
+  letter-spacing: 2px;
+  color: var(--black);
+  margin-bottom: 20px;
 }
-.category-item span {
-  font-size: 0.75rem;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--dark-gray);
+.promo-winter {
+  border-top: 4px solid var(--gold);
+}
+.promo-bestsellers {
+  border-top: 4px solid var(--black);
 }
 
 /* SECTIONS PRODUITS */
@@ -563,38 +592,36 @@ img {
   color: var(--white);
 }
 
-/* NEWSLETTER */
-.newsletter {
+/* VIP */
+.vip-newsletter {
   padding: 80px 0;
   background: var(--off-white);
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
 }
-.newsletter-content {
+.vip-content {
   text-align: center;
   max-width: 580px;
   margin: 0 auto;
 }
-.newsletter-content h2 {
+.vip-content h2 {
   font-family: var(--font-serif);
   font-size: 2.4rem;
   font-weight: 400;
   letter-spacing: 2px;
 }
-.newsletter-content p {
-  font-size: 0.7rem;
-  letter-spacing: 4px;
-  text-transform: uppercase;
+.vip-content p {
+  font-size: 0.9rem;
   color: var(--mid-gray);
-  margin-bottom: 24px;
+  margin: 12px 0 24px;
 }
-.newsletter form {
+.vip-content form {
   display: flex;
   gap: 8px;
   border-bottom: 1px solid var(--black);
   padding-bottom: 4px;
 }
-.newsletter input {
+.vip-content input {
   flex: 1;
   border: none;
   background: transparent;
@@ -603,30 +630,31 @@ img {
   outline: none;
   color: var(--black);
 }
-.newsletter input::placeholder {
+.vip-content input::placeholder {
   color: var(--light-gray);
 }
-.newsletter button {
+.vip-content button {
   font-size: 1.2rem;
   padding: 6px 12px;
   color: var(--black);
   transition: var(--transition);
 }
-.newsletter button:hover {
+.vip-content button:hover {
   color: var(--gold);
 }
 
-.contact-info {
-  margin-top: 28px;
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  font-size: 0.85rem;
-  color: var(--dark-gray);
+/* SMALL WIP */
+.small-wip {
+  padding: 40px 0;
+  background: var(--white);
+  text-align: center;
+  border-bottom: 1px solid var(--border);
 }
-.contact-info i {
-  color: var(--gold);
-  margin-right: 6px;
+.small-wip p {
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  color: var(--mid-gray);
+  text-transform: uppercase;
 }
 
 /* FOOTER */
@@ -781,9 +809,6 @@ img {
   .products-grid {
     grid-template-columns: repeat(3, 1fr);
   }
-  .categories-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
 }
 @media (max-width: 768px) {
   .hero-content {
@@ -791,13 +816,13 @@ img {
     gap: 30px;
   }
   .hero-text h1 {
-    font-size: 3.6rem;
+    font-size: 3.2rem;
   }
   .products-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  .categories-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .promo-grid {
+    grid-template-columns: 1fr;
   }
   .section-header h2 {
     font-size: 2.2rem;
@@ -812,7 +837,7 @@ img {
     gap: 12px;
   }
   .hero-text h1 {
-    font-size: 2.8rem;
+    font-size: 2.6rem;
   }
   .cart-sidebar {
     max-width: 100%;
@@ -822,9 +847,5 @@ img {
   }
   .header-right {
     gap: 8px;
-  }
-  .contact-info {
-    flex-direction: column;
-    gap: 6px;
   }
 }
