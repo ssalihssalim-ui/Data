@@ -1,5 +1,5 @@
 /* ============================================================
-   RESET & BASE – Pleine largeur
+   RESET & BASE – LUNA
    ============================================================ */
 * {
   margin: 0;
@@ -9,16 +9,19 @@
 
 :root {
   --white: #ffffff;
-  --off-white: #fafafa;
-  --light-gray: #eaeaea;
+  --off-white: #f8f6f2;
+  --light-gray: #eae7e0;
   --mid-gray: #999999;
-  --dark-gray: #333333;
+  --dark-gray: #2a2a2a;
   --black: #111111;
-  --border: #eeeeee;
+  --gold: #c9a84c;
+  --gold-light: #e8d5a3;
+  --border: #e0dbd2;
   --shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
-  --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.06);
-  --transition: 0.25s ease;
-  --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.06);
+  --transition: 0.3s ease;
+  --font-serif: 'Playfair Display', serif;
+  --font-sans: 'Inter', sans-serif;
 }
 
 html, body {
@@ -26,7 +29,7 @@ html, body {
   overflow-x: hidden;
 }
 body {
-  font-family: var(--font);
+  font-family: var(--font-sans);
   background: var(--white);
   color: var(--dark-gray);
   line-height: 1.6;
@@ -54,14 +57,14 @@ img {
 }
 
 /* ============================================================
-   BOUTONS (petits)
+   BOUTONS
    ============================================================ */
 .btn {
   display: inline-block;
-  padding: 12px 28px;
+  padding: 14px 36px;
   font-weight: 500;
-  font-size: 0.75rem;
-  letter-spacing: 1.5px;
+  font-size: 0.7rem;
+  letter-spacing: 2.5px;
   text-transform: uppercase;
   transition: var(--transition);
   border: 1.5px solid transparent;
@@ -76,26 +79,25 @@ img {
   border-color: var(--black);
 }
 .btn-primary:hover {
-  background: var(--white);
-  color: var(--black);
+  background: var(--gold);
+  color: var(--white);
+  border-color: var(--gold);
 }
 .btn-block {
   width: 100%;
   display: block;
 }
 
-/* Petits boutons pour Connexion/Inscription */
 .btn-outline-small {
   background: transparent;
   color: var(--black);
   border: 1px solid var(--black);
   padding: 4px 12px;
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   font-weight: 500;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   transition: var(--transition);
-  border-radius: 2px;
 }
 .btn-outline-small:hover {
   background: var(--black);
@@ -106,20 +108,19 @@ img {
   color: var(--white);
   border: 1px solid var(--black);
   padding: 4px 12px;
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   font-weight: 500;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   transition: var(--transition);
-  border-radius: 2px;
 }
 .btn-primary-small:hover {
-  background: var(--white);
-  color: var(--black);
+  background: var(--gold);
+  border-color: var(--gold);
 }
 
 /* ============================================================
-   HEADER (pleine largeur)
+   HEADER
    ============================================================ */
 .header {
   position: sticky;
@@ -136,7 +137,6 @@ img {
   justify-content: space-between;
   height: 64px;
   padding: 0 24px;
-  max-width: 100%;
 }
 .header-left {
   display: flex;
@@ -149,42 +149,37 @@ img {
   gap: 12px;
 }
 
-/* Menu hamburger */
 .menu-toggle {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   color: var(--black);
   padding: 4px 8px;
-  transition: var(--transition);
 }
-.menu-toggle:hover {
-  opacity: 0.6;
-}
-
 .logo {
-  font-size: 1.1rem;
-  font-weight: 300;
-  letter-spacing: 2px;
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 3px;
   text-transform: uppercase;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   cursor: pointer;
 }
-.logo i {
-  font-size: 0.9rem;
-  opacity: 0.6;
+.logo .logo-icon {
+  color: var(--gold);
+  font-size: 1.2rem;
 }
 .logo span {
-  font-weight: 600;
+  color: var(--black);
 }
 
 .header-right button {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: var(--dark-gray);
   transition: var(--transition);
 }
 .header-right button:hover {
-  color: var(--black);
+  color: var(--gold);
 }
 
 .cart-btn {
@@ -194,7 +189,7 @@ img {
   position: absolute;
   top: -8px;
   right: -12px;
-  background: var(--black);
+  background: var(--gold);
   color: var(--white);
   font-size: 0.5rem;
   font-weight: 600;
@@ -217,12 +212,13 @@ img {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 500;
   color: var(--black);
 }
 .user-avatar i {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
+  color: var(--gold);
 }
 .dropdown-menu {
   position: absolute;
@@ -241,7 +237,7 @@ img {
 }
 .dropdown-menu a {
   padding: 6px 18px;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--dark-gray);
   transition: var(--transition);
 }
@@ -250,7 +246,7 @@ img {
 }
 
 /* ============================================================
-   MENU LATERAL GAUCHE (side menu)
+   MENU LATÉRAL
    ============================================================ */
 .menu-overlay {
   position: fixed;
@@ -274,24 +270,23 @@ img {
   height: 100%;
   background: var(--white);
   z-index: 3000;
-  padding: 20px 24px;
+  padding: 24px 28px;
   transform: translateX(-100%);
   transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  box-shadow: 4px 0 30px rgba(0, 0, 0, 0.06);
+  box-shadow: 4px 0 30px rgba(0, 0, 0, 0.04);
   border-right: 1px solid var(--border);
   overflow-y: auto;
 }
 .side-menu.open {
   transform: translateX(0);
 }
-
 .side-menu-header {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 30px;
+  margin-bottom: 24px;
 }
 .close-menu {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   color: var(--mid-gray);
   transition: var(--transition);
 }
@@ -304,12 +299,13 @@ img {
   list-style: none;
 }
 .side-menu-links li {
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 .side-menu-links a {
   display: block;
-  padding: 12px 8px;
-  font-size: 0.95rem;
+  padding: 10px 4px;
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
   font-weight: 400;
   color: var(--dark-gray);
   border-bottom: 1px solid transparent;
@@ -318,8 +314,32 @@ img {
 }
 .side-menu-links a:hover,
 .side-menu-links a.active {
-  color: var(--black);
-  border-bottom-color: var(--black);
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+}
+
+.side-menu-categories {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+.side-menu-categories p {
+  font-size: 0.6rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--mid-gray);
+  margin-bottom: 12px;
+}
+.side-menu-categories a {
+  display: block;
+  padding: 6px 4px;
+  font-size: 0.85rem;
+  color: var(--dark-gray);
+  transition: var(--transition);
+}
+.side-menu-categories a:hover {
+  color: var(--gold);
+  padding-left: 8px;
 }
 
 /* ============================================================
@@ -327,13 +347,13 @@ img {
    ============================================================ */
 .view {
   display: none;
-  animation: fadeIn 0.3s ease;
+  animation: fadeIn 0.4s ease;
 }
 .view.active {
   display: block;
 }
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -362,7 +382,7 @@ img {
   transition: var(--transition);
 }
 .form-group input:focus {
-  border-color: var(--black);
+  border-color: var(--gold);
 }
 
 /* ============================================================
@@ -380,23 +400,30 @@ img {
   gap: 60px;
   align-items: center;
 }
+.hero-text .hero-tag {
+  font-size: 0.6rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  padding: 4px 14px;
+  display: inline-block;
+  margin-bottom: 16px;
+}
 .hero-text h1 {
-  font-size: 4.5rem;
-  font-weight: 300;
+  font-family: var(--font-serif);
+  font-size: 5rem;
+  font-weight: 400;
   letter-spacing: -2px;
   line-height: 1;
   color: var(--black);
 }
-.hero-sub {
-  font-size: 0.8rem;
-  letter-spacing: 3px;
+.hero-text .hero-sub {
+  font-size: 0.9rem;
+  letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--mid-gray);
   margin: 16px 0 32px;
-}
-.hero-sub strong {
-  color: var(--black);
-  font-weight: 600;
 }
 .hero-placeholder {
   width: 100%;
@@ -406,13 +433,47 @@ img {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.7rem;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  color: var(--light-gray);
+  font-family: var(--font-serif);
+  font-size: 3rem;
+  color: var(--gold);
+  letter-spacing: 8px;
 }
-.hero-placeholder::after {
-  content: '✦ Collection ✦';
+
+/* ============================================================
+   CATÉGORIES
+   ============================================================ */
+.categories-section {
+  padding: 40px 0 60px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+}
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  text-align: center;
+}
+.category-item {
+  padding: 20px 10px;
+  border: 1px solid var(--border);
+  transition: var(--transition);
+  cursor: pointer;
+}
+.category-item:hover {
+  border-color: var(--gold);
+  box-shadow: var(--shadow-hover);
+}
+.category-item i {
+  font-size: 2rem;
+  color: var(--gold);
+  display: block;
+  margin-bottom: 8px;
+}
+.category-item span {
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--dark-gray);
 }
 
 /* ============================================================
@@ -433,13 +494,14 @@ img {
   font-size: 0.6rem;
   letter-spacing: 4px;
   text-transform: uppercase;
-  color: var(--mid-gray);
+  color: var(--gold);
   display: block;
   margin-bottom: 6px;
 }
 .section-header h2 {
+  font-family: var(--font-serif);
   font-size: 2.8rem;
-  font-weight: 300;
+  font-weight: 400;
   letter-spacing: -1px;
   color: var(--black);
 }
@@ -463,6 +525,7 @@ img {
 }
 .product-card:hover {
   box-shadow: var(--shadow-hover);
+  border-color: var(--gold-light);
 }
 .product-card .product-image {
   width: 100%;
@@ -478,14 +541,15 @@ img {
   align-items: flex-start;
 }
 .product-card .product-name {
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  font-weight: 400;
   letter-spacing: 0.3px;
   margin-bottom: 2px;
   color: var(--black);
 }
 .product-card .product-desc {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   color: var(--mid-gray);
   margin-bottom: 6px;
   text-transform: uppercase;
@@ -495,7 +559,7 @@ img {
   font-size: 0.95rem;
   font-weight: 500;
   margin-bottom: 10px;
-  color: var(--black);
+  color: var(--gold);
 }
 .product-card .add-to-cart {
   width: 100%;
@@ -509,8 +573,9 @@ img {
   border: 1px solid var(--black);
 }
 .product-card .add-to-cart:hover {
-  background: var(--white);
-  color: var(--black);
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--white);
 }
 
 /* ============================================================
@@ -528,8 +593,9 @@ img {
   margin: 0 auto;
 }
 .newsletter-content h2 {
-  font-size: 2.2rem;
-  font-weight: 300;
+  font-family: var(--font-serif);
+  font-size: 2.4rem;
+  font-weight: 400;
   letter-spacing: 2px;
 }
 .newsletter-content p {
@@ -564,7 +630,7 @@ img {
   transition: var(--transition);
 }
 .newsletter button:hover {
-  opacity: 0.5;
+  color: var(--gold);
 }
 
 /* ============================================================
@@ -592,7 +658,7 @@ img {
   transition: var(--transition);
 }
 .social-icons a:hover {
-  color: var(--black);
+  color: var(--gold);
 }
 
 /* ============================================================
@@ -640,7 +706,8 @@ img {
   margin-bottom: 14px;
 }
 .cart-header h3 {
-  font-size: 1.1rem;
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
   font-weight: 400;
   letter-spacing: 1px;
 }
@@ -656,7 +723,6 @@ img {
 .cart-items {
   flex: 1;
   overflow-y: auto;
-  padding-right: 4px;
 }
 .cart-items::-webkit-scrollbar {
   width: 3px;
@@ -686,11 +752,12 @@ img {
   flex: 1;
 }
 .cart-item-details h4 {
-  font-size: 0.8rem;
-  font-weight: 500;
+  font-family: var(--font-serif);
+  font-size: 0.85rem;
+  font-weight: 400;
 }
 .cart-item-details p {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--mid-gray);
 }
 .cart-item-remove {
@@ -699,7 +766,7 @@ img {
   padding: 4px 8px;
 }
 .cart-item-remove:hover {
-  color: var(--black);
+  color: var(--gold);
 }
 .cart-footer {
   padding-top: 14px;
@@ -712,6 +779,9 @@ img {
   font-weight: 500;
   font-size: 1rem;
   margin-bottom: 14px;
+}
+.cart-total span:last-child {
+  color: var(--gold);
 }
 
 /* ============================================================
@@ -728,9 +798,12 @@ img {
     gap: 30px;
   }
   .hero-text h1 {
-    font-size: 3.2rem;
+    font-size: 3.6rem;
   }
   .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .categories-grid {
     grid-template-columns: repeat(2, 1fr);
   }
   .section-header h2 {
@@ -746,7 +819,7 @@ img {
     gap: 12px;
   }
   .hero-text h1 {
-    font-size: 2.6rem;
+    font-size: 2.8rem;
   }
   .cart-sidebar {
     max-width: 100%;
@@ -756,9 +829,5 @@ img {
   }
   .header-right {
     gap: 8px;
-  }
-  .btn-outline-small, .btn-primary-small {
-    font-size: 0.5rem;
-    padding: 3px 8px;
   }
 }
