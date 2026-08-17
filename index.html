@@ -15,15 +15,34 @@
   <!-- ========== HEADER ========== -->
   <header class="header" id="mainHeader">
     <div class="container header-inner">
+      <!-- Logo à gauche -->
       <div class="logo" id="logoLink">
         <i class="fas fa-feather-alt"></i>
         <span>WHITE</span> Artistry
       </div>
-      <nav class="nav-links" id="navLinks">
-        <a href="#" data-view="home">Accueil</a>
-        <a href="#" data-view="products">Boutique</a>
-        <a href="#" data-view="about">À propos</a>
+
+      <!-- Menu Hamburger (visible sur mobile) -->
+      <button class="hamburger" id="hamburgerBtn" aria-label="Ouvrir le menu">
+        <i class="fas fa-bars"></i>
+      </button>
+
+      <!-- Menu latéral (slide-in) -->
+      <nav class="side-menu" id="sideMenu">
+        <div class="side-menu-header">
+          <span class="side-menu-title">Menu</span>
+          <button class="close-menu" id="closeMenuBtn" aria-label="Fermer le menu">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <ul class="side-menu-links">
+          <li><a href="#" data-view="home">Accueil</a></li>
+          <li><a href="#" data-view="products">Boutique</a></li>
+          <li><a href="#" data-view="about">À propos</a></li>
+          <li><a href="#" data-view="profile" id="profileLink">Mon profil</a></li>
+        </ul>
       </nav>
+
+      <!-- Actions à droite : login/register + panier -->
       <div class="header-actions">
         <button class="search-btn" aria-label="Rechercher"><i class="fas fa-search"></i></button>
         <button class="cart-btn" id="openCartBtn" aria-label="Panier">
