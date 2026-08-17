@@ -149,27 +149,100 @@ img {
 .logo span {
   font-weight: 600;
 }
-.nav-links {
-  display: flex;
-  gap: 28px;
-  font-size: 0.75rem;
-  font-weight: 400;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+
+/* Hamburger */
+.hamburger {
+  display: none;
+  font-size: 1.4rem;
+  color: var(--black);
+  padding: 4px;
 }
-.nav-links a {
+.hamburger:hover {
+  opacity: 0.6;
+}
+
+/* Menu latéral (slide-in) */
+.side-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 300px;
+  max-width: 80%;
+  height: 100%;
+  background: var(--white);
+  z-index: 2000;
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 2px 0 20px rgba(0,0,0,0.05);
+  border-right: 1px solid var(--border);
+  padding: 20px 24px;
+  overflow-y: auto;
+}
+.side-menu.open {
+  transform: translateX(0);
+}
+.side-menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+.side-menu-title {
+  font-size: 1.2rem;
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+.close-menu {
+  font-size: 1.4rem;
   color: var(--mid-gray);
   transition: var(--transition);
-  cursor: pointer;
 }
-.nav-links a:hover,
-.nav-links a.active {
+.close-menu:hover {
   color: var(--black);
+  transform: rotate(90deg);
 }
+.side-menu-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.side-menu-links li a {
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  color: var(--dark-gray);
+  transition: var(--transition);
+  display: block;
+  padding: 8px 0;
+}
+.side-menu-links li a:hover {
+  color: var(--black);
+  font-weight: 500;
+}
+
+/* Overlay pour le menu */
+.side-menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.2);
+  z-index: 1500;
+  opacity: 0;
+  visibility: hidden;
+  transition: var(--transition);
+}
+.side-menu-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Header actions (droite) */
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 12px;
 }
 .header-actions button {
   font-size: 1.1rem;
@@ -638,6 +711,7 @@ img {
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
 @media (max-width: 768px) {
   .hero-content {
     grid-template-columns: 1fr;
@@ -645,9 +719,6 @@ img {
   }
   .hero-text h1 {
     font-size: 3.2rem;
-  }
-  .nav-links {
-    display: none;
   }
   .products-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -660,7 +731,16 @@ img {
     font-size: 0.6rem;
     padding: 4px 12px;
   }
+  /* Afficher le hamburger */
+  .hamburger {
+    display: block;
+  }
+  /* Cacher les liens de navigation standards (si présents) */
+  .nav-links {
+    display: none !important;
+  }
 }
+
 @media (max-width: 480px) {
   .products-grid {
     grid-template-columns: 1fr 1fr;
