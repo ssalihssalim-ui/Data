@@ -1,5 +1,5 @@
 // ============================================================
-// 1. CONFIGURATION FIREBASE (À REMPLACER PAR VOS CLÉS)
+// 1. CONFIGURATION FIREBASE (À REMPLACER)
 // ============================================================
 const firebaseConfig = {
   apiKey: "VOTRE_API_KEY",
@@ -15,7 +15,7 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 // ============================================================
-// 2. DONNÉES DE DÉMONSTRATION (fallback si Firestore vide)
+// 2. DONNÉES DE DÉMONSTRATION
 // ============================================================
 const MOCK_PRODUCTS = [
   { id: 'mock1', name: 'Typewriter', price: 9.99, image: 'https://picsum.photos/seed/type/400/400', description: 'Vintage' },
@@ -31,6 +31,15 @@ const MOCK_PRODUCTS = [
 // ============================================================
 // 3. ÉLÉMENTS DOM
 // ============================================================
+// Menu latéral
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const closeMenuBtn = document.getElementById('closeMenuBtn');
+const sideMenu = document.getElementById('sideMenu');
+const sideMenuOverlay = document.createElement('div');
+sideMenuOverlay.className = 'side-menu-overlay';
+document.body.appendChild(sideMenuOverlay);
+
+// Navigation
 const views = document.querySelectorAll('.view');
 const navLinks = document.querySelectorAll('[data-view]');
 const authButtons = document.getElementById('authButtons');
@@ -45,6 +54,7 @@ const logoutBtnProfile = document.getElementById('logoutBtnProfile');
 const profileEmail = document.getElementById('profileEmail');
 const profileUid = document.getElementById('profileUid');
 
+// Panier
 const bestSellersGrid = document.getElementById('bestSellersGrid');
 const newArrivalsGrid = document.getElementById('newArrivalsGrid');
 const allProductsGrid = document.getElementById('allProductsGrid');
@@ -56,33 +66,53 @@ const cartTotalPrice = document.getElementById('cartTotalPrice');
 const openCartBtn = document.getElementById('openCartBtn');
 const closeCartBtn = document.getElementById('closeCartBtn');
 
+// Formulaires
 const loginForm = document.getElementById('loginForm');
 const registerForm = document.getElementById('registerForm');
 const loginError = document.getElementById('loginError');
 const registerError = document.getElementById('registerError');
 
 // ============================================================
-// 4. AUTHENTIFICATION
+// 4. MENU LATÉRAL
 // ============================================================
-// Écouter les changements d'état de l'utilisateur
+function openSideMenu() {
+  sideMenu.classList.add('open');
+  sideMenuOverlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeSideMenu() {
+  sideMenu.classList.remove('open');
+  sideMenuOverlay.classList.remove('active');
+  document.body.style.overflow = '';
+}
+hamburgerBtn.addEventListener('click', openSideMenu);
+closeMenuBtn.addEventListener('click', closeSideMenu);
+sideMenuOverlay.addEventListener('click', closeSideMenu);
+
+// Fermeture du menu lors d'un clic sur un lien (optionnel)
+document.querySelectorAll('.side-menu-links a').forEach(link => {
+  link.addEventListener('click', () => {
+    closeSideMenu();
+  });
+});
+
+// ============================================================
+// 5. AUTHENTIFICATION
+// ============================================================
 auth.onAuthStateChanged(user => {
   if (user) {
-    // Connecté
     authButtons.style.display = 'none';
     userMenu.style.display = 'flex';
     userNameDisplay.textContent = user.displayName || user.email?.split('@')[0] || 'Utilisateur';
     profileEmail.textContent = user.email || '—';
     profileUid.textContent = user.uid || '—';
-    // Mettre à jour la vue si nécessaire (si on est sur login/register, rediriger vers home)
     const activeView = document.querySelector('.view.active');
     if (activeView && ['view-login', 'view-register'].includes(activeView.id)) {
       showView('home');
     }
   } else {
-    // Déconnecté
     authButtons.style.display = 'flex';
     userMenu.style.display = 'none';
-    // Rediriger vers home si on est sur profil
     const activeView = document.querySelector('.view.active');
     if (activeView && activeView.id === 'view-profile') {
       showView('home');
@@ -90,7 +120,6 @@ auth.onAuthStateChanged(user => {
   }
 });
 
-// Connexion
 loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const email = document.getElementById('loginEmail').value;
@@ -105,7 +134,6 @@ loginForm.addEventListener('submit', async (e) => {
   }
 });
 
-// Inscription
 registerForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const email = document.getElementById('registerEmail').value;
@@ -120,7 +148,6 @@ registerForm.addEventListener('submit', async (e) => {
   }
 });
 
-// Déconnexion
 logoutBtn.addEventListener('click', () => {
   auth.signOut();
   dropdownMenu.classList.remove('open');
@@ -129,7 +156,6 @@ logoutBtnProfile.addEventListener('click', () => {
   auth.signOut();
 });
 
-// Affichage du dropdown
 userAvatar.addEventListener('click', (e) => {
   e.stopPropagation();
   dropdownMenu.classList.toggle('open');
@@ -139,29 +165,23 @@ document.addEventListener('click', () => {
 });
 
 // ============================================================
-// 5. NAVIGATION (SPA)
+// 6. NAVIGATION
 // ============================================================
 function showView(viewId) {
-  // Masquer toutes les vues
   views.forEach(v => v.classList.remove('active'));
-  // Afficher la vue ciblée
   const target = document.getElementById(`view-${viewId}`);
   if (target) target.classList.add('active');
-  // Mettre à jour les liens actifs
   navLinks.forEach(link => {
     link.classList.toggle('active', link.dataset.view === viewId);
   });
-  // Si la vue est 'login' ou 'register' et que l'utilisateur est connecté, rediriger vers home
   if ((viewId === 'login' || viewId === 'register') && auth.currentUser) {
     showView('home');
   }
-  // Si la vue est 'profile' et que l'utilisateur n'est pas connecté, rediriger vers login
   if (viewId === 'profile' && !auth.currentUser) {
     showView('login');
   }
 }
 
-// Gestion des clics sur les liens de navigation
 navLinks.forEach(link => {
   link.addEventListener('click', (e) => {
     e.preventDefault();
@@ -174,18 +194,14 @@ navLinks.forEach(link => {
   });
 });
 
-// Clic sur le logo → accueil
 document.getElementById('logoLink').addEventListener('click', () => showView('home'));
-
-// Boutons Connexion / Inscription
 loginBtn.addEventListener('click', () => showView('login'));
 registerBtn.addEventListener('click', () => showView('register'));
 
 // ============================================================
-// 6. PANIER (localStorage)
+// 7. PANIER
 // ============================================================
 let cart = [];
-
 function loadCart() {
   const stored = localStorage.getItem('white_cart');
   cart = stored ? JSON.parse(stored) : [];
@@ -195,7 +211,6 @@ function saveCart() {
   localStorage.setItem('white_cart', JSON.stringify(cart));
   updateCartUI();
 }
-
 function addToCart(product) {
   const existing = cart.find(item => item.id === product.id);
   if (existing) {
@@ -207,19 +222,16 @@ function addToCart(product) {
   cartBadge.style.transform = 'scale(1.3)';
   setTimeout(() => cartBadge.style.transform = 'scale(1)', 200);
 }
-
 function removeFromCart(id) {
   cart = cart.filter(item => item.id !== id);
   saveCart();
   renderCartItems();
 }
-
 function updateCartUI() {
   const total = cart.reduce((acc, item) => acc + item.quantity, 0);
   cartBadge.textContent = total;
   renderCartItems();
 }
-
 function renderCartItems() {
   if (cart.length === 0) {
     cartItems.innerHTML = `<p class="empty-cart-msg">Votre panier est vide.</p>`;
@@ -250,8 +262,6 @@ function renderCartItems() {
     btn.addEventListener('click', () => removeFromCart(btn.dataset.id));
   });
 }
-
-// Ouverture / fermeture panier
 function openCart() {
   cartSidebar.classList.add('open');
   cartOverlay.classList.add('active');
@@ -267,7 +277,7 @@ closeCartBtn.addEventListener('click', closeCart);
 cartOverlay.addEventListener('click', closeCart);
 
 // ============================================================
-// 7. AFFICHAGE DES PRODUITS (Firestore + fallback)
+// 8. AFFICHAGE PRODUITS
 // ============================================================
 function renderProducts(container, products) {
   if (!products || products.length === 0) {
@@ -308,11 +318,8 @@ function renderProducts(container, products) {
 }
 
 function displayProducts(products) {
-  // Best Sellers : 4 premiers
   renderProducts(bestSellersGrid, products.slice(0, 4));
-  // New Arrivals : 4 suivants
   renderProducts(newArrivalsGrid, products.slice(4, 8));
-  // Tous les produits (vue boutique)
   renderProducts(allProductsGrid, products);
 }
 
@@ -336,11 +343,10 @@ async function fetchProducts() {
 }
 
 // ============================================================
-// 8. INITIALISATION
+// 9. INITIALISATION
 // ============================================================
 loadCart();
 fetchProducts();
-// Vue par défaut : accueil
 showView('home');
 
 console.log('✨ White Artistry Pro — Prêt !');
