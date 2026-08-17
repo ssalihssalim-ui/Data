@@ -15,17 +15,17 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 // ============================================================
-// DONNÉES MOCKÉES (bijouterie)
+// DONNÉES MOCKÉES (inspiration Barcelona Home)
 // ============================================================
 const MOCK_PRODUCTS = [
-  { id: 'mock1', name: 'Celestial Necklace', price: 299.00, image: 'https://picsum.photos/seed/necklace1/400/400', description: '18K Gold' },
-  { id: 'mock2', name: 'Solitaire Ring', price: 159.00, image: 'https://picsum.photos/seed/ring1/400/400', description: '14K Gold' },
-  { id: 'mock3', name: 'Stellar Bracelet', price: 249.00, image: 'https://picsum.photos/seed/bracelet1/400/400', description: 'Silver Plated' },
-  { id: 'mock4', name: 'Luna Watch', price: 399.00, image: 'https://picsum.photos/seed/watch1/400/400', description: 'Gold Plated' },
-  { id: 'mock5', name: 'Aurora Pendant', price: 189.00, image: 'https://picsum.photos/seed/pendant1/400/400', description: '18K Gold' },
-  { id: 'mock6', name: 'Nova Cuff', price: 219.00, image: 'https://picsum.photos/seed/cuff1/400/400', description: 'Silver Plated' },
-  { id: 'mock7', name: 'Eclipse Hoops', price: 179.00, image: 'https://picsum.photos/seed/hoops1/400/400', description: '14K Gold' },
-  { id: 'mock8', name: 'Comet Chain', price: 259.00, image: 'https://picsum.photos/seed/chain1/400/400', description: '18K Gold' }
+  { id: 'mock1', name: 'Linen Candle', price: 59.00, image: 'https://picsum.photos/seed/candle1/400/400', description: '100% natural' },
+  { id: 'mock2', name: 'Wooden Chair', price: 299.00, image: 'https://picsum.photos/seed/chair1/400/400', description: 'Solid oak' },
+  { id: 'mock3', name: 'Ceramic Vase', price: 89.00, image: 'https://picsum.photos/seed/vase1/400/400', description: 'Handmade' },
+  { id: 'mock4', name: 'Marble Table', price: 459.00, image: 'https://picsum.photos/seed/table1/400/400', description: 'Natural stone' },
+  { id: 'mock5', name: 'Wool Rug', price: 199.00, image: 'https://picsum.photos/seed/rug1/400/400', description: 'Sustainable' },
+  { id: 'mock6', name: 'Brass Lamp', price: 149.00, image: 'https://picsum.photos/seed/lamp1/400/400', description: 'Vintage finish' },
+  { id: 'mock7', name: 'Leather Pouf', price: 179.00, image: 'https://picsum.photos/seed/pouf1/400/400', description: 'Genuine leather' },
+  { id: 'mock8', name: 'Mirror Round', price: 129.00, image: 'https://picsum.photos/seed/mirror1/400/400', description: 'Brass frame' }
 ];
 
 // ============================================================
@@ -54,7 +54,6 @@ const profileEmail = document.getElementById('profileEmail');
 const profileUid = document.getElementById('profileUid');
 
 const featuredGrid = document.getElementById('featuredGrid');
-const newArrivalsGrid = document.getElementById('newArrivalsGrid');
 const allProductsGrid = document.getElementById('allProductsGrid');
 
 const cartBadge = document.getElementById('cartBadge');
@@ -225,12 +224,12 @@ registerBtn.addEventListener('click', () => showView('register'));
 let cart = [];
 
 function loadCart() {
-  const stored = localStorage.getItem('jewelrix_cart');
+  const stored = localStorage.getItem('barcelona_cart');
   cart = stored ? JSON.parse(stored) : [];
   updateCartUI();
 }
 function saveCart() {
-  localStorage.setItem('jewelrix_cart', JSON.stringify(cart));
+  localStorage.setItem('barcelona_cart', JSON.stringify(cart));
   updateCartUI();
 }
 
@@ -347,8 +346,6 @@ function renderProducts(container, products) {
 function displayProducts(products) {
   // Featured : 4 premiers
   renderProducts(featuredGrid, products.slice(0, 4));
-  // New arrivals : 4 suivants
-  renderProducts(newArrivalsGrid, products.slice(4, 8));
   // Tous
   renderProducts(allProductsGrid, products);
 }
@@ -379,4 +376,4 @@ loadCart();
 fetchProducts();
 showView('home');
 
-console.log('✨ JEWELRIX — Prêt !');
+console.log('✨ BARCELONA — Prêt !');
