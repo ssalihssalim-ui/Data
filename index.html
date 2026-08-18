@@ -18,7 +18,7 @@
 
     <div class="wrapper">
 
-        <!-- HEADER / NAVBAR -->
+        <!-- HEADER -->
         <header class="header">
             <a href="index.html" class="logo" id="logoLink"><i class="fas fa-leaf"></i> MANORA</a>
             <nav class="nav-links">
@@ -27,25 +27,21 @@
                 <a href="#" id="navDashboard" style="display:none;">Dashboard</a>
             </nav>
             <div class="header-icons">
-                <i class="fas fa-search" data-icon="search" id="searchIcon"></i>
+                <i class="fas fa-search" data-icon="search"></i>
                 <i class="far fa-user" data-icon="user" id="userIcon"></i>
-                <i class="fas fa-shopping-bag" data-icon="bag" id="bagIcon"></i>
+                <i class="fas fa-shopping-bag" data-icon="bag"></i>
                 <span class="user-status" id="userStatus"></span>
             </div>
         </header>
 
     </div>
 
-    <!-- ============================================================ -->
-    <!-- ===== PAGE D'ACCUEIL (HERO) ===== -->
-    <!-- ============================================================ -->
+    <!-- ===== PAGE ACCUEIL ===== -->
     <section class="hero" id="pageHome">
         <div class="hero-overlay"></div>
         <div class="hero-content">
             <div class="hero-tag"><i class="fas fa-star" style="color: #f5cba7; margin-right: 0.4rem;"></i> nouvelle collection</div>
-            <h1>
-                Beauté <span class="gold-accent">&</span> Bien-être
-            </h1>
+            <h1>Beauté <span class="gold-accent">&</span> Bien-être</h1>
             <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; justify-content: center; margin-top: 0.2rem;">
                 <span class="lunch-easter" id="lunchBadge"><i class="fas fa-spa" style="margin-right: 0.3rem;"></i> wellness</span>
                 <span style="font-size: 0.7rem; letter-spacing: 0.2em; color: #f5cba7;">✦</span>
@@ -61,45 +57,28 @@
         </div>
     </section>
 
-    <!-- ============================================================ -->
-    <!-- ===== PAGE BOUTIQUE / CATALOGUE ===== -->
-    <!-- ============================================================ -->
+    <!-- ===== PAGE BOUTIQUE ===== -->
     <div class="shop-page" id="pageShop" style="display: none;">
         <div class="wrapper shop-wrapper">
-            <!-- MENU LATÉRAL CATÉGORIES -->
             <aside class="shop-sidebar">
                 <h3><i class="fas fa-list"></i> Catégories</h3>
-                <ul class="category-list">
+                <ul class="category-list" id="shopCategoryList">
                     <li class="category-item active" data-category="all"><i class="fas fa-th"></i> Tous</li>
-                    <li class="category-item" data-category="soin"><i class="fas fa-spa"></i> Soin</li>
-                    <li class="category-item" data-category="maquillage"><i class="fas fa-paint-brush"></i> Maquillage</li>
-                    <li class="category-item" data-category="vitamines"><i class="fas fa-pills"></i> Vitamines</li>
-                    <li class="category-item" data-category="ensemble"><i class="fas fa-box"></i> Ensembles</li>
-                    <li class="category-item" data-category="coquet"><i class="fas fa-gift"></i> Coquet</li>
-                    <li class="category-item" data-category="accessoires"><i class="fas fa-shopping-bag"></i> Accessoires</li>
-                    <li class="category-item" data-category="sport"><i class="fas fa-dumbbell"></i> Sport</li>
                 </ul>
             </aside>
-
-            <!-- LISTE DES PRODUITS -->
             <main class="shop-content">
                 <div class="shop-header">
                     <h2>Nos Produits</h2>
                     <p id="productCount">0 produits</p>
                 </div>
-                <div class="products-grid" id="productsGrid">
-                    <!-- Les produits sont générés par JavaScript -->
-                </div>
+                <div class="products-grid" id="productsGrid"></div>
             </main>
         </div>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- ===== DASHBOARD ADMIN ===== -->
-    <!-- ============================================================ -->
+    <!-- ===== PAGE DASHBOARD ===== -->
     <div class="dashboard-page" id="pageDashboard" style="display: none;">
         <div class="dashboard-container">
-            <!-- SIDEBAR -->
             <aside class="dashboard-sidebar">
                 <div class="dashboard-user">
                     <i class="fas fa-user-circle"></i>
@@ -118,33 +97,22 @@
                 </nav>
                 <button class="dashboard-logout" id="dashboardLogout"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
             </aside>
-
-            <!-- CONTENU -->
             <main class="dashboard-content">
                 <div class="dashboard-header">
                     <h2 id="dashboardTitle">Tableau de bord</h2>
-                    <p id="dashboardSubtitle">Bienvenue dans votre espace administrateur</p>
-                </div>
-                <div class="dashboard-stats" id="dashboardStats">
-                    <div class="stat-card"><h3>128</h3><p>Produits</p></div>
-                    <div class="stat-card"><h3>45</h3><p>Clients</p></div>
-                    <div class="stat-card"><h3>12</h3><p>Fournisseurs</p></div>
-                    <div class="stat-card"><h3>2 450 MAD</h3><p>Ventes du mois</p></div>
+                    <p id="dashboardSubtitle">Gestion complète</p>
                 </div>
                 <div class="dashboard-section-content" id="dashboardSectionContent">
                     <div class="dashboard-placeholder">
                         <i class="fas fa-chart-simple"></i>
                         <h3>Sélectionnez une section</h3>
-                        <p>Choisissez une option dans le menu de gauche pour afficher son contenu</p>
                     </div>
                 </div>
             </main>
         </div>
     </div>
 
-    <!-- ============================================================ -->
     <!-- ===== FOOTER ===== -->
-    <!-- ============================================================ -->
     <div class="wrapper">
         <div class="categories" id="homeCategories">
             <span class="cat-item">Soin</span>
@@ -155,7 +123,6 @@
             <span class="cat-item">Accessoires</span>
             <span class="cat-item">Sport</span>
         </div>
-
         <div class="silver-section">
             <div class="silver-content">
                 <h3><i class="fas fa-heart"></i> Collection Wellness</h3>
@@ -163,7 +130,6 @@
                 <button class="btn-secondary" id="silverBtn">Découvrir</button>
             </div>
         </div>
-
         <footer class="footer">
             <div class="footer-links">
                 <a href="#">À propos</a>
@@ -171,11 +137,7 @@
                 <a href="#">Livraison</a>
                 <a href="#">Retours</a>
             </div>
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <span style="font-size: 0.6rem;">© 2026 MANORA</span>
-                <span style="color: #d4cfc6;">|</span>
-                <span style="font-size: 0.6rem; letter-spacing: 0.1em;">Beauty & Wellness</span>
-            </div>
+            <div><span>© 2026 MANORA</span><span style="color:#d4cfc6;">|</span><span>Beauty & Wellness</span></div>
             <div class="footer-social">
                 <i class="fab fa-instagram"></i>
                 <i class="fab fa-pinterest-p"></i>
@@ -184,9 +146,7 @@
         </footer>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- ===== MODAL AUTHENTIFICATION ===== -->
-    <!-- ============================================================ -->
+    <!-- ===== MODAL AUTH ===== -->
     <div class="auth-overlay" id="authOverlay">
         <div class="auth-modal">
             <button class="auth-close" id="authClose"><i class="fas fa-times"></i></button>
@@ -198,8 +158,6 @@
                 <button class="auth-tab active" data-tab="login">Connexion</button>
                 <button class="auth-tab" data-tab="register">Inscription</button>
             </div>
-
-            <!-- FORMULAIRE CONNEXION -->
             <form class="auth-form" id="loginForm">
                 <div class="form-group">
                     <label for="loginEmail"><i class="fas fa-envelope"></i> Email</label>
@@ -213,8 +171,6 @@
                 <button type="submit" class="auth-submit" id="loginBtn">Se connecter</button>
                 <p class="auth-forgot"><a href="#" id="resetPasswordLink">Mot de passe oublié ?</a></p>
             </form>
-
-            <!-- FORMULAIRE INSCRIPTION -->
             <form class="auth-form hidden" id="registerForm">
                 <div class="form-group">
                     <label for="registerName"><i class="fas fa-user"></i> Nom complet</label>
@@ -231,7 +187,7 @@
                 <div class="form-group">
                     <label for="registerPassword"><i class="fas fa-lock"></i> Mot de passe</label>
                     <input type="password" id="registerPassword" placeholder="••••••••" required />
-                    <small style="font-size: 0.6rem; color: #999;">Minimum 6 caractères</small>
+                    <small>Minimum 6 caractères</small>
                 </div>
                 <div class="form-group">
                     <label for="registerConfirm"><i class="fas fa-check-circle"></i> Confirmer</label>
@@ -239,14 +195,24 @@
                 </div>
                 <div id="registerError" class="auth-error hidden"></div>
                 <button type="submit" class="auth-submit" id="registerBtn">Créer mon compte</button>
-                <p class="auth-terms">En créant un compte, vous acceptez nos <a href="#">conditions d'utilisation</a></p>
+                <p class="auth-terms">En créant un compte, vous acceptez nos <a href="#">conditions</a></p>
             </form>
         </div>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- ===== FIREBASE SDKs ===== -->
-    <!-- ============================================================ -->
+    <!-- ===== MODAL CRUD ===== -->
+    <div class="crud-overlay" id="crudOverlay">
+        <div class="crud-modal">
+            <button class="crud-close" id="crudClose"><i class="fas fa-times"></i></button>
+            <h2 id="crudTitle">Ajouter</h2>
+            <form id="crudForm">
+                <div id="crudFields"></div>
+                <button type="submit" class="auth-submit" id="crudSubmit">Enregistrer</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== FIREBASE ===== -->
     <script type="importmap">
         {
             "imports": {
