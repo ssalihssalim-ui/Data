@@ -4,9 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MANORA · Beauty & Wellness</title>
-  <!-- Font Awesome (icônes) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-  <!-- CSS principal -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -23,9 +21,7 @@
     <!-- HEADER -->
     <header class="header">
       <a href="#" class="logo" id="logoLink"><i class="fas fa-leaf"></i> MANORA</a>
-      <nav class="nav-links">
-        <!-- Navbar vide -->
-      </nav>
+      <nav class="nav-links"></nav>
       <div class="header-icons">
         <i class="fas fa-search" data-icon="search"></i>
         <i class="far fa-user" data-icon="user" id="userIcon"></i>
@@ -37,7 +33,6 @@
     <!-- HERO SECTION -->
     <section class="hero">
       <div class="hero-tag"><i class="fas fa-star" style="color: #e8a87c; margin-right: 0.4rem;"></i> nouvelle collection</div>
-      
       <h1>
         Beauté <span class="gold-accent">&</span> Bien-être
       </h1>
@@ -46,11 +41,8 @@
         <span style="font-size: 0.7rem; letter-spacing: 0.2em; color: #e8a87c;">✦</span>
         <span style="font-size: 0.6rem; letter-spacing: 0.1em; color: #999;">édition limitée</span>
       </div>
-
       <p class="hero-sub">Découvrez notre nouvelle collection</p>
-      
       <button class="btn-primary" id="shopNowBtn">Shop Now</button>
-
       <div class="hero-note">
         <span><i class="fas fa-check-circle"></i> 100% naturel</span>
         <span><i class="fas fa-truck"></i> livraison offerte</span>
@@ -98,7 +90,7 @@
       </div>
     </footer>
 
-  </div> <!-- fin wrapper -->
+  </div>
 
   <!-- MODAL AUTHENTIFICATION -->
   <div class="auth-overlay" id="authOverlay">
@@ -110,13 +102,12 @@
         <p>Connectez-vous ou créez un compte</p>
       </div>
 
-      <!-- Tabs -->
       <div class="auth-tabs">
         <button class="auth-tab active" data-tab="login">Connexion</button>
         <button class="auth-tab" data-tab="register">Inscription</button>
       </div>
 
-      <!-- Formulaire Connexion -->
+      <!-- Connexion -->
       <form class="auth-form" id="loginForm">
         <div class="form-group">
           <label for="loginEmail"><i class="fas fa-envelope"></i> Email</label>
@@ -131,7 +122,7 @@
         <p class="auth-forgot"><a href="#" id="resetPasswordLink">Mot de passe oublié ?</a></p>
       </form>
 
-      <!-- Formulaire Inscription -->
+      <!-- Inscription -->
       <form class="auth-form hidden" id="registerForm">
         <div class="form-group">
           <label for="registerName"><i class="fas fa-user"></i> Nom complet</label>
@@ -140,6 +131,10 @@
         <div class="form-group">
           <label for="registerEmail"><i class="fas fa-envelope"></i> Email</label>
           <input type="email" id="registerEmail" placeholder="votre@email.com" required />
+        </div>
+        <div class="form-group">
+          <label for="registerPhone"><i class="fas fa-phone"></i> Téléphone</label>
+          <input type="tel" id="registerPhone" placeholder="06 12 34 56 78" />
         </div>
         <div class="form-group">
           <label for="registerPassword"><i class="fas fa-lock"></i> Mot de passe</label>
@@ -157,14 +152,14 @@
     </div>
   </div>
 
-  <!-- Firebase SDKs -->
+  <!-- ===== FIREBASE SDKs ===== -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  
-  <!-- Configuration Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <!-- ===== CONFIGURATION FIREBASE ===== -->
+  <!-- 🔥 REMPLACEZ CES VALEURS PAR VOTRE CONFIGURATION FIREBASE -->
   <script>
-    // ===== CONFIGURATION FIREBASE =====
-    // REMPLACEZ CES VALEURS PAR VOTRE PROPRE CONFIGURATION FIREBASE
     const firebaseConfig = {
       apiKey: "VOTRE_API_KEY",
       authDomain: "VOTRE_PROJET.firebaseapp.com",
@@ -177,6 +172,10 @@
     // Initialiser Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Activer la persistance pour une meilleure expérience
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
   </script>
 
   <!-- Script principal -->
