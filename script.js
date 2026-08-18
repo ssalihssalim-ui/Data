@@ -49,7 +49,7 @@ setPersistence(auth, browserLocalPersistence)
 console.log('🔥 Firebase initialisé !');
 
 // ============================================================
-// PRODUITS avec devise MAD
+// PRODUITS (devise MAD)
 // ============================================================
 const products = [
     { id: 1, name: 'Crème Hydratante', category: 'soin', price: '290 MAD', image: '🧴', description: 'Hydratation intense 24h' },
@@ -142,7 +142,7 @@ export function showPage(page) {
     if (page === 'dashboard') navDashboard?.classList.add('active');
 }
 
-// Navigation - Boutique accessible sans connexion ✅
+// Navigation - Boutique accessible sans connexion
 navShop?.addEventListener('click', (e) => {
     e.preventDefault();
     showPage('shop');
@@ -201,7 +201,7 @@ document.querySelectorAll('.category-item').forEach(item => {
     });
 });
 
-// Clic sur produit - accessible sans connexion ✅
+// Clic sur produit
 document.addEventListener('click', function(e) {
     const card = e.target.closest('.product-card');
     if (card) {
@@ -229,7 +229,6 @@ export function updateUI(user) {
         userStatus.className = 'user-status';
         userIcon.style.color = '';
         if (navDashboard) navDashboard.style.display = 'none';
-        // On ne redirige pas vers home, on reste sur la page
     }
 }
 
@@ -453,7 +452,7 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // ============================================================
-// BOUTON SHOP NOW - Accessible sans connexion ✅
+// BOUTON SHOP NOW - Accessible sans connexion
 // ============================================================
 document.getElementById('shopNowBtn')?.addEventListener('click', function() {
     showPage('shop');
@@ -463,7 +462,7 @@ document.getElementById('shopNowBtn')?.addEventListener('click', function() {
 });
 
 // ============================================================
-// BOUTON SILVER - Accessible sans connexion ✅
+// BOUTON SILVER - Accessible sans connexion
 // ============================================================
 document.getElementById('silverBtn')?.addEventListener('click', function() {
     showPage('shop');
@@ -500,7 +499,7 @@ document.querySelectorAll('.header-icons i').forEach(icon => {
 });
 
 // ============================================================
-// CATÉGORIES ACCUEIL - Accessibles sans connexion ✅
+// CATÉGORIES ACCUEIL - Accessibles sans connexion
 // ============================================================
 document.querySelectorAll('#homeCategories .cat-item').forEach(item => {
     item.addEventListener('click', function() {
