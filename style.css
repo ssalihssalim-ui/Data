@@ -127,7 +127,7 @@ p {
 }
 
 /* ============================================================ */
-/* ===== HERO SECTION - HAUTEUR AUGMENTÉE À 500px ===== */
+/* ===== HERO SECTION AVEC IMAGE EN HTML ===== */
 /* ============================================================ */
 .hero {
     position: relative;
@@ -137,14 +137,13 @@ p {
     justify-content: center;
     text-align: center;
     width: 100%;
-    height: 500px;
-    /* 🟢 HAUTEUR AUGMENTÉE DE 100px (400 → 500) */
-    min-height: 350px;
+    height: 400px;
+    min-height: 300px;
     overflow: hidden;
     background: #1a1a1a;
 }
 
-/* ===== IMAGE AVEC margin-top: 100px ===== */
+/* ===== IMAGE EN HTML (POSITIONNÉE EN ARRIÈRE-PLAN) ===== */
 .hero-image {
     position: absolute;
     top: 0;
@@ -152,10 +151,9 @@ p {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    /* 🟢 Couvre tout l'espace */
     z-index: 0;
     display: block;
-    margin-top: 100px;
-    /* 🟢 IMAGE POUSSÉE VERS LE BAS DE 100px */
 }
 
 /* Overlay sombre */
@@ -702,14 +700,8 @@ p {
     }
 
     .hero {
-        height: 400px;
-        /* 🟢 Version tablette : 400px */
-        min-height: 320px;
-    }
-
-    .hero-image {
-        margin-top: 70px;
-        /* 🟢 Margin-top réduit sur tablette */
+        height: 350px;
+        min-height: 280px;
     }
 
     .hero .hero-note {
@@ -745,14 +737,8 @@ p {
     }
 
     .hero {
-        height: 320px;
-        /* 🟢 Version mobile : 320px */
-        min-height: 270px;
-    }
-
-    .hero-image {
-        margin-top: 50px;
-        /* 🟢 Margin-top réduit sur mobile */
+        height: 300px;
+        min-height: 250px;
     }
 
     .btn-primary {
