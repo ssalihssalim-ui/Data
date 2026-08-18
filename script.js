@@ -209,16 +209,7 @@
     });
   }
 
-  // ===== 6. NAVIGATION LINKS =====
-  document.querySelectorAll('.nav-links a').forEach(link => {
-    link.addEventListener('click', function(e) {
-      e.preventDefault();
-      const page = this.dataset.page || this.textContent.trim();
-      showToast(`📍 ${page} — page en construction`);
-    });
-  });
-
-  // ===== 7. ICÔNES HEADER =====
+  // ===== 6. ICÔNES HEADER =====
   document.querySelectorAll('.header-icons i').forEach(icon => {
     if (icon.id === 'userIcon') return; // déjà géré
     icon.addEventListener('click', function() {
@@ -230,7 +221,7 @@
     });
   });
 
-  // ===== 8. FOOTER LINKS =====
+  // ===== 7. FOOTER LINKS =====
   document.querySelectorAll('.footer-links a').forEach(link => {
     link.addEventListener('click', function(e) {
       e.preventDefault();
@@ -239,7 +230,7 @@
     });
   });
 
-  // ===== 9. SOCIAL ICONS =====
+  // ===== 8. SOCIAL ICONS =====
   document.querySelectorAll('.footer-social i').forEach(icon => {
     icon.addEventListener('click', function() {
       const social = this.dataset.social || 'réseau social';
