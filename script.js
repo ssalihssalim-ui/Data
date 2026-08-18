@@ -1,5 +1,5 @@
 // ============================================================
-// SCRIPT.JS - Navigation, Auth, Catalogue, Interactions
+// SCRIPT.JS - Navigation, Auth, Catalogue
 // ============================================================
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
@@ -16,10 +16,16 @@ import {
 } from "firebase/auth";
 import {
     getFirestore,
+    collection,
     doc,
     setDoc,
+    getDocs,
+    getDoc,
     updateDoc,
-    serverTimestamp
+    deleteDoc,
+    serverTimestamp,
+    query,
+    orderBy
 } from "firebase/firestore";
 
 // ============================================================
@@ -49,24 +55,9 @@ setPersistence(auth, browserLocalPersistence)
 console.log('🔥 Firebase initialisé !');
 
 // ============================================================
-// PRODUITS (devise MAD)
+// PRODUITS (cache)
 // ============================================================
-const products = [
-    { id: 1, name: 'Crème Hydratante', category: 'soin', price: '290 MAD', image: '🧴', description: 'Hydratation intense 24h' },
-    { id: 2, name: 'Sérum Anti-Âge', category: 'soin', price: '490 MAD', image: '💧', description: 'Réduit les rides' },
-    { id: 3, name: 'Fond de Teint', category: 'maquillage', price: '340 MAD', image: '🎨', description: 'Couvrance parfaite' },
-    { id: 4, name: 'Mascara Volume', category: 'maquillage', price: '190 MAD', image: '👁️', description: 'Volume intense' },
-    { id: 5, name: 'Vitamine C', category: 'vitamines', price: '150 MAD', image: '🍊', description: 'Immunité renforcée' },
-    { id: 6, name: 'Vitamine D', category: 'vitamines', price: '120 MAD', image: '☀️', description: 'Énergie et vitalité' },
-    { id: 7, name: 'Coffret Beauty', category: 'ensemble', price: '590 MAD', image: '🎁', description: 'Coffret complet' },
-    { id: 8, name: 'Set Soin Visage', category: 'ensemble', price: '390 MAD', image: '🧖', description: 'Routine complète' },
-    { id: 9, name: 'Accessoire Cheveux', category: 'accessoires', price: '90 MAD', image: '💇', description: 'Élégant et pratique' },
-    { id: 10, name: 'Bracelet Bien-être', category: 'accessoires', price: '240 MAD', image: '📿', description: 'Pierre naturelle' },
-    { id: 11, name: 'Tapisserie Yoga', category: 'sport', price: '290 MAD', image: '🧘', description: 'Confort et adhérence' },
-    { id: 12, name: 'Bouteille Sport', category: 'sport', price: '140 MAD', image: '💪', description: 'Isotherme 1L' },
-    { id: 13, name: 'Boîte Coquet', category: 'coquet', price: '220 MAD', image: '🎀', description: 'Fait main' },
-    { id: 14, name: 'Sachet Parfumé', category: 'coquet', price: '80 MAD', image: '🌸', description: 'Parfum délicat' },
-];
+let products = [];
 
 // ============================================================
 // TOAST SYSTEM
@@ -142,13 +133,10 @@ export function showPage(page) {
     if (page === 'dashboard') navDashboard?.classList.add('active');
 }
 
-// Navigation - Boutique accessible sans connexion
 navShop?.addEventListener('click', (e) => {
     e.preventDefault();
     showPage('shop');
-    renderProducts('all');
-    document.querySelector('.category-item.active')?.classList.remove('active');
-    document.querySelector('.category-item[data-category="all"]')?.classList.add('active');
+    loadShopProducts();
 });
 
 navDashboard?.addEventListener('click', (e) => {
@@ -163,53 +151,65 @@ navDashboard?.addEventListener('click', (e) => {
 });
 
 // ============================================================
-// AFFICHAGE CATALOGUE
+// BOUTIQUE - CHARGER PRODUITS DEPUIS FIRESTORE
 // ============================================================
-const productsGrid = document.getElementById('productsGrid');
-const productCount = document.getElementById('productCount');
+export async function loadShopProducts(category = 'all') {
+    try {
+        const q = query(collection(db, 'produits'), orderBy('name'));
+        const snapshot = await getDocs(q);
+        products = [];
+        snapshot.forEach(doc => {
+            products.push({ id: doc.id, ...doc.data() });
+        });
+        renderProducts(category);
+        loadShopCategories();
+    } catch (error) {
+        console.error('Erreur chargement produits:', error);
+        showToast('⚠️ Erreur chargement produits', true);
+    }
+}
 
-export function renderProducts(category = 'all') {
-    const filtered = category === 'all'
-        ? products
-        : products.filter(p => p.category === category);
+function loadShopCategories() {
+    const list = document.getElementById('shopCategoryList');
+    const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
+    list.innerHTML = `
+        <li class="category-item active" data-category="all"><i class="fas fa-th"></i> Tous</li>
+        ${categories.map(cat => `
+            <li class="category-item" data-category="${cat}"><i class="fas fa-tag"></i> ${cat}</li>
+        `).join('')}
+    `;
+    document.querySelectorAll('#shopCategoryList .category-item').forEach(item => {
+        item.addEventListener('click', function() {
+            document.querySelectorAll('#shopCategoryList .category-item').forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            renderProducts(this.dataset.category);
+        });
+    });
+}
 
-    productCount.textContent = `${filtered.length} produits`;
+function renderProducts(category = 'all') {
+    const grid = document.getElementById('productsGrid');
+    const count = document.getElementById('productCount');
+    const filtered = category === 'all' ? products : products.filter(p => p.category === category);
+
+    count.textContent = `${filtered.length} produits`;
 
     if (filtered.length === 0) {
-        productsGrid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:2rem;color:#999;">Aucun produit dans cette catégorie</div>`;
+        grid.innerHTML = `<div class="empty-state"><i class="fas fa-box-open"></i><p>Aucun produit</p></div>`;
         return;
     }
 
-    productsGrid.innerHTML = filtered.map(p => `
+    grid.innerHTML = filtered.map(p => `
         <div class="product-card" data-id="${p.id}">
-            <div class="product-image">${p.image}</div>
+            <div class="product-image">${p.image || '📦'}</div>
             <div class="product-info">
                 <h4>${p.name}</h4>
-                <p>${p.description}</p>
-                <div class="product-price">${p.price}</div>
+                <p>${p.description || ''}</p>
+                <div class="product-price">${p.price || '0 MAD'}</div>
             </div>
         </div>
     `).join('');
 }
-
-// Catégories clics (dans la boutique)
-document.querySelectorAll('.category-item').forEach(item => {
-    item.addEventListener('click', function() {
-        document.querySelectorAll('.category-item').forEach(c => c.classList.remove('active'));
-        this.classList.add('active');
-        renderProducts(this.dataset.category);
-    });
-});
-
-// Clic sur produit
-document.addEventListener('click', function(e) {
-    const card = e.target.closest('.product-card');
-    if (card) {
-        const name = card.querySelector('h4')?.textContent || 'Produit';
-        const price = card.querySelector('.product-price')?.textContent || '';
-        showToast(`🛍️ ${name} — ${price} ajouté au panier`);
-    }
-});
 
 // ============================================================
 // AUTH UI
@@ -233,7 +233,7 @@ export function updateUI(user) {
 }
 
 // ============================================================
-// MODAL
+// MODAL AUTH
 // ============================================================
 const authOverlay = document.getElementById('authOverlay');
 const userIcon = document.getElementById('userIcon');
@@ -254,7 +254,7 @@ export function closeAuthModal() {
 userIcon?.addEventListener('click', function() {
     const user = auth.currentUser;
     if (user) {
-        if (confirm('Vous êtes connecté en tant que ' + (user.displayName || user.email) + '. Voulez-vous vous déconnecter ?')) {
+        if (confirm('Se déconnecter ?')) {
             signOut(auth);
             showToast('👋 Déconnexion réussie');
         }
@@ -452,30 +452,38 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // ============================================================
-// BOUTON SHOP NOW - Accessible sans connexion
+// BOUTONS ACCUEIL
 // ============================================================
-document.getElementById('shopNowBtn')?.addEventListener('click', function() {
+document.getElementById('shopNowBtn')?.addEventListener('click', () => {
     showPage('shop');
-    renderProducts('all');
-    document.querySelector('.category-item.active')?.classList.remove('active');
-    document.querySelector('.category-item[data-category="all"]')?.classList.add('active');
+    loadShopProducts('all');
 });
 
-// ============================================================
-// BOUTON SILVER - Accessible sans connexion
-// ============================================================
-document.getElementById('silverBtn')?.addEventListener('click', function() {
+document.getElementById('silverBtn')?.addEventListener('click', () => {
     showPage('shop');
-    renderProducts('all');
-    document.querySelector('.category-item.active')?.classList.remove('active');
-    document.querySelector('.category-item[data-category="all"]')?.classList.add('active');
+    loadShopProducts('all');
 });
 
-// ============================================================
-// LUNCH BADGE
-// ============================================================
-document.getElementById('lunchBadge')?.addEventListener('click', function() {
+document.getElementById('lunchBadge')?.addEventListener('click', () => {
     showToast('🌿 Wellness & Bien-être — MANORA');
+});
+
+// ============================================================
+// CATÉGORIES ACCUEIL
+// ============================================================
+document.querySelectorAll('#homeCategories .cat-item').forEach(item => {
+    item.addEventListener('click', function() {
+        const category = this.textContent.trim();
+        showPage('shop');
+        loadShopProducts('all');
+        setTimeout(() => {
+            const items = document.querySelectorAll('#shopCategoryList .category-item');
+            items.forEach(el => {
+                el.classList.toggle('active', el.textContent.trim() === category);
+            });
+            renderProducts(category);
+        }, 300);
+    });
 });
 
 // ============================================================
@@ -486,7 +494,7 @@ document.querySelectorAll('.header-icons i').forEach(icon => {
     icon.addEventListener('click', function() {
         const user = auth.currentUser;
         if (!user && this.dataset.icon === 'bag') {
-            showToast('🛍️ Connectez-vous pour finaliser votre commande', true);
+            showToast('🛍️ Connectez-vous pour commander', true);
             openAuthModal();
             return;
         }
@@ -498,27 +506,4 @@ document.querySelectorAll('.header-icons i').forEach(icon => {
     });
 });
 
-// ============================================================
-// CATÉGORIES ACCUEIL - Accessibles sans connexion
-// ============================================================
-document.querySelectorAll('#homeCategories .cat-item').forEach(item => {
-    item.addEventListener('click', function() {
-        const category = this.textContent.trim();
-        showPage('shop');
-        const catMap = {
-            'Soin': 'soin',
-            'Maquillage': 'maquillage',
-            'Vitamines': 'vitamines',
-            'Ensemble': 'ensemble',
-            'Coquet': 'coquet',
-            'Accessoires': 'accessoires',
-            'Sport': 'sport'
-        };
-        const catKey = catMap[category] || 'all';
-        document.querySelectorAll('.category-item').forEach(c => c.classList.remove('active'));
-        document.querySelector(`.category-item[data-category="${catKey}"]`)?.classList.add('active');
-        renderProducts(catKey);
-    });
-});
-
-console.log('🌿 MANORA · Script principal chargé - Boutique accessible sans connexion - Devise MAD');
+console.log('🌿 MANORA · Script principal chargé');
