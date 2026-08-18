@@ -24,13 +24,13 @@
     <header class="header">
       <a href="#" class="logo" id="logoLink"><i class="fas fa-moon"></i> LUNA</a>
       <nav class="nav-links">
-        <a href="#" data-page="Home">Home</a>
+        <!-- Navigation simplifiée : seulement Catalog et Contact -->
         <a href="#" data-page="Catalog">Catalog</a>
         <a href="#" data-page="Contact">Contact</a>
       </nav>
       <div class="header-icons">
         <i class="fas fa-search" data-icon="search"></i>
-        <i class="far fa-user" data-icon="user"></i>
+        <i class="far fa-user" data-icon="user" id="userIcon"></i>
         <i class="fas fa-shopping-bag" data-icon="bag"></i>
       </div>
     </header>
@@ -100,6 +100,60 @@
     </footer>
 
   </div> <!-- fin wrapper -->
+
+  <!-- MODAL AUTHENTIFICATION -->
+  <div class="auth-overlay" id="authOverlay">
+    <div class="auth-modal">
+      <button class="auth-close" id="authClose"><i class="fas fa-times"></i></button>
+      
+      <div class="auth-header">
+        <h2>Bienvenue chez LUNA</h2>
+        <p>Connectez-vous ou créez un compte</p>
+      </div>
+
+      <!-- Tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">Connexion</button>
+        <button class="auth-tab" data-tab="register">Inscription</button>
+      </div>
+
+      <!-- Formulaire Connexion -->
+      <form class="auth-form" id="loginForm">
+        <div class="form-group">
+          <label for="loginEmail"><i class="fas fa-envelope"></i> Email</label>
+          <input type="email" id="loginEmail" placeholder="votre@email.com" required />
+        </div>
+        <div class="form-group">
+          <label for="loginPassword"><i class="fas fa-lock"></i> Mot de passe</label>
+          <input type="password" id="loginPassword" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="auth-submit">Se connecter</button>
+        <p class="auth-forgot"><a href="#">Mot de passe oublié ?</a></p>
+      </form>
+
+      <!-- Formulaire Inscription -->
+      <form class="auth-form hidden" id="registerForm">
+        <div class="form-group">
+          <label for="registerName"><i class="fas fa-user"></i> Nom complet</label>
+          <input type="text" id="registerName" placeholder="Jean Dupont" required />
+        </div>
+        <div class="form-group">
+          <label for="registerEmail"><i class="fas fa-envelope"></i> Email</label>
+          <input type="email" id="registerEmail" placeholder="votre@email.com" required />
+        </div>
+        <div class="form-group">
+          <label for="registerPassword"><i class="fas fa-lock"></i> Mot de passe</label>
+          <input type="password" id="registerPassword" placeholder="••••••••" required />
+        </div>
+        <div class="form-group">
+          <label for="registerConfirm"><i class="fas fa-check-circle"></i> Confirmer</label>
+          <input type="password" id="registerConfirm" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="auth-submit">Créer mon compte</button>
+        <p class="auth-terms">En créant un compte, vous acceptez nos <a href="#">conditions d'utilisation</a></p>
+      </form>
+    </div>
+  </div>
 
   <!-- JavaScript -->
   <script src="script.js"></script>
