@@ -28,6 +28,8 @@
       transition: 'opacity 0.4s ease, transform 0.3s ease',
       fontFamily: "'Montserrat', sans-serif",
       pointerEvents: 'none',
+      maxWidth: '90%',
+      wordBreak: 'break-word',
     });
     document.body.appendChild(toast);
 
@@ -40,7 +42,7 @@
       toast.style.opacity = '0';
       toast.style.transform = 'translateX(-50%) translateY(20px)';
       setTimeout(() => toast.remove(), 400);
-    }, 3000);
+    }, 4000);
   }
 
   // ===== AUTH STATE =====
@@ -73,18 +75,16 @@
   function closeAuthModal() {
     authOverlay.classList.remove('active');
     document.body.style.overflow = '';
-    // Reset errors
     document.getElementById('loginError').classList.add('hidden');
     document.getElementById('registerError').classList.add('hidden');
   }
 
   if (userIcon) {
     userIcon.addEventListener('click', function() {
-      const user = firebase.auth().currentUser;
+      const user = auth.currentUser;
       if (user) {
-        // Si déjà connecté, on affiche un toast ou on permet de se déconnecter
         if (confirm('Vous êtes connecté en tant que ' + (user.displayName || user.email) + '. Voulez-vous vous déconnecter ?')) {
-          firebase.auth().signOut();
+          auth.signOut();
           showToast('👋 Déconnexion réussie');
         }
       } else {
@@ -127,80 +127,33 @@
         loginForm.classList.add('hidden');
         registerForm.classList.remove('hidden');
       }
-      // Reset errors
       document.getElementById('loginError').classList.add('hidden');
       document.getElementById('registerError').classList.add('hidden');
     });
   });
 
-  // ===== FIREBASE AUTH =====
-  const auth = firebase.auth();
+  // ========================================
+  // ===== INSCRIPTION AVEC FIRESTORE =====
+  // ========================================
 
-  // ===== LOGIN =====
-  const loginBtn = document.getElementById('loginBtn');
-  if (loginForm) {
-    loginForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const email = document.getElementById('loginEmail').value.trim();
-      const password = document.getElementById('loginPassword').value;
-      const errorDiv = document.getElementById('loginError');
-
-      errorDiv.classList.add('hidden');
-      loginBtn.disabled = true;
-      loginBtn.textContent = 'Connexion...';
-
-      auth.signInWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-          const user = userCredential.user;
-          showToast('✅ Bienvenue ' + (user.displayName || user.email) + ' !');
-          closeAuthModal();
-          loginForm.reset();
-        })
-        .catch((error) => {
-          errorDiv.classList.remove('hidden');
-          let message = 'Erreur de connexion';
-          switch (error.code) {
-            case 'auth/user-not-found':
-              message = 'Aucun compte trouvé avec cet email';
-              break;
-            case 'auth/wrong-password':
-              message = 'Mot de passe incorrect';
-              break;
-            case 'auth/invalid-email':
-              message = 'Email invalide';
-              break;
-            case 'auth/too-many-requests':
-              message = 'Trop de tentatives, réessayez plus tard';
-              break;
-            default:
-              message = error.message;
-          }
-          errorDiv.textContent = '⚠️ ' + message;
-          showToast('⚠️ ' + message, true);
-        })
-        .finally(() => {
-          loginBtn.disabled = false;
-          loginBtn.textContent = 'Se connecter';
-        });
-    });
-  }
-
-  // ===== REGISTER =====
   const registerBtn = document.getElementById('registerBtn');
   if (registerForm) {
     registerForm.addEventListener('submit', function(e) {
       e.preventDefault();
+      
       const name = document.getElementById('registerName').value.trim();
       const email = document.getElementById('registerEmail').value.trim();
+      const phone = document.getElementById('registerPhone').value.trim();
       const password = document.getElementById('registerPassword').value;
       const confirm = document.getElementById('registerConfirm').value;
       const errorDiv = document.getElementById('registerError');
 
       errorDiv.classList.add('hidden');
 
+      // === VALIDATIONS ===
       if (!name || !email || !password || !confirm) {
         errorDiv.classList.remove('hidden');
-        errorDiv.textContent = '⚠️ Veuillez remplir tous les champs';
+        errorDiv.textContent = '⚠️ Veuillez remplir tous les champs obligatoires';
         showToast('⚠️ Veuillez remplir tous les champs', true);
         return;
       }
@@ -220,44 +173,155 @@
       }
 
       registerBtn.disabled = true;
-      registerBtn.textContent = 'Création...';
+      registerBtn.textContent = 'Création en cours...';
 
+      // === 1. CRÉATION DU COMPTE AUTH ===
       auth.createUserWithEmailAndPassword(email, password)
         .then((userCredential) => {
-          // Mettre à jour le profil avec le nom
-          return userCredential.user.updateProfile({
+          const user = userCredential.user;
+          
+          // Mettre à jour le nom dans Auth
+          return user.updateProfile({
             displayName: name
           }).then(() => {
             return userCredential.user;
           });
         })
         .then((user) => {
+          // === 2. ENREGISTREMENT DANS FIRESTORE ===
+          const userData = {
+            uid: user.uid,
+            name: name,
+            email: email,
+            phone: phone || '',
+            role: 'client',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+            emailVerified: user.emailVerified || false,
+            preferences: {
+              newsletter: false,
+              promotions: false
+            },
+            address: {
+              line1: '',
+              line2: '',
+              city: '',
+              postalCode: '',
+              country: 'France'
+            }
+          };
+
+          return db.collection('users').doc(user.uid).set(userData);
+        })
+        .then(() => {
+          // === 3. SUCCÈS ===
           showToast('🎉 Bienvenue ' + name + ' ! Votre compte est créé');
           closeAuthModal();
           registerForm.reset();
         })
         .catch((error) => {
+          // === 4. GESTION DES ERREURS ===
           errorDiv.classList.remove('hidden');
-          let message = 'Erreur d\'inscription';
+          let message = 'Erreur lors de l\'inscription';
+          
           switch (error.code) {
             case 'auth/email-already-in-use':
-              message = 'Cet email est déjà utilisé';
+              message = 'Cet email est déjà utilisé par un autre compte';
               break;
             case 'auth/invalid-email':
-              message = 'Email invalide';
+              message = 'L\'adresse email n\'est pas valide';
               break;
             case 'auth/weak-password':
-              message = 'Mot de passe trop faible (min 6 caractères)';
+              message = 'Le mot de passe est trop faible (min 6 caractères)';
+              break;
+            case 'auth/network-request-failed':
+              message = 'Problème de connexion réseau. Vérifiez votre internet.';
               break;
             default:
               message = error.message;
           }
+          
           errorDiv.textContent = '⚠️ ' + message;
           showToast('⚠️ ' + message, true);
+          console.error('Erreur inscription:', error);
         })
         .finally(() => {
           registerBtn.disabled = false;
           registerBtn.textContent = 'Créer mon compte';
+        });
+    });
+  }
+
+  // ========================================
+  // ===== CONNEXION =====
+  // ========================================
+
+  const loginBtn = document.getElementById('loginBtn');
+  if (loginForm) {
+    loginForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const errorDiv = document.getElementById('loginError');
+
+      errorDiv.classList.add('hidden');
+
+      if (!email || !password) {
+        errorDiv.classList.remove('hidden');
+        errorDiv.textContent = '⚠️ Veuillez remplir tous les champs';
+        showToast('⚠️ Veuillez remplir tous les champs', true);
+        return;
+      }
+
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Connexion...';
+
+      auth.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          const user = userCredential.user;
+          
+          // Mettre à jour lastLogin dans Firestore
+          db.collection('users').doc(user.uid).update({
+            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+          }).catch((err) => {
+            console.warn('Impossible de mettre à jour lastLogin:', err);
+          });
+
+          showToast('✅ Bienvenue ' + (user.displayName || user.email) + ' !');
+          closeAuthModal();
+          loginForm.reset();
+        })
+        .catch((error) => {
+          errorDiv.classList.remove('hidden');
+          let message = 'Erreur de connexion';
+          
+          switch (error.code) {
+            case 'auth/user-not-found':
+              message = 'Aucun compte trouvé avec cet email';
+              break;
+            case 'auth/wrong-password':
+              message = 'Mot de passe incorrect';
+              break;
+            case 'auth/invalid-email':
+              message = 'Email invalide';
+              break;
+            case 'auth/too-many-requests':
+              message = 'Trop de tentatives, réessayez plus tard';
+              break;
+            case 'auth/network-request-failed':
+              message = 'Problème de connexion réseau';
+              break;
+            default:
+              message = error.message;
+          }
+          
+          errorDiv.textContent = '⚠️ ' + message;
+          showToast('⚠️ ' + message, true);
+        })
+        .finally(() => {
+          loginBtn.disabled = false;
+          loginBtn.textContent = 'Se connecter';
         });
     });
   }
@@ -281,6 +345,8 @@
         let message = 'Erreur';
         if (error.code === 'auth/user-not-found') {
           message = 'Aucun compte trouvé avec cet email';
+        } else if (error.code === 'auth/invalid-email') {
+          message = 'Email invalide';
         } else {
           message = error.message;
         }
@@ -292,14 +358,44 @@
   auth.onAuthStateChanged((user) => {
     updateUI(user);
     if (user) {
-      // Si la modale est ouverte et qu'on est connecté, on la ferme
       if (authOverlay.classList.contains('active')) {
         closeAuthModal();
       }
     }
   });
 
-  // ===== 1. BOUTON SHOP NOW =====
+  // ========================================
+  // ===== FONCTIONS UTILITAIRES =====
+  // ========================================
+
+  // Fonction pour récupérer les données d'un utilisateur depuis Firestore
+  function getUserData(uid) {
+    return db.collection('users').doc(uid).get()
+      .then((doc) => {
+        if (doc.exists) {
+          return doc.data();
+        } else {
+          return null;
+        }
+      })
+      .catch((error) => {
+        console.error('Erreur récupération données:', error);
+        return null;
+      });
+  }
+
+  // Fonction pour mettre à jour les préférences utilisateur
+  function updateUserPreferences(uid, preferences) {
+    return db.collection('users').doc(uid).update({
+      preferences: preferences
+    });
+  }
+
+  // ========================================
+  // ===== ÉVÉNEMENTS DU SITE =====
+  // ========================================
+
+  // Bouton Shop Now
   const shopBtn = document.getElementById('shopNowBtn');
   if (shopBtn) {
     shopBtn.addEventListener('click', function(e) {
@@ -323,7 +419,7 @@
     });
   }
 
-  // ===== 2. BOUTON DÉCOUVRIR =====
+  // Bouton Découvrir
   const silverBtn = document.getElementById('silverBtn');
   if (silverBtn) {
     silverBtn.addEventListener('click', function() {
@@ -348,7 +444,7 @@
     });
   }
 
-  // ===== 3. CATÉGORIES =====
+  // Catégories
   document.querySelectorAll('.cat-item').forEach((el) => {
     el.addEventListener('click', function() {
       const category = this.dataset.category || this.textContent.trim();
@@ -362,24 +458,18 @@
     });
   });
 
-  // ===== 4. LUNCH BADGE =====
-  const lunchBadge = document.getElementById('lunchBadge');
-  if (lunchBadge) {
-    lunchBadge.addEventListener('click', function() {
-      showToast('🌿 Wellness & Bien-être — MANORA');
-    });
-  }
+  // Lunch Badge
+  document.getElementById('lunchBadge').addEventListener('click', function() {
+    showToast('🌿 Wellness & Bien-être — MANORA');
+  });
 
-  // ===== 5. LOGO =====
-  const logo = document.getElementById('logoLink');
-  if (logo) {
-    logo.addEventListener('click', function(e) {
-      e.preventDefault();
-      showToast('🌿 MANORA — Beauty & Wellness');
-    });
-  }
+  // Logo
+  document.getElementById('logoLink').addEventListener('click', function(e) {
+    e.preventDefault();
+    showToast('🌿 MANORA — Beauty & Wellness');
+  });
 
-  // ===== 6. ICÔNES HEADER =====
+  // Icônes header
   document.querySelectorAll('.header-icons i').forEach(icon => {
     if (icon.id === 'userIcon') return;
     icon.addEventListener('click', function() {
@@ -397,22 +487,21 @@
     });
   });
 
-  // ===== 7. FOOTER LINKS =====
+  // Footer links
   document.querySelectorAll('.footer-links a').forEach(link => {
     link.addEventListener('click', function(e) {
       e.preventDefault();
-      const page = this.dataset.footer || this.textContent.trim();
-      showToast(`📄 ${page} — page en construction`);
+      showToast(`📄 ${this.dataset.footer || this.textContent.trim()} — page en construction`);
     });
   });
 
-  // ===== 8. SOCIAL ICONS =====
+  // Social icons
   document.querySelectorAll('.footer-social i').forEach(icon => {
     icon.addEventListener('click', function() {
-      const social = this.dataset.social || 'réseau social';
-      showToast(`📱 ${social} — bientôt disponible`);
+      showToast(`📱 ${this.dataset.social || 'réseau social'} — bientôt disponible`);
     });
   });
 
-  console.log('🌿 MANORA · Beauty & Wellness — Firebase Auth intégré');
+  console.log('🌿 MANORA · Beauty & Wellness — Firebase Auth + Firestore actif');
+  console.log('📊 Les utilisateurs sont enregistrés dans Firestore collection "users"');
 })();
