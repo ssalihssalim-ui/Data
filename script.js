@@ -77,21 +77,4 @@ function showToast(msg, isError = false) {
         borderLeft: isError ? '4px solid #e74c3c' : '4px solid #e8a87c',
         opacity: '0',
         transition: 'opacity 0.4s ease, transform 0.3s ease',
-        fontFamily: "'Montserrat', sans-serif",
-        pointerEvents: 'none',
-        maxWidth: '90%',
-        wordBreak: 'break-word',
-    });
-    document.body.appendChild(toast);
-
-    requestAnimationFrame(() => {
-        toast.style.opacity = '1';
-        toast.style.transform = 'translateX(-50%) translateY(0)';
-    });
-
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateX(-50%) translateY(20px)';
-        setTimeout(() => toast.remove(), 400);
-    }, 4000);
-}
+        fontFamily: "'Montserrat', sans-serif
