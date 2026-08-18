@@ -127,7 +127,7 @@ p {
 }
 
 /* ============================================================ */
-/* ===== HERO SECTION AVEC IMAGE manora.jpeg (HAUTEUR: 500px) ===== */
+/* ===== HERO SECTION - IMAGE RÉDUITE À 100px ===== */
 /* ============================================================ */
 .hero {
     position: relative;
@@ -137,36 +137,44 @@ p {
     justify-content: center;
     text-align: center;
     width: 100%;
-    height: 500px;
-    /* 🟢 HAUTEUR AUGMENTÉE DE 400px À 500px */
-    min-height: 350px;
+    height: 400px;
+    /* 🟢 Le conteneur reste à 400px */
+    min-height: 300px;
     overflow: hidden;
     background: #1a1a1a;
 }
 
-/* Image de couverture en arrière-plan */
+/* Image de couverture - RÉDUITE À 100px DE HAUTEUR */
 .hero::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: auto;
+    height: 100px;
+    /* 🟢 IMAGE RÉDUITE À 100px */
+    min-height: 100px;
+    max-height: 100px;
     background-image: url('manora.jpeg');
-    background-size: cover;
+    background-size: contain;
+    /* 🟢 "contain" pour garder les proportions */
     background-position: center;
     background-repeat: no-repeat;
     z-index: 0;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
-/* Overlay sombre pour améliorer la lisibilité du texte */
+/* Overlay sombre - plus léger car l'image est petite */
 .hero-overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.40);
+    background: rgba(0, 0, 0, 0.15);
+    /* 🟢 Overlay plus léger */
     z-index: 1;
 }
 
@@ -703,9 +711,15 @@ p {
     }
 
     .hero {
-        height: 400px;
-        /* 🟢 VERSION RESPONSIVE : 400px sur tablette */
-        min-height: 300px;
+        height: 350px;
+        min-height: 280px;
+    }
+
+    /* Image réduite à 80px sur tablette */
+    .hero::before {
+        height: 80px;
+        min-height: 80px;
+        max-height: 80px;
     }
 
     .hero .hero-note {
@@ -741,9 +755,15 @@ p {
     }
 
     .hero {
-        height: 320px;
-        /* 🟢 VERSION RESPONSIVE : 320px sur mobile */
+        height: 300px;
         min-height: 250px;
+    }
+
+    /* Image réduite à 60px sur mobile */
+    .hero::before {
+        height: 60px;
+        min-height: 60px;
+        max-height: 60px;
     }
 
     .btn-primary {
@@ -814,14 +834,7 @@ p {
 }
 */
 
-/* Option 4: TEST - Image d'Unsplash pour vérifier que le CSS fonctionne */
-/*
-.hero::before {
-    background-image: url('https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=1440&q=80');
-}
-*/
-
-/* Option 5: Afficher une bordure rouge si l'image ne charge pas */
+/* Option 4: Afficher une bordure rouge si l'image ne charge pas */
 /*
 .hero::before {
     background-color: #e74c3c;
