@@ -127,7 +127,7 @@ p {
 }
 
 /* ============================================================ */
-/* ===== HERO SECTION - IMAGE AVEC margin-top: 100px ===== */
+/* ===== HERO SECTION - IMAGE RÉDUITE À 100px ===== */
 /* ============================================================ */
 .hero {
     position: relative;
@@ -138,26 +138,27 @@ p {
     text-align: center;
     width: 100%;
     height: 400px;
+    /* 🟢 Le conteneur reste à 400px */
     min-height: 300px;
     overflow: hidden;
     background: #1a1a1a;
 }
 
-/* Image de couverture - DÉCALÉE VERS LE BAS AVEC margin-top: 100px */
+/* Image de couverture - RÉDUITE À 100px DE HAUTEUR */
 .hero::before {
     content: '';
     position: absolute;
-    top: 0;
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
-    margin-top: 100px;
-    /* 🟢 IMAGE POUSSÉE VERS LE BAS DE 100px */
+    transform: translate(-50%, -50%);
     width: auto;
-    height: 200px;
-    min-height: 200px;
-    max-height: 200px;
+    height: 100px;
+    /* 🟢 IMAGE RÉDUITE À 100px */
+    min-height: 100px;
+    max-height: 100px;
     background-image: url('manora.jpeg');
     background-size: contain;
+    /* 🟢 "contain" pour garder les proportions */
     background-position: center;
     background-repeat: no-repeat;
     z-index: 0;
@@ -165,7 +166,7 @@ p {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
-/* Overlay sombre - plus léger */
+/* Overlay sombre - plus léger car l'image est petite */
 .hero-overlay {
     position: absolute;
     top: 0;
@@ -173,6 +174,7 @@ p {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.15);
+    /* 🟢 Overlay plus léger */
     z-index: 1;
 }
 
@@ -713,12 +715,11 @@ p {
         min-height: 280px;
     }
 
+    /* Image réduite à 80px sur tablette */
     .hero::before {
-        height: 150px;
-        min-height: 150px;
-        max-height: 150px;
-        margin-top: 80px;
-        /* 🟢 Margin-top réduit sur tablette */
+        height: 80px;
+        min-height: 80px;
+        max-height: 80px;
     }
 
     .hero .hero-note {
@@ -758,12 +759,11 @@ p {
         min-height: 250px;
     }
 
+    /* Image réduite à 60px sur mobile */
     .hero::before {
-        height: 100px;
-        min-height: 100px;
-        max-height: 100px;
-        margin-top: 60px;
-        /* 🟢 Margin-top réduit sur mobile */
+        height: 60px;
+        min-height: 60px;
+        max-height: 60px;
     }
 
     .btn-primary {
