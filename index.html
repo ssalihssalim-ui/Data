@@ -66,6 +66,7 @@
     <!-- ============================================================ -->
     <div class="shop-page" id="pageShop" style="display: none;">
         <div class="wrapper shop-wrapper">
+            <!-- MENU LATÉRAL CATÉGORIES -->
             <aside class="shop-sidebar">
                 <h3><i class="fas fa-list"></i> Catégories</h3>
                 <ul class="category-list">
@@ -79,12 +80,16 @@
                     <li class="category-item" data-category="sport"><i class="fas fa-dumbbell"></i> Sport</li>
                 </ul>
             </aside>
+
+            <!-- LISTE DES PRODUITS -->
             <main class="shop-content">
                 <div class="shop-header">
                     <h2>Nos Produits</h2>
                     <p id="productCount">0 produits</p>
                 </div>
-                <div class="products-grid" id="productsGrid"></div>
+                <div class="products-grid" id="productsGrid">
+                    <!-- Les produits sont générés par JavaScript -->
+                </div>
             </main>
         </div>
     </div>
@@ -94,6 +99,7 @@
     <!-- ============================================================ -->
     <div class="dashboard-page" id="pageDashboard" style="display: none;">
         <div class="dashboard-container">
+            <!-- SIDEBAR -->
             <aside class="dashboard-sidebar">
                 <div class="dashboard-user">
                     <i class="fas fa-user-circle"></i>
@@ -112,6 +118,8 @@
                 </nav>
                 <button class="dashboard-logout" id="dashboardLogout"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
             </aside>
+
+            <!-- CONTENU -->
             <main class="dashboard-content">
                 <div class="dashboard-header">
                     <h2 id="dashboardTitle">Tableau de bord</h2>
@@ -121,7 +129,7 @@
                     <div class="stat-card"><h3>128</h3><p>Produits</p></div>
                     <div class="stat-card"><h3>45</h3><p>Clients</p></div>
                     <div class="stat-card"><h3>12</h3><p>Fournisseurs</p></div>
-                    <div class="stat-card"><h3>€2,450</h3><p>Ventes du mois</p></div>
+                    <div class="stat-card"><h3>2 450 MAD</h3><p>Ventes du mois</p></div>
                 </div>
                 <div class="dashboard-section-content" id="dashboardSectionContent">
                     <div class="dashboard-placeholder">
@@ -134,9 +142,10 @@
         </div>
     </div>
 
+    <!-- ============================================================ -->
+    <!-- ===== FOOTER ===== -->
+    <!-- ============================================================ -->
     <div class="wrapper">
-
-        <!-- CATÉGORIES ACCUEIL -->
         <div class="categories" id="homeCategories">
             <span class="cat-item">Soin</span>
             <span class="cat-item">Maquillage</span>
@@ -147,7 +156,6 @@
             <span class="cat-item">Sport</span>
         </div>
 
-        <!-- COLLECTION SECTION -->
         <div class="silver-section">
             <div class="silver-content">
                 <h3><i class="fas fa-heart"></i> Collection Wellness</h3>
@@ -156,7 +164,6 @@
             </div>
         </div>
 
-        <!-- FOOTER -->
         <footer class="footer">
             <div class="footer-links">
                 <a href="#">À propos</a>
@@ -175,7 +182,6 @@
                 <i class="fab fa-youtube"></i>
             </div>
         </footer>
-
     </div>
 
     <!-- ============================================================ -->
@@ -192,7 +198,8 @@
                 <button class="auth-tab active" data-tab="login">Connexion</button>
                 <button class="auth-tab" data-tab="register">Inscription</button>
             </div>
-            <!-- Connexion -->
+
+            <!-- FORMULAIRE CONNEXION -->
             <form class="auth-form" id="loginForm">
                 <div class="form-group">
                     <label for="loginEmail"><i class="fas fa-envelope"></i> Email</label>
@@ -206,7 +213,8 @@
                 <button type="submit" class="auth-submit" id="loginBtn">Se connecter</button>
                 <p class="auth-forgot"><a href="#" id="resetPasswordLink">Mot de passe oublié ?</a></p>
             </form>
-            <!-- Inscription -->
+
+            <!-- FORMULAIRE INSCRIPTION -->
             <form class="auth-form hidden" id="registerForm">
                 <div class="form-group">
                     <label for="registerName"><i class="fas fa-user"></i> Nom complet</label>
