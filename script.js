@@ -1,8 +1,8 @@
 // ============================================================
 // IMPORTS FIREBASE (Version 12.17.1 - Modulaire)
 // ============================================================
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
 import { 
     getAuth, 
     createUserWithEmailAndPassword,
@@ -13,7 +13,7 @@ import {
     setPersistence,
     browserLocalPersistence,
     updateProfile
-} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+} from "firebase/auth";
 import {
     getFirestore,
     doc,
@@ -21,7 +21,7 @@ import {
     getDoc,
     updateDoc,
     serverTimestamp
-} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+} from "firebase/firestore";
 
 // ============================================================
 // CONFIGURATION FIREBASE
@@ -119,6 +119,13 @@ function updateUI(user) {
 }
 
 // ============================================================
+// FONCTION DE VALIDATION D'EMAIL// ============================================================
+function isValidEmail(email) {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+}
+
+// ============================================================
 // MODAL AUTH
 // ============================================================
 const authOverlay = document.getElementById('authOverlay');
@@ -209,10 +216,24 @@ if (registerForm) {
         errorDiv.classList.add('hidden');
 
         // Validations
-        if (!name || !email || !password || !confirm) {
+        if (!name || name.length < 2) {
             errorDiv.classList.remove('hidden');
-            errorDiv.textContent = '⚠️ Veuillez remplir tous les champs obligatoires';
-            showToast('⚠️ Veuillez remplir tous les champs', true);
+            errorDiv.textContent = '⚠️ Veuillez entrer un nom valide';
+            showToast('⚠️ Nom invalide', true);
+            return;
+        }
+
+        if (!email || !isValidEmail(email)) {
+            errorDiv.classList.remove('hidden');
+            errorDiv.textContent = '⚠️ Veuillez entrer un email valide';
+            showToast('⚠️ Email invalide', true);
+            return;
+        }
+
+        if (!password || password.length < 6) {
+            errorDiv.classList.remove('hidden');
+            errorDiv.textContent = '⚠️ Mot de passe minimum 6 caractères';
+            showToast('⚠️ Mot de passe trop court', true);
             return;
         }
 
@@ -223,34 +244,16 @@ if (registerForm) {
             return;
         }
 
-        if (password.length < 6) {
-            errorDiv.classList.remove('hidden');
-            errorDiv.textContent = '⚠️ Le mot de passe doit faire au moins 6 caractères';
-            showToast('⚠️ Mot de passe trop court (min 6 caractères)', true);
-            return;
-        }
-
         const registerBtn = document.getElementById('registerBtn');
         registerBtn.disabled = true;
         registerBtn.textContent = 'Création en cours...';
 
-        console.log('📝 Création du compte Auth...');
-
-        // 1. Création du compte
         createUserWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
                 const user = userCredential.user;
-                console.log('✅ Compte Auth créé:', user.uid);
-
-                // Mettre à jour le nom
-                return updateProfile(user, {
-                    displayName: name
-                }).then(() => user);
+                return updateProfile(user, { displayName: name }).then(() => user);
             })
             .then((user) => {
-                console.log('📝 Enregistrement dans Firestore...');
-
-                // 2. Enregistrement dans Firestore
                 const userData = {
                     uid: user.uid,
                     name: name,
@@ -260,23 +263,12 @@ if (registerForm) {
                     createdAt: serverTimestamp(),
                     lastLogin: serverTimestamp(),
                     emailVerified: user.emailVerified || false,
-                    preferences: {
-                        newsletter: false,
-                        promotions: false
-                    },
-                    address: {
-                        line1: '',
-                        line2: '',
-                        city: '',
-                        postalCode: '',
-                        country: 'France'
-                    }
+                    preferences: { newsletter: false, promotions: false },
+                    address: { line1: '', line2: '', city: '', postalCode: '', country: 'France' }
                 };
-
                 return setDoc(doc(db, 'users', user.uid), userData).then(() => user);
             })
-            .then((user) => {
-                console.log('✅ Document Firestore créé !');
+            .then(() => {
                 showToast('🎉 Bienvenue ' + name + ' ! Votre compte est créé');
                 closeAuthModal();
                 registerForm.reset();
@@ -284,25 +276,23 @@ if (registerForm) {
             .catch((error) => {
                 console.error('❌ ERREUR:', error);
                 errorDiv.classList.remove('hidden');
-
                 let message = 'Erreur lors de l\'inscription';
                 switch (error.code) {
                     case 'auth/email-already-in-use':
-                        message = 'Cet email est déjà utilisé par un autre compte';
+                        message = 'Cet email est déjà utilisé';
                         break;
                     case 'auth/invalid-email':
-                        message = 'L\'adresse email n\'est pas valide';
+                        message = 'Email invalide';
                         break;
                     case 'auth/weak-password':
-                        message = 'Le mot de passe est trop faible (min 6 caractères)';
+                        message = 'Mot de passe trop faible (min 6 caractères)';
                         break;
                     case 'auth/network-request-failed':
-                        message = 'Problème de connexion réseau. Vérifiez votre internet.';
+                        message = 'Problème de connexion réseau';
                         break;
                     default:
                         message = error.message;
                 }
-
                 errorDiv.textContent = '⚠️ ' + message;
                 showToast('⚠️ ' + message, true);
             })
@@ -326,10 +316,17 @@ if (loginForm) {
 
         errorDiv.classList.add('hidden');
 
-        if (!email || !password) {
+        if (!email || !isValidEmail(email)) {
             errorDiv.classList.remove('hidden');
-            errorDiv.textContent = '⚠️ Veuillez remplir tous les champs';
-            showToast('⚠️ Veuillez remplir tous les champs', true);
+            errorDiv.textContent = '⚠️ Email invalide';
+            showToast('⚠️ Email invalide', true);
+            return;
+        }
+
+        if (!password) {
+            errorDiv.classList.remove('hidden');
+            errorDiv.textContent = '⚠️ Mot de passe requis';
+            showToast('⚠️ Mot de passe requis', true);
             return;
         }
 
@@ -340,12 +337,7 @@ if (loginForm) {
         signInWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
                 const user = userCredential.user;
-
-                // Mettre à jour lastLogin
-                updateDoc(doc(db, 'users', user.uid), {
-                    lastLogin: serverTimestamp()
-                }).catch(() => {});
-
+                updateDoc(doc(db, 'users', user.uid), { lastLogin: serverTimestamp() }).catch(() => {});
                 showToast('✅ Bienvenue ' + (user.displayName || user.email) + ' !');
                 closeAuthModal();
                 loginForm.reset();
@@ -353,7 +345,6 @@ if (loginForm) {
             .catch((error) => {
                 errorDiv.classList.remove('hidden');
                 let message = 'Erreur de connexion';
-
                 switch (error.code) {
                     case 'auth/user-not-found':
                         message = 'Aucun compte trouvé avec cet email';
@@ -370,7 +361,6 @@ if (loginForm) {
                     default:
                         message = error.message;
                 }
-
                 errorDiv.textContent = '⚠️ ' + message;
                 showToast('⚠️ ' + message, true);
             })
@@ -388,8 +378,8 @@ document.getElementById('resetPasswordLink').addEventListener('click', function(
     e.preventDefault();
     const email = document.getElementById('loginEmail').value.trim();
 
-    if (!email) {
-        showToast('⚠️ Veuillez entrer votre email', true);
+    if (!email || !isValidEmail(email)) {
+        showToast('⚠️ Veuillez entrer un email valide', true);
         document.getElementById('loginEmail').focus();
         return;
     }
