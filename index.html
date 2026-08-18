@@ -20,10 +20,11 @@
 
         <!-- HEADER / NAVBAR -->
         <header class="header">
-            <a href="#" class="logo" id="logoLink"><i class="fas fa-leaf"></i> MANORA</a>
+            <a href="index.html" class="logo" id="logoLink"><i class="fas fa-leaf"></i> MANORA</a>
             <nav class="nav-links">
-                <a href="#" data-page="home" class="active" id="navHome">Accueil</a>
-                <a href="#" data-page="shop" id="navShop">Boutique</a>
+                <a href="index.html" class="active">Accueil</a>
+                <a href="#" id="navShop">Boutique</a>
+                <a href="#" id="navDashboard" style="display:none;">Dashboard</a>
             </nav>
             <div class="header-icons">
                 <i class="fas fa-search" data-icon="search" id="searchIcon"></i>
@@ -65,7 +66,6 @@
     <!-- ============================================================ -->
     <div class="shop-page" id="pageShop" style="display: none;">
         <div class="wrapper shop-wrapper">
-            <!-- MENU LATÉRAL GAUCHE -->
             <aside class="shop-sidebar">
                 <h3><i class="fas fa-list"></i> Catégories</h3>
                 <ul class="category-list">
@@ -79,26 +79,21 @@
                     <li class="category-item" data-category="sport"><i class="fas fa-dumbbell"></i> Sport</li>
                 </ul>
             </aside>
-
-            <!-- CONTENU PRODUITS -->
             <main class="shop-content">
                 <div class="shop-header">
                     <h2>Nos Produits</h2>
                     <p id="productCount">0 produits</p>
                 </div>
-                <div class="products-grid" id="productsGrid">
-                    <!-- Les produits seront générés par JavaScript -->
-                </div>
+                <div class="products-grid" id="productsGrid"></div>
             </main>
         </div>
     </div>
 
     <!-- ============================================================ -->
-    <!-- ===== DASHBOARD ADMIN (Après Connexion) ===== -->
+    <!-- ===== DASHBOARD ADMIN ===== -->
     <!-- ============================================================ -->
     <div class="dashboard-page" id="pageDashboard" style="display: none;">
         <div class="dashboard-container">
-            <!-- Menu latéral Dashboard -->
             <aside class="dashboard-sidebar">
                 <div class="dashboard-user">
                     <i class="fas fa-user-circle"></i>
@@ -117,8 +112,6 @@
                 </nav>
                 <button class="dashboard-logout" id="dashboardLogout"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
             </aside>
-
-            <!-- Contenu Dashboard -->
             <main class="dashboard-content">
                 <div class="dashboard-header">
                     <h2 id="dashboardTitle">Tableau de bord</h2>
@@ -141,23 +134,64 @@
         </div>
     </div>
 
+    <div class="wrapper">
+
+        <!-- CATÉGORIES ACCUEIL -->
+        <div class="categories" id="homeCategories">
+            <span class="cat-item">Soin</span>
+            <span class="cat-item">Maquillage</span>
+            <span class="cat-item">Vitamines</span>
+            <span class="cat-item">Ensemble</span>
+            <span class="cat-item">Coquet</span>
+            <span class="cat-item">Accessoires</span>
+            <span class="cat-item">Sport</span>
+        </div>
+
+        <!-- COLLECTION SECTION -->
+        <div class="silver-section">
+            <div class="silver-content">
+                <h3><i class="fas fa-heart"></i> Collection Wellness</h3>
+                <p>Soin · beauté · bien-être · vitalité</p>
+                <button class="btn-secondary" id="silverBtn">Découvrir</button>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="footer">
+            <div class="footer-links">
+                <a href="#">À propos</a>
+                <a href="#">FAQ</a>
+                <a href="#">Livraison</a>
+                <a href="#">Retours</a>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 0.6rem;">© 2026 MANORA</span>
+                <span style="color: #d4cfc6;">|</span>
+                <span style="font-size: 0.6rem; letter-spacing: 0.1em;">Beauty & Wellness</span>
+            </div>
+            <div class="footer-social">
+                <i class="fab fa-instagram"></i>
+                <i class="fab fa-pinterest-p"></i>
+                <i class="fab fa-youtube"></i>
+            </div>
+        </footer>
+
+    </div>
+
     <!-- ============================================================ -->
     <!-- ===== MODAL AUTHENTIFICATION ===== -->
     <!-- ============================================================ -->
     <div class="auth-overlay" id="authOverlay">
         <div class="auth-modal">
             <button class="auth-close" id="authClose"><i class="fas fa-times"></i></button>
-
             <div class="auth-header">
                 <h2><i class="fas fa-leaf" style="color: #e8a87c;"></i> Bienvenue chez MANORA</h2>
                 <p>Connectez-vous ou créez un compte</p>
             </div>
-
             <div class="auth-tabs">
                 <button class="auth-tab active" data-tab="login">Connexion</button>
                 <button class="auth-tab" data-tab="register">Inscription</button>
             </div>
-
             <!-- Connexion -->
             <form class="auth-form" id="loginForm">
                 <div class="form-group">
@@ -172,7 +206,6 @@
                 <button type="submit" class="auth-submit" id="loginBtn">Se connecter</button>
                 <p class="auth-forgot"><a href="#" id="resetPasswordLink">Mot de passe oublié ?</a></p>
             </form>
-
             <!-- Inscription -->
             <form class="auth-form hidden" id="registerForm">
                 <div class="form-group">
@@ -218,6 +251,7 @@
     </script>
 
     <script type="module" src="script.js"></script>
+    <script type="module" src="admin.js"></script>
 
 </body>
 </html>
