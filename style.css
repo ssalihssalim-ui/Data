@@ -143,11 +143,7 @@ p {
     background: #1a1a1a;
 }
 
-/* ============================================================ */
 /* ===== IMAGE DE COUVERTURE ===== */
-/* ============================================================ */
-
-/* OPTION 1: Image en plein écran (cover) - RECOMMANDÉE */
 .hero::before {
     content: '';
     position: absolute;
@@ -159,62 +155,13 @@ p {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    background-color: #2c3e50;
-    /* 🟢 Couleur de fond si l'image ne charge pas */
     z-index: 0;
 }
 
-/* OPTION 2: Image avec margin-top: 100px (Décommentez pour activer) */
-/*
+/* ===== SI L'IMAGE NE CHARGE PAS, COULEUR DE FOND ===== */
 .hero::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    margin-top: 100px;
-    width: auto;
-    height: 200px;
-    min-height: 200px;
-    max-height: 200px;
-    background-image: url('manora.jpeg');
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
     background-color: #2c3e50;
-    z-index: 0;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
-*/
-
-/* OPTION 3: Si l'image est dans un dossier "images" */
-/*
-.hero::before {
-    background-image: url('images/manora.jpeg');
-}
-*/
-
-/* OPTION 4: Si l'image est en .jpg */
-/*
-.hero::before {
-    background-image: url('manora.jpg');
-}
-*/
-
-/* OPTION 5: Si l'image est en .png */
-/*
-.hero::before {
-    background-image: url('manora.png');
-}
-*/
-
-/* OPTION 6: Test avec une image en ligne (pour vérifier que le CSS fonctionne) */
-/*
-.hero::before {
-    background-image: url('https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=1440&q=80');
-}
-*/
 
 /* Overlay sombre */
 .hero-overlay {
