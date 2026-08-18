@@ -127,7 +127,7 @@ p {
 }
 
 /* ============================================================ */
-/* ===== HERO SECTION - IMAGE RÉDUITE À 100px ===== */
+/* ===== HERO SECTION ===== */
 /* ============================================================ */
 .hero {
     position: relative;
@@ -138,43 +138,92 @@ p {
     text-align: center;
     width: 100%;
     height: 400px;
-    /* 🟢 Le conteneur reste à 400px */
     min-height: 300px;
     overflow: hidden;
     background: #1a1a1a;
 }
 
-/* Image de couverture - RÉDUITE À 100px DE HAUTEUR */
+/* ============================================================ */
+/* ===== IMAGE DE COUVERTURE ===== */
+/* ============================================================ */
+
+/* OPTION 1: Image en plein écran (cover) - RECOMMANDÉE */
 .hero::before {
     content: '';
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: auto;
-    height: 100px;
-    /* 🟢 IMAGE RÉDUITE À 100px */
-    min-height: 100px;
-    max-height: 100px;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background-image: url('manora.jpeg');
-    background-size: contain;
-    /* 🟢 "contain" pour garder les proportions */
+    background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    background-color: #2c3e50;
+    /* 🟢 Couleur de fond si l'image ne charge pas */
+    z-index: 0;
+}
+
+/* OPTION 2: Image avec margin-top: 100px (Décommentez pour activer) */
+/*
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 100px;
+    width: auto;
+    height: 200px;
+    min-height: 200px;
+    max-height: 200px;
+    background-image: url('manora.jpeg');
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: #2c3e50;
     z-index: 0;
     border-radius: 8px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
+*/
 
-/* Overlay sombre - plus léger car l'image est petite */
+/* OPTION 3: Si l'image est dans un dossier "images" */
+/*
+.hero::before {
+    background-image: url('images/manora.jpeg');
+}
+*/
+
+/* OPTION 4: Si l'image est en .jpg */
+/*
+.hero::before {
+    background-image: url('manora.jpg');
+}
+*/
+
+/* OPTION 5: Si l'image est en .png */
+/*
+.hero::before {
+    background-image: url('manora.png');
+}
+*/
+
+/* OPTION 6: Test avec une image en ligne (pour vérifier que le CSS fonctionne) */
+/*
+.hero::before {
+    background-image: url('https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=1440&q=80');
+}
+*/
+
+/* Overlay sombre */
 .hero-overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.15);
-    /* 🟢 Overlay plus léger */
+    background: rgba(0, 0, 0, 0.40);
     z-index: 1;
 }
 
@@ -715,13 +764,6 @@ p {
         min-height: 280px;
     }
 
-    /* Image réduite à 80px sur tablette */
-    .hero::before {
-        height: 80px;
-        min-height: 80px;
-        max-height: 80px;
-    }
-
     .hero .hero-note {
         width: 90%;
     }
@@ -757,13 +799,6 @@ p {
     .hero {
         height: 300px;
         min-height: 250px;
-    }
-
-    /* Image réduite à 60px sur mobile */
-    .hero::before {
-        height: 60px;
-        min-height: 60px;
-        max-height: 60px;
     }
 
     .btn-primary {
@@ -808,35 +843,3 @@ p {
         font-size: 0.4rem;
     }
 }
-
-/* ============================================================ */
-/* ===== OPTIONS DE DÉBOGUAGE (À DÉCOMMENTER SI BESOIN) ===== */
-/* ============================================================ */
-
-/* Option 1: Si l'image est dans un dossier "images" */
-/*
-.hero::before {
-    background-image: url('images/manora.jpeg');
-}
-*/
-
-/* Option 2: Si l'image a une autre extension (.jpg) */
-/*
-.hero::before {
-    background-image: url('manora.jpg');
-}
-*/
-
-/* Option 3: Si l'image est au format PNG */
-/*
-.hero::before {
-    background-image: url('manora.png');
-}
-*/
-
-/* Option 4: Afficher une bordure rouge si l'image ne charge pas */
-/*
-.hero::before {
-    background-color: #e74c3c;
-}
-*/
