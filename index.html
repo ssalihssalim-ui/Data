@@ -1,184 +1,704 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MANORA · Beauty & Wellness</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MANORA · Beauty & Wellness</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- PROMO BAR -->
-  <div class="promo-bar">
-    <span><i class="fas fa-sparkles"></i> Nouvelle collection beauté & bien-être</span>
-    <i class="fas fa-circle" style="font-size: 0.2rem; vertical-align: middle;"></i>
-    <span>Shop Now <i class="fas fa-arrow-right" style="font-size: 0.5rem;"></i></span>
-  </div>
-
-  <div class="wrapper">
-
-    <!-- HEADER -->
-    <header class="header">
-      <a href="#" class="logo" id="logoLink"><i class="fas fa-leaf"></i> MANORA</a>
-      <nav class="nav-links"></nav>
-      <div class="header-icons">
-        <i class="fas fa-search" data-icon="search"></i>
-        <i class="far fa-user" data-icon="user" id="userIcon"></i>
-        <i class="fas fa-shopping-bag" data-icon="bag"></i>
-        <span class="user-status" id="userStatus"></span>
-      </div>
-    </header>
-
-    <!-- HERO SECTION -->
-    <section class="hero">
-      <div class="hero-tag"><i class="fas fa-star" style="color: #e8a87c; margin-right: 0.4rem;"></i> nouvelle collection</div>
-      <h1>
-        Beauté <span class="gold-accent">&</span> Bien-être
-      </h1>
-      <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; justify-content: center; margin-top: 0.2rem;">
-        <span class="lunch-easter" id="lunchBadge"><i class="fas fa-spa" style="margin-right: 0.3rem;"></i> wellness</span>
-        <span style="font-size: 0.7rem; letter-spacing: 0.2em; color: #e8a87c;">✦</span>
-        <span style="font-size: 0.6rem; letter-spacing: 0.1em; color: #999;">édition limitée</span>
-      </div>
-      <p class="hero-sub">Découvrez notre nouvelle collection</p>
-      <button class="btn-primary" id="shopNowBtn">Shop Now</button>
-      <div class="hero-note">
-        <span><i class="fas fa-check-circle"></i> 100% naturel</span>
-        <span><i class="fas fa-truck"></i> livraison offerte</span>
-        <span><i class="fas fa-undo-alt"></i> 30 jours</span>
-      </div>
-    </section>
-
-    <!-- CATÉGORIES -->
-    <div class="categories">
-      <span class="cat-item" data-category="Soin">Soin</span>
-      <span class="cat-item" data-category="Maquillage">Maquillage</span>
-      <span class="cat-item" data-category="Vitamines">Vitamines</span>
-      <span class="cat-item" data-category="Ensemble">Ensemble</span>
-      <span class="cat-item" data-category="Coquet">Coquet</span>
-      <span class="cat-item" data-category="Accessoires">Accessoires</span>
-      <span class="cat-item" data-category="Sport">Sport</span>
+    <!-- PROMO BAR -->
+    <div class="promo-bar">
+        <span><i class="fas fa-sparkles"></i> Nouvelle collection beauté & bien-être</span>
+        <i class="fas fa-circle" style="font-size: 0.2rem; vertical-align: middle;"></i>
+        <span>Shop Now <i class="fas fa-arrow-right" style="font-size: 0.5rem;"></i></span>
     </div>
 
-    <!-- COLLECTION SECTION -->
-    <div class="silver-section">
-      <div class="silver-content">
-        <h3><i class="fas fa-heart"></i> Collection Wellness</h3>
-        <p>Soin · beauté · bien-être · vitalité</p>
-        <button class="btn-secondary" id="silverBtn">Découvrir</button>
-      </div>
+    <div class="wrapper">
+
+        <!-- HEADER -->
+        <header class="header">
+            <a href="#" class="logo" id="logoLink"><i class="fas fa-leaf"></i> MANORA</a>
+            <nav class="nav-links"></nav>
+            <div class="header-icons">
+                <i class="fas fa-search" data-icon="search" id="searchIcon"></i>
+                <i class="far fa-user" data-icon="user" id="userIcon"></i>
+                <i class="fas fa-shopping-bag" data-icon="bag" id="bagIcon"></i>
+                <span class="user-status" id="userStatus"></span>
+            </div>
+        </header>
+
+        <!-- HERO SECTION -->
+        <section class="hero">
+            <div class="hero-tag"><i class="fas fa-star" style="color: #e8a87c; margin-right: 0.4rem;"></i> nouvelle collection</div>
+            <h1>
+                Beauté <span class="gold-accent">&</span> Bien-être
+            </h1>
+            <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; justify-content: center; margin-top: 0.2rem;">
+                <span class="lunch-easter" id="lunchBadge"><i class="fas fa-spa" style="margin-right: 0.3rem;"></i> wellness</span>
+                <span style="font-size: 0.7rem; letter-spacing: 0.2em; color: #e8a87c;">✦</span>
+                <span style="font-size: 0.6rem; letter-spacing: 0.1em; color: #999;">édition limitée</span>
+            </div>
+            <p class="hero-sub">Découvrez notre nouvelle collection</p>
+            <button class="btn-primary" id="shopNowBtn">Shop Now</button>
+            <div class="hero-note">
+                <span><i class="fas fa-check-circle"></i> 100% naturel</span>
+                <span><i class="fas fa-truck"></i> livraison offerte</span>
+                <span><i class="fas fa-undo-alt"></i> 30 jours</span>
+            </div>
+        </section>
+
+        <!-- CATÉGORIES -->
+        <div class="categories">
+            <span class="cat-item" data-category="Soin">Soin</span>
+            <span class="cat-item" data-category="Maquillage">Maquillage</span>
+            <span class="cat-item" data-category="Vitamines">Vitamines</span>
+            <span class="cat-item" data-category="Ensemble">Ensemble</span>
+            <span class="cat-item" data-category="Coquet">Coquet</span>
+            <span class="cat-item" data-category="Accessoires">Accessoires</span>
+            <span class="cat-item" data-category="Sport">Sport</span>
+        </div>
+
+        <!-- COLLECTION SECTION -->
+        <div class="silver-section">
+            <div class="silver-content">
+                <h3><i class="fas fa-heart"></i> Collection Wellness</h3>
+                <p>Soin · beauté · bien-être · vitalité</p>
+                <button class="btn-secondary" id="silverBtn">Découvrir</button>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="footer">
+            <div class="footer-links">
+                <a href="#" data-footer="about">À propos</a>
+                <a href="#" data-footer="faq">FAQ</a>
+                <a href="#" data-footer="shipping">Livraison</a>
+                <a href="#" data-footer="returns">Retours</a>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 0.6rem;">© 2026 MANORA</span>
+                <span style="color: #d4cfc6;">|</span>
+                <span style="font-size: 0.6rem; letter-spacing: 0.1em;">Beauty & Wellness</span>
+            </div>
+            <div class="footer-social">
+                <i class="fab fa-instagram" data-social="instagram"></i>
+                <i class="fab fa-pinterest-p" data-social="pinterest"></i>
+                <i class="fab fa-youtube" data-social="youtube"></i>
+            </div>
+        </footer>
+
     </div>
 
-    <!-- FOOTER -->
-    <footer class="footer">
-      <div class="footer-links">
-        <a href="#" data-footer="about">À propos</a>
-        <a href="#" data-footer="faq">FAQ</a>
-        <a href="#" data-footer="shipping">Livraison</a>
-        <a href="#" data-footer="returns">Retours</a>
-      </div>
-      <div style="display: flex; align-items: center; gap: 0.5rem;">
-        <span style="font-size: 0.6rem;">© 2026 MANORA</span>
-        <span style="color: #d4cfc6;">|</span>
-        <span style="font-size: 0.6rem; letter-spacing: 0.1em;">Beauty & Wellness</span>
-      </div>
-      <div class="footer-social">
-        <i class="fab fa-instagram" data-social="instagram"></i>
-        <i class="fab fa-pinterest-p" data-social="pinterest"></i>
-        <i class="fab fa-youtube" data-social="youtube"></i>
-      </div>
-    </footer>
+    <!-- MODAL AUTHENTIFICATION -->
+    <div class="auth-overlay" id="authOverlay">
+        <div class="auth-modal">
+            <button class="auth-close" id="authClose"><i class="fas fa-times"></i></button>
 
-  </div>
+            <div class="auth-header">
+                <h2><i class="fas fa-leaf" style="color: #e8a87c;"></i> Bienvenue chez MANORA</h2>
+                <p>Connectez-vous ou créez un compte</p>
+            </div>
 
-  <!-- MODAL AUTHENTIFICATION -->
-  <div class="auth-overlay" id="authOverlay">
-    <div class="auth-modal">
-      <button class="auth-close" id="authClose"><i class="fas fa-times"></i></button>
-      
-      <div class="auth-header">
-        <h2><i class="fas fa-leaf" style="color: #e8a87c;"></i> Bienvenue chez MANORA</h2>
-        <p>Connectez-vous ou créez un compte</p>
-      </div>
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Connexion</button>
+                <button class="auth-tab" data-tab="register">Inscription</button>
+            </div>
 
-      <div class="auth-tabs">
-        <button class="auth-tab active" data-tab="login">Connexion</button>
-        <button class="auth-tab" data-tab="register">Inscription</button>
-      </div>
+            <!-- Connexion -->
+            <form class="auth-form" id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail"><i class="fas fa-envelope"></i> Email</label>
+                    <input type="email" id="loginEmail" placeholder="votre@email.com" required />
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword"><i class="fas fa-lock"></i> Mot de passe</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••" required />
+                </div>
+                <div id="loginError" class="auth-error hidden"></div>
+                <button type="submit" class="auth-submit" id="loginBtn">Se connecter</button>
+                <p class="auth-forgot"><a href="#" id="resetPasswordLink">Mot de passe oublié ?</a></p>
+            </form>
 
-      <!-- Connexion -->
-      <form class="auth-form" id="loginForm">
-        <div class="form-group">
-          <label for="loginEmail"><i class="fas fa-envelope"></i> Email</label>
-          <input type="email" id="loginEmail" placeholder="votre@email.com" required />
+            <!-- Inscription -->
+            <form class="auth-form hidden" id="registerForm">
+                <div class="form-group">
+                    <label for="registerName"><i class="fas fa-user"></i> Nom complet</label>
+                    <input type="text" id="registerName" placeholder="Jean Dupont" required />
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail"><i class="fas fa-envelope"></i> Email</label>
+                    <input type="email" id="registerEmail" placeholder="votre@email.com" required />
+                </div>
+                <div class="form-group">
+                    <label for="registerPhone"><i class="fas fa-phone"></i> Téléphone</label>
+                    <input type="tel" id="registerPhone" placeholder="06 12 34 56 78" />
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword"><i class="fas fa-lock"></i> Mot de passe</label>
+                    <input type="password" id="registerPassword" placeholder="••••••••" required />
+                    <small style="font-size: 0.6rem; color: #999;">Minimum 6 caractères</small>
+                </div>
+                <div class="form-group">
+                    <label for="registerConfirm"><i class="fas fa-check-circle"></i> Confirmer</label>
+                    <input type="password" id="registerConfirm" placeholder="••••••••" required />
+                </div>
+                <div id="registerError" class="auth-error hidden"></div>
+                <button type="submit" class="auth-submit" id="registerBtn">Créer mon compte</button>
+                <p class="auth-terms">En créant un compte, vous acceptez nos <a href="#">conditions d'utilisation</a></p>
+            </form>
         </div>
-        <div class="form-group">
-          <label for="loginPassword"><i class="fas fa-lock"></i> Mot de passe</label>
-          <input type="password" id="loginPassword" placeholder="••••••••" required />
-        </div>
-        <div id="loginError" class="auth-error hidden"></div>
-        <button type="submit" class="auth-submit" id="loginBtn">Se connecter</button>
-        <p class="auth-forgot"><a href="#" id="resetPasswordLink">Mot de passe oublié ?</a></p>
-      </form>
-
-      <!-- Inscription -->
-      <form class="auth-form hidden" id="registerForm">
-        <div class="form-group">
-          <label for="registerName"><i class="fas fa-user"></i> Nom complet</label>
-          <input type="text" id="registerName" placeholder="Jean Dupont" required />
-        </div>
-        <div class="form-group">
-          <label for="registerEmail"><i class="fas fa-envelope"></i> Email</label>
-          <input type="email" id="registerEmail" placeholder="votre@email.com" required />
-        </div>
-        <div class="form-group">
-          <label for="registerPhone"><i class="fas fa-phone"></i> Téléphone</label>
-          <input type="tel" id="registerPhone" placeholder="06 12 34 56 78" />
-        </div>
-        <div class="form-group">
-          <label for="registerPassword"><i class="fas fa-lock"></i> Mot de passe</label>
-          <input type="password" id="registerPassword" placeholder="••••••••" required />
-          <small style="font-size: 0.6rem; color: #999;">Minimum 6 caractères</small>
-        </div>
-        <div class="form-group">
-          <label for="registerConfirm"><i class="fas fa-check-circle"></i> Confirmer</label>
-          <input type="password" id="registerConfirm" placeholder="••••••••" required />
-        </div>
-        <div id="registerError" class="auth-error hidden"></div>
-        <button type="submit" class="auth-submit" id="registerBtn">Créer mon compte</button>
-        <p class="auth-terms">En créant un compte, vous acceptez nos <a href="#">conditions d'utilisation</a></p>
-      </form>
     </div>
-  </div>
 
-  <!-- ===== FIREBASE SDKs ===== -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <!-- ===== FIREBASE SDKs (Version 12.17.1 - MODULAIRE) ===== -->
+    <script type="importmap">
+        {
+            "imports": {
+                "firebase/app": "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js",
+                "firebase/auth": "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js",
+                "firebase/firestore": "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js",
+                "firebase/analytics": "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js"
+            }
+        }
+    </script>
 
-  <!-- ===== CONFIGURATION FIREBASE ===== -->
-  <!-- 🔥 REMPLACEZ CES VALEURS PAR VOTRE CONFIGURATION FIREBASE -->
-  <script>
-    const firebaseConfig = {
-      apiKey: "VOTRE_API_KEY",
-      authDomain: "VOTRE_PROJET.firebaseapp.com",
-      projectId: "VOTRE_PROJET_ID",
-      storageBucket: "VOTRE_PROJET.appspot.com",
-      messagingSenderId: "VOTRE_SENDER_ID",
-      appId: "VOTRE_APP_ID"
-    };
+    <!-- ===== SCRIPT PRINCIPAL (MODULAIRE) ===== -->
+    <script type="module">
+        // ============================================================
+        // IMPORTS FIREBASE
+        // ============================================================
+        import { initializeApp } from "firebase/app";
+        import { getAnalytics } from "firebase/analytics";
+        import { 
+            getAuth, 
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            sendPasswordResetEmail,
+            onAuthStateChanged,
+            signOut,
+            setPersistence,
+            browserLocalPersistence,
+            updateProfile
+        } from "firebase/auth";
+        import {
+            getFirestore,
+            doc,
+            setDoc,
+            getDoc,
+            updateDoc,
+            serverTimestamp
+        } from "firebase/firestore";
 
-    // Initialiser Firebase
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+        // ============================================================
+        // CONFIGURATION FIREBASE
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBuaSbWc0yIBvILjduH3K5NlJqpC1npX1E",
+            authDomain: "manora-4281c.firebaseapp.com",
+            projectId: "manora-4281c",
+            storageBucket: "manora-4281c.firebasestorage.app",
+            messagingSenderId: "255958969186",
+            appId: "1:255958969186:web:569bb30959197a77ae1a3b",
+            measurementId: "G-3HF31CC37B"
+        };
 
-    // Activer la persistance pour une meilleure expérience
-    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-  </script>
+        // Initialiser Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-  <!-- Script principal -->
-  <script src="script.js"></script>
+        // Activer la persistance
+        setPersistence(auth, browserLocalPersistence)
+            .catch((error) => {
+                console.warn('Erreur persistance:', error);
+            });
+
+        console.log('🔥 Firebase 12.17.1 initialisé !');
+        console.log('📁 Projet:', firebaseConfig.projectId);
+
+        // ============================================================
+        // TOAST SYSTEM
+        // ============================================================
+        function showToast(msg, isError = false) {
+            const existing = document.querySelector('.toast-luna');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.className = 'toast-luna';
+            toast.textContent = msg;
+            Object.assign(toast.style, {
+                position: 'fixed',
+                bottom: '30px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                background: isError ? '#c0392b' : '#1a1a1a',
+                color: '#f0ede8',
+                padding: '0.9rem 2.2rem',
+                borderRadius: '0',
+                letterSpacing: '0.15em',
+                fontSize: '0.7rem',
+                textTransform: 'uppercase',
+                boxShadow: '0 12px 30px rgba(0,0,0,0.25)',
+                zIndex: '99999',
+                borderLeft: isError ? '4px solid #e74c3c' : '4px solid #e8a87c',
+                opacity: '0',
+                transition: 'opacity 0.4s ease, transform 0.3s ease',
+                fontFamily: "'Montserrat', sans-serif",
+                pointerEvents: 'none',
+                maxWidth: '90%',
+                wordBreak: 'break-word',
+            });
+            document.body.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateX(-50%) translateY(0)';
+            });
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(-50%) translateY(20px)';
+                setTimeout(() => toast.remove(), 400);
+            }, 4000);
+        }
+
+        // ============================================================
+        // UPDATE UI
+        // ============================================================
+        function updateUI(user) {
+            const userStatus = document.getElementById('userStatus');
+            const userIcon = document.getElementById('userIcon');
+
+            if (user) {
+                const displayName = user.displayName || user.email || 'Utilisateur';
+                userStatus.textContent = '👤 ' + displayName.split('@')[0];
+                userStatus.className = 'user-status logged-in';
+                userIcon.style.color = '#4caf50';
+            } else {
+                userStatus.textContent = '';
+                userStatus.className = 'user-status';
+                userIcon.style.color = '';
+            }
+        }
+
+        // ============================================================
+        // MODAL AUTH
+        // ============================================================
+        const authOverlay = document.getElementById('authOverlay');
+        const userIcon = document.getElementById('userIcon');
+        const authClose = document.getElementById('authClose');
+
+        function openAuthModal() {
+            authOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeAuthModal() {
+            authOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+            document.getElementById('loginError').classList.add('hidden');
+            document.getElementById('registerError').classList.add('hidden');
+        }
+
+        if (userIcon) {
+            userIcon.addEventListener('click', function() {
+                const user = auth.currentUser;
+                if (user) {
+                    if (confirm('Vous êtes connecté en tant que ' + (user.displayName || user.email) + '. Voulez-vous vous déconnecter ?')) {
+                        signOut(auth);
+                        showToast('👋 Déconnexion réussie');
+                    }
+                } else {
+                    openAuthModal();
+                }
+            });
+        }
+
+        if (authClose) {
+            authClose.addEventListener('click', closeAuthModal);
+        }
+
+        authOverlay.addEventListener('click', function(e) {
+            if (e.target === authOverlay) {
+                closeAuthModal();
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && authOverlay.classList.contains('active')) {
+                closeAuthModal();
+            }
+        });
+
+        // ============================================================
+        // TABS
+        // ============================================================
+        const tabs = document.querySelectorAll('.auth-tab');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                tabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                const tabName = this.dataset.tab;
+                if (tabName === 'login') {
+                    loginForm.classList.remove('hidden');
+                    registerForm.classList.add('hidden');
+                } else {
+                    loginForm.classList.add('hidden');
+                    registerForm.classList.remove('hidden');
+                }
+                document.getElementById('loginError').classList.add('hidden');
+                document.getElementById('registerError').classList.add('hidden');
+            });
+        });
+
+        // ============================================================
+        // INSCRIPTION AVEC FIRESTORE
+        // ============================================================
+        if (registerForm) {
+            registerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const name = document.getElementById('registerName').value.trim();
+                const email = document.getElementById('registerEmail').value.trim();
+                const phone = document.getElementById('registerPhone').value.trim();
+                const password = document.getElementById('registerPassword').value;
+                const confirm = document.getElementById('registerConfirm').value;
+                const errorDiv = document.getElementById('registerError');
+
+                errorDiv.classList.add('hidden');
+
+                // Validations
+                if (!name || !email || !password || !confirm) {
+                    errorDiv.classList.remove('hidden');
+                    errorDiv.textContent = '⚠️ Veuillez remplir tous les champs obligatoires';
+                    showToast('⚠️ Veuillez remplir tous les champs', true);
+                    return;
+                }
+
+                if (password !== confirm) {
+                    errorDiv.classList.remove('hidden');
+                    errorDiv.textContent = '⚠️ Les mots de passe ne correspondent pas';
+                    showToast('⚠️ Les mots de passe ne correspondent pas', true);
+                    return;
+                }
+
+                if (password.length < 6) {
+                    errorDiv.classList.remove('hidden');
+                    errorDiv.textContent = '⚠️ Le mot de passe doit faire au moins 6 caractères';
+                    showToast('⚠️ Mot de passe trop court (min 6 caractères)', true);
+                    return;
+                }
+
+                const registerBtn = document.getElementById('registerBtn');
+                registerBtn.disabled = true;
+                registerBtn.textContent = 'Création en cours...';
+
+                console.log('📝 Création du compte Auth...');
+
+                // 1. Création du compte
+                createUserWithEmailAndPassword(auth, email, password)
+                    .then((userCredential) => {
+                        const user = userCredential.user;
+                        console.log('✅ Compte Auth créé:', user.uid);
+
+                        // Mettre à jour le nom
+                        return updateProfile(user, {
+                            displayName: name
+                        }).then(() => user);
+                    })
+                    .then((user) => {
+                        console.log('📝 Enregistrement dans Firestore...');
+
+                        // 2. Enregistrement dans Firestore
+                        const userData = {
+                            uid: user.uid,
+                            name: name,
+                            email: email,
+                            phone: phone || '',
+                            role: 'client',
+                            createdAt: serverTimestamp(),
+                            lastLogin: serverTimestamp(),
+                            emailVerified: user.emailVerified || false,
+                            preferences: {
+                                newsletter: false,
+                                promotions: false
+                            },
+                            address: {
+                                line1: '',
+                                line2: '',
+                                city: '',
+                                postalCode: '',
+                                country: 'France'
+                            }
+                        };
+
+                        return setDoc(doc(db, 'users', user.uid), userData).then(() => user);
+                    })
+                    .then((user) => {
+                        console.log('✅ Document Firestore créé !');
+                        showToast('🎉 Bienvenue ' + name + ' ! Votre compte est créé');
+                        closeAuthModal();
+                        registerForm.reset();
+                    })
+                    .catch((error) => {
+                        console.error('❌ ERREUR:', error);
+                        errorDiv.classList.remove('hidden');
+
+                        let message = 'Erreur lors de l\'inscription';
+                        switch (error.code) {
+                            case 'auth/email-already-in-use':
+                                message = 'Cet email est déjà utilisé par un autre compte';
+                                break;
+                            case 'auth/invalid-email':
+                                message = 'L\'adresse email n\'est pas valide';
+                                break;
+                            case 'auth/weak-password':
+                                message = 'Le mot de passe est trop faible (min 6 caractères)';
+                                break;
+                            case 'auth/network-request-failed':
+                                message = 'Problème de connexion réseau. Vérifiez votre internet.';
+                                break;
+                            default:
+                                message = error.message;
+                        }
+
+                        errorDiv.textContent = '⚠️ ' + message;
+                        showToast('⚠️ ' + message, true);
+                    })
+                    .finally(() => {
+                        registerBtn.disabled = false;
+                        registerBtn.textContent = 'Créer mon compte';
+                    });
+            });
+        }
+
+        // ============================================================
+        // CONNEXION
+        // ============================================================
+        if (loginForm) {
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const email = document.getElementById('loginEmail').value.trim();
+                const password = document.getElementById('loginPassword').value;
+                const errorDiv = document.getElementById('loginError');
+
+                errorDiv.classList.add('hidden');
+
+                if (!email || !password) {
+                    errorDiv.classList.remove('hidden');
+                    errorDiv.textContent = '⚠️ Veuillez remplir tous les champs';
+                    showToast('⚠️ Veuillez remplir tous les champs', true);
+                    return;
+                }
+
+                const loginBtn = document.getElementById('loginBtn');
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'Connexion...';
+
+                signInWithEmailAndPassword(auth, email, password)
+                    .then((userCredential) => {
+                        const user = userCredential.user;
+
+                        // Mettre à jour lastLogin
+                        updateDoc(doc(db, 'users', user.uid), {
+                            lastLogin: serverTimestamp()
+                        }).catch(() => {});
+
+                        showToast('✅ Bienvenue ' + (user.displayName || user.email) + ' !');
+                        closeAuthModal();
+                        loginForm.reset();
+                    })
+                    .catch((error) => {
+                        errorDiv.classList.remove('hidden');
+                        let message = 'Erreur de connexion';
+
+                        switch (error.code) {
+                            case 'auth/user-not-found':
+                                message = 'Aucun compte trouvé avec cet email';
+                                break;
+                            case 'auth/wrong-password':
+                                message = 'Mot de passe incorrect';
+                                break;
+                            case 'auth/invalid-email':
+                                message = 'Email invalide';
+                                break;
+                            case 'auth/too-many-requests':
+                                message = 'Trop de tentatives, réessayez plus tard';
+                                break;
+                            default:
+                                message = error.message;
+                        }
+
+                        errorDiv.textContent = '⚠️ ' + message;
+                        showToast('⚠️ ' + message, true);
+                    })
+                    .finally(() => {
+                        loginBtn.disabled = false;
+                        loginBtn.textContent = 'Se connecter';
+                    });
+            });
+        }
+
+        // ============================================================
+        // RESET PASSWORD
+        // ============================================================
+        document.getElementById('resetPasswordLink').addEventListener('click', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+
+            if (!email) {
+                showToast('⚠️ Veuillez entrer votre email', true);
+                document.getElementById('loginEmail').focus();
+                return;
+            }
+
+            sendPasswordResetEmail(auth, email)
+                .then(() => {
+                    showToast('📧 Email de réinitialisation envoyé à ' + email);
+                })
+                .catch((error) => {
+                    let message = 'Erreur';
+                    if (error.code === 'auth/user-not-found') {
+                        message = 'Aucun compte trouvé avec cet email';
+                    } else {
+                        message = error.message;
+                    }
+                    showToast('⚠️ ' + message, true);
+                });
+        });
+
+        // ============================================================
+        // SURVEILLANCE DE L'ÉTAT AUTH
+        // ============================================================
+        onAuthStateChanged(auth, (user) => {
+            updateUI(user);
+            if (user && authOverlay.classList.contains('active')) {
+                closeAuthModal();
+            }
+        });
+
+        // ============================================================
+        // ÉVÉNEMENTS DU SITE
+        // ============================================================
+
+        // Bouton Shop Now
+        const shopBtn = document.getElementById('shopNowBtn');
+        if (shopBtn) {
+            shopBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const user = auth.currentUser;
+                if (!user) {
+                    showToast('🔐 Connectez-vous pour commander', true);
+                    openAuthModal();
+                    return;
+                }
+                const originalText = this.textContent;
+                this.textContent = '✓ Ajouté';
+                this.style.background = '#e8a87c';
+                this.style.color = '#111';
+                setTimeout(() => {
+                    this.textContent = originalText;
+                    this.style.background = '#1a1a1a';
+                    this.style.color = '#f5f2ec';
+                }, 1200);
+                showToast('✨ Produit ajouté au panier');
+            });
+        }
+
+        // Bouton Découvrir
+        const silverBtn = document.getElementById('silverBtn');
+        if (silverBtn) {
+            silverBtn.addEventListener('click', function() {
+                const user = auth.currentUser;
+                if (!user) {
+                    showToast('🔐 Connectez-vous pour découvrir', true);
+                    openAuthModal();
+                    return;
+                }
+                const originalText = this.textContent;
+                this.textContent = '✓ Exploré';
+                this.style.borderColor = '#e8a87c';
+                this.style.background = '#e8a87c';
+                this.style.color = 'white';
+                setTimeout(() => {
+                    this.textContent = originalText;
+                    this.style.background = 'white';
+                    this.style.color = '#1a1a1a';
+                    this.style.borderColor = '#e8a87c';
+                }, 1000);
+                showToast('🌿 Collection Wellness — découvrez nos produits');
+            });
+        }
+
+        // Catégories
+        document.querySelectorAll('.cat-item').forEach((el) => {
+            el.addEventListener('click', function() {
+                const category = this.dataset.category || this.textContent.trim();
+                const user = auth.currentUser;
+                if (!user) {
+                    showToast('🔐 Connectez-vous pour voir les ' + category, true);
+                    openAuthModal();
+                    return;
+                }
+                showToast(`🔍 ${category} — découvrez notre sélection`);
+            });
+        });
+
+        // Lunch Badge
+        document.getElementById('lunchBadge').addEventListener('click', function() {
+            showToast('🌿 Wellness & Bien-être — MANORA');
+        });
+
+        // Logo
+        document.getElementById('logoLink').addEventListener('click', function(e) {
+            e.preventDefault();
+            showToast('🌿 MANORA — Beauty & Wellness');
+        });
+
+        // Icônes header
+        document.querySelectorAll('.header-icons i').forEach(icon => {
+            if (icon.id === 'userIcon') return;
+            icon.addEventListener('click', function() {
+                const user = auth.currentUser;
+                if (!user && this.dataset.icon !== 'search') {
+                    showToast('🔐 Connectez-vous pour accéder à cette fonction', true);
+                    openAuthModal();
+                    return;
+                }
+                const iconType = this.dataset.icon || '';
+                let label = 'Action';
+                if (iconType === 'search') label = 'Recherche';
+                else if (iconType === 'bag') label = 'Panier';
+                showToast(`🛍️ ${label} — bientôt disponible`);
+            });
+        });
+
+        // Footer links
+        document.querySelectorAll('.footer-links a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                showToast(`📄 ${this.dataset.footer || this.textContent.trim()} — page en construction`);
+            });
+        });
+
+        // Social icons
+        document.querySelectorAll('.footer-social i').forEach(icon => {
+            icon.addEventListener('click', function() {
+                showToast(`📱 ${this.dataset.social || 'réseau social'} — bientôt disponible`);
+            });
+        });
+
+        console.log('🌿 MANORA · Beauty & Wellness — Firebase Auth + Firestore actif');
+        console.log('📊 Les utilisateurs sont enregistrés dans Firestore collection "users"');
+    </script>
+
 </body>
 </html>
