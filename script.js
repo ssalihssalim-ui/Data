@@ -49,23 +49,23 @@ setPersistence(auth, browserLocalPersistence)
 console.log('🔥 Firebase initialisé !');
 
 // ============================================================
-// PRODUITS
+// PRODUITS avec devise MAD
 // ============================================================
 const products = [
-    { id: 1, name: 'Crème Hydratante', category: 'soin', price: '€29.90', image: '🧴', description: 'Hydratation intense 24h' },
-    { id: 2, name: 'Sérum Anti-Âge', category: 'soin', price: '€49.90', image: '💧', description: 'Réduit les rides' },
-    { id: 3, name: 'Fond de Teint', category: 'maquillage', price: '€34.90', image: '🎨', description: 'Couvrance parfaite' },
-    { id: 4, name: 'Mascara Volume', category: 'maquillage', price: '€19.90', image: '👁️', description: 'Volume intense' },
-    { id: 5, name: 'Vitamine C', category: 'vitamines', price: '€15.90', image: '🍊', description: 'Immunité renforcée' },
-    { id: 6, name: 'Vitamine D', category: 'vitamines', price: '€12.90', image: '☀️', description: 'Énergie et vitalité' },
-    { id: 7, name: 'Coffret Beauty', category: 'ensemble', price: '€59.90', image: '🎁', description: 'Coffret complet' },
-    { id: 8, name: 'Set Soin Visage', category: 'ensemble', price: '€39.90', image: '🧖', description: 'Routine complète' },
-    { id: 9, name: 'Accessoire Cheveux', category: 'accessoires', price: '€9.90', image: '💇', description: 'Élégant et pratique' },
-    { id: 10, name: 'Bracelet Bien-être', category: 'accessoires', price: '€24.90', image: '📿', description: 'Pierre naturelle' },
-    { id: 11, name: 'Tapisserie Yoga', category: 'sport', price: '€29.90', image: '🧘', description: 'Confort et adhérence' },
-    { id: 12, name: 'Bouteille Sport', category: 'sport', price: '€14.90', image: '💪', description: 'Isotherme 1L' },
-    { id: 13, name: 'Boîte Coquet', category: 'coquet', price: '€22.90', image: '🎀', description: 'Fait main' },
-    { id: 14, name: 'Sachet Parfumé', category: 'coquet', price: '€8.90', image: '🌸', description: 'Parfum délicat' },
+    { id: 1, name: 'Crème Hydratante', category: 'soin', price: '290 MAD', image: '🧴', description: 'Hydratation intense 24h' },
+    { id: 2, name: 'Sérum Anti-Âge', category: 'soin', price: '490 MAD', image: '💧', description: 'Réduit les rides' },
+    { id: 3, name: 'Fond de Teint', category: 'maquillage', price: '340 MAD', image: '🎨', description: 'Couvrance parfaite' },
+    { id: 4, name: 'Mascara Volume', category: 'maquillage', price: '190 MAD', image: '👁️', description: 'Volume intense' },
+    { id: 5, name: 'Vitamine C', category: 'vitamines', price: '150 MAD', image: '🍊', description: 'Immunité renforcée' },
+    { id: 6, name: 'Vitamine D', category: 'vitamines', price: '120 MAD', image: '☀️', description: 'Énergie et vitalité' },
+    { id: 7, name: 'Coffret Beauty', category: 'ensemble', price: '590 MAD', image: '🎁', description: 'Coffret complet' },
+    { id: 8, name: 'Set Soin Visage', category: 'ensemble', price: '390 MAD', image: '🧖', description: 'Routine complète' },
+    { id: 9, name: 'Accessoire Cheveux', category: 'accessoires', price: '90 MAD', image: '💇', description: 'Élégant et pratique' },
+    { id: 10, name: 'Bracelet Bien-être', category: 'accessoires', price: '240 MAD', image: '📿', description: 'Pierre naturelle' },
+    { id: 11, name: 'Tapisserie Yoga', category: 'sport', price: '290 MAD', image: '🧘', description: 'Confort et adhérence' },
+    { id: 12, name: 'Bouteille Sport', category: 'sport', price: '140 MAD', image: '💪', description: 'Isotherme 1L' },
+    { id: 13, name: 'Boîte Coquet', category: 'coquet', price: '220 MAD', image: '🎀', description: 'Fait main' },
+    { id: 14, name: 'Sachet Parfumé', category: 'coquet', price: '80 MAD', image: '🌸', description: 'Parfum délicat' },
 ];
 
 // ============================================================
@@ -142,21 +142,23 @@ export function showPage(page) {
     if (page === 'dashboard') navDashboard?.classList.add('active');
 }
 
-// Navigation
+// Navigation - Boutique accessible sans connexion ✅
 navShop?.addEventListener('click', (e) => {
     e.preventDefault();
-    const user = auth.currentUser;
-    if (!user) {
-        showToast('🔐 Connectez-vous pour voir la boutique', true);
-        openAuthModal();
-        return;
-    }
     showPage('shop');
     renderProducts('all');
+    document.querySelector('.category-item.active')?.classList.remove('active');
+    document.querySelector('.category-item[data-category="all"]')?.classList.add('active');
 });
 
 navDashboard?.addEventListener('click', (e) => {
     e.preventDefault();
+    const user = auth.currentUser;
+    if (!user) {
+        showToast('🔐 Connectez-vous pour accéder au dashboard', true);
+        openAuthModal();
+        return;
+    }
     showPage('dashboard');
 });
 
@@ -166,7 +168,7 @@ navDashboard?.addEventListener('click', (e) => {
 const productsGrid = document.getElementById('productsGrid');
 const productCount = document.getElementById('productCount');
 
-function renderProducts(category = 'all') {
+export function renderProducts(category = 'all') {
     const filtered = category === 'all'
         ? products
         : products.filter(p => p.category === category);
@@ -190,7 +192,7 @@ function renderProducts(category = 'all') {
     `).join('');
 }
 
-// Catégories clics
+// Catégories clics (dans la boutique)
 document.querySelectorAll('.category-item').forEach(item => {
     item.addEventListener('click', function() {
         document.querySelectorAll('.category-item').forEach(c => c.classList.remove('active'));
@@ -199,12 +201,13 @@ document.querySelectorAll('.category-item').forEach(item => {
     });
 });
 
-// Clic sur produit
+// Clic sur produit - accessible sans connexion ✅
 document.addEventListener('click', function(e) {
     const card = e.target.closest('.product-card');
     if (card) {
         const name = card.querySelector('h4')?.textContent || 'Produit';
-        showToast(`🛍️ ${name} — ajouté au panier`);
+        const price = card.querySelector('.product-price')?.textContent || '';
+        showToast(`🛍️ ${name} — ${price} ajouté au panier`);
     }
 });
 
@@ -226,7 +229,7 @@ export function updateUI(user) {
         userStatus.className = 'user-status';
         userIcon.style.color = '';
         if (navDashboard) navDashboard.style.display = 'none';
-        showPage('home');
+        // On ne redirige pas vers home, on reste sur la page
     }
 }
 
@@ -450,15 +453,9 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // ============================================================
-// BOUTON SHOP NOW
+// BOUTON SHOP NOW - Accessible sans connexion ✅
 // ============================================================
 document.getElementById('shopNowBtn')?.addEventListener('click', function() {
-    const user = auth.currentUser;
-    if (!user) {
-        showToast('🔐 Connectez-vous pour voir le catalogue', true);
-        openAuthModal();
-        return;
-    }
     showPage('shop');
     renderProducts('all');
     document.querySelector('.category-item.active')?.classList.remove('active');
@@ -466,17 +463,13 @@ document.getElementById('shopNowBtn')?.addEventListener('click', function() {
 });
 
 // ============================================================
-// BOUTON SILVER
+// BOUTON SILVER - Accessible sans connexion ✅
 // ============================================================
 document.getElementById('silverBtn')?.addEventListener('click', function() {
-    const user = auth.currentUser;
-    if (!user) {
-        showToast('🔐 Connectez-vous pour découvrir', true);
-        openAuthModal();
-        return;
-    }
     showPage('shop');
     renderProducts('all');
+    document.querySelector('.category-item.active')?.classList.remove('active');
+    document.querySelector('.category-item[data-category="all"]')?.classList.add('active');
 });
 
 // ============================================================
@@ -493,8 +486,8 @@ document.querySelectorAll('.header-icons i').forEach(icon => {
     if (icon.id === 'userIcon') return;
     icon.addEventListener('click', function() {
         const user = auth.currentUser;
-        if (!user && this.dataset.icon !== 'search') {
-            showToast('🔐 Connectez-vous pour accéder à cette fonction', true);
+        if (!user && this.dataset.icon === 'bag') {
+            showToast('🛍️ Connectez-vous pour finaliser votre commande', true);
             openAuthModal();
             return;
         }
@@ -507,17 +500,11 @@ document.querySelectorAll('.header-icons i').forEach(icon => {
 });
 
 // ============================================================
-// CATÉGORIES ACCUEIL
+// CATÉGORIES ACCUEIL - Accessibles sans connexion ✅
 // ============================================================
 document.querySelectorAll('#homeCategories .cat-item').forEach(item => {
     item.addEventListener('click', function() {
         const category = this.textContent.trim();
-        const user = auth.currentUser;
-        if (!user) {
-            showToast('🔐 Connectez-vous pour voir les ' + category, true);
-            openAuthModal();
-            return;
-        }
         showPage('shop');
         const catMap = {
             'Soin': 'soin',
@@ -535,4 +522,4 @@ document.querySelectorAll('#homeCategories .cat-item').forEach(item => {
     });
 });
 
-console.log('🌿 MANORA · Script principal chargé');
+console.log('🌿 MANORA · Script principal chargé - Boutique accessible sans connexion - Devise MAD');
