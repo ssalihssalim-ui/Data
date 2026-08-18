@@ -22,7 +22,7 @@
       fontSize: '0.7rem',
       textTransform: 'uppercase',
       boxShadow: '0 12px 30px rgba(0,0,0,0.25)',
-      zIndex: '9999',
+      zIndex: '99999',
       borderLeft: '4px solid #b4946a',
       opacity: '0',
       transition: 'opacity 0.4s ease, transform 0.3s ease',
@@ -41,6 +41,110 @@
       toast.style.transform = 'translateX(-50%) translateY(20px)';
       setTimeout(() => toast.remove(), 400);
     }, 2200);
+  }
+
+  // ===== MODAL AUTH =====
+  const authOverlay = document.getElementById('authOverlay');
+  const userIcon = document.getElementById('userIcon');
+  const authClose = document.getElementById('authClose');
+
+  function openAuthModal() {
+    authOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeAuthModal() {
+    authOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  if (userIcon) {
+    userIcon.addEventListener('click', openAuthModal);
+  }
+
+  if (authClose) {
+    authClose.addEventListener('click', closeAuthModal);
+  }
+
+  authOverlay.addEventListener('click', function(e) {
+    if (e.target === authOverlay) {
+      closeAuthModal();
+    }
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && authOverlay.classList.contains('active')) {
+      closeAuthModal();
+    }
+  });
+
+  // ===== TABS =====
+  const tabs = document.querySelectorAll('.auth-tab');
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', function() {
+      tabs.forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+
+      const tabName = this.dataset.tab;
+      if (tabName === 'login') {
+        loginForm.classList.remove('hidden');
+        registerForm.classList.add('hidden');
+      } else {
+        loginForm.classList.add('hidden');
+        registerForm.classList.remove('hidden');
+      }
+    });
+  });
+
+  // ===== LOGIN =====
+  if (loginForm) {
+    loginForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+
+      if (!email || !password) {
+        showToast('⚠️ Veuillez remplir tous les champs');
+        return;
+      }
+
+      showToast('✅ Connexion réussie ! Bienvenue chez LUNA');
+      closeAuthModal();
+      this.reset();
+    });
+  }
+
+  // ===== REGISTER =====
+  if (registerForm) {
+    registerForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('registerName').value;
+      const email = document.getElementById('registerEmail').value;
+      const password = document.getElementById('registerPassword').value;
+      const confirm = document.getElementById('registerConfirm').value;
+
+      if (!name || !email || !password || !confirm) {
+        showToast('⚠️ Veuillez remplir tous les champs');
+        return;
+      }
+
+      if (password !== confirm) {
+        showToast('⚠️ Les mots de passe ne correspondent pas');
+        return;
+      }
+
+      if (password.length < 6) {
+        showToast('⚠️ Le mot de passe doit faire au moins 6 caractères');
+        return;
+      }
+
+      showToast('🎉 Compte créé ! Bienvenue chez LUNA');
+      closeAuthModal();
+      this.reset();
+    });
   }
 
   // ===== 1. BOUTON SHOP NOW =====
@@ -116,11 +220,11 @@
 
   // ===== 7. ICÔNES HEADER =====
   document.querySelectorAll('.header-icons i').forEach(icon => {
+    if (icon.id === 'userIcon') return; // déjà géré
     icon.addEventListener('click', function() {
       const iconType = this.dataset.icon || '';
       let label = 'Action';
       if (iconType === 'search') label = 'Recherche';
-      else if (iconType === 'user') label = 'Compte';
       else if (iconType === 'bag') label = 'Panier';
       showToast(`🛍️ ${label} — bientôt disponible`);
     });
