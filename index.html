@@ -3,260 +3,105 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BARCELONA · Design & Maison</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:opsz,wght@14..32,300;400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <title>LUNA · 18K Solid Gold</title>
+  <!-- Font Awesome (icônes) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <!-- CSS principal -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- HEADER -->
-  <header class="header">
-    <div class="header-inner">
-      <div class="header-left">
-        <button class="menu-toggle" id="menuToggle" aria-label="Menu">
-          <i class="fas fa-bars"></i>
-        </button>
-        <div class="logo" id="logoLink">
-          <span class="logo-icon">◆</span>
-          <span>BARCELONA</span>
-        </div>
+  <!-- PROMO BAR -->
+  <div class="promo-bar">
+    <span><i class="fas fa-gem"></i> Brand New 18k Solid Gold Collection</span>
+    <i class="fas fa-circle" style="font-size: 0.2rem; vertical-align: middle;"></i>
+    <span>Shop Now <i class="fas fa-arrow-right" style="font-size: 0.5rem;"></i></span>
+  </div>
+
+  <div class="wrapper">
+
+    <!-- HEADER -->
+    <header class="header">
+      <a href="#" class="logo" id="logoLink"><i class="fas fa-moon"></i> LUNA</a>
+      <nav class="nav-links">
+        <a href="#" data-page="Home">Home</a>
+        <a href="#" data-page="Catalog">Catalog</a>
+        <a href="#" data-page="Contact">Contact</a>
+      </nav>
+      <div class="header-icons">
+        <i class="fas fa-search" data-icon="search"></i>
+        <i class="far fa-user" data-icon="user"></i>
+        <i class="fas fa-shopping-bag" data-icon="bag"></i>
       </div>
-      <div class="header-right">
-        <button class="search-btn" aria-label="Rechercher"><i class="fas fa-search"></i></button>
-        <button class="cart-btn" id="openCartBtn" aria-label="Panier">
-          <i class="fas fa-shopping-bag"></i>
-          <span class="cart-badge" id="cartBadge">0</span>
-        </button>
-        <div class="auth-buttons" id="authButtons">
-          <button class="btn-outline-small" id="loginBtn">Connexion</button>
-          <button class="btn-primary-small" id="registerBtn">Inscription</button>
-        </div>
-        <div class="user-menu" id="userMenu" style="display:none;">
-          <button class="user-avatar" id="userAvatar">
-            <i class="fas fa-user-circle"></i>
-            <span id="userNameDisplay">Utilisateur</span>
-          </button>
-          <div class="dropdown-menu" id="dropdownMenu">
-            <a href="#" data-view="profile">Mon profil</a>
-            <a href="#" id="logoutBtn">Déconnexion</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </header>
+    </header>
 
-  <!-- MENU LATÉRAL -->
-  <div class="menu-overlay" id="menuOverlay"></div>
-  <nav class="side-menu" id="sideMenu">
-    <div class="side-menu-header">
-      <button class="close-menu" id="closeMenuBtn"><i class="fas fa-times"></i></button>
-    </div>
-    <ul class="side-menu-links">
-      <li><a href="#" data-view="home" class="active">Accueil</a></li>
-      <li><a href="#" data-view="products">Collection</a></li>
-      <li><a href="#" data-view="about">À propos</a></li>
-      <li><a href="#" data-view="profile">Mon profil</a></li>
-    </ul>
-    <div class="side-menu-categories">
-      <p>CATÉGORIES</p>
-      <a href="#" data-category="Furniture">Meubles</a>
-      <a href="#" data-category="Lighting">Luminaires</a>
-      <a href="#" data-category="Décor">Décoration</a>
-      <a href="#" data-category="Candles">Bougies</a>
-    </div>
-  </nav>
-
-  <!-- VUES -->
-  <main id="appViews">
-
-    <!-- ACCUEIL -->
-    <section class="view active" id="view-home">
-      <!-- HERO -->
-      <div class="hero">
-        <div class="container hero-content">
-          <div class="hero-text">
-            <span class="hero-tag">shopify</span>
-            <h1>perfectly <br />CUSTOMIZED <br />PAGES</h1>
-            <p class="hero-sub">Furniture designed by nature, whether statement or styles.</p>
-            <a href="#" data-view="products" class="btn btn-primary">DISCOVER</a>
-          </div>
-          <div class="hero-visual">
-            <div class="hero-placeholder">✦ ✦ ✦</div>
-          </div>
-        </div>
+    <!-- HERO SECTION -->
+    <section class="hero">
+      <div class="hero-tag"><i class="fas fa-star" style="color: #b4946a; margin-right: 0.4rem;"></i> new collection</div>
+      
+      <h1>
+        18K <span class="gold-accent">SOLID</span> GOLD
+      </h1>
+      <!-- Le fameux "Lunch" → transformé en détail design assumé -->
+      <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; justify-content: center; margin-top: 0.2rem;">
+        <span class="lunch-easter" id="lunchBadge"><i class="fas fa-utensils" style="margin-right: 0.3rem;"></i> lunch</span>
+        <span style="font-size: 0.7rem; letter-spacing: 0.2em; color: #b4946a;">✦</span>
+        <span style="font-size: 0.6rem; letter-spacing: 0.1em; color: #999;">édition limitée</span>
       </div>
 
-      <!-- OUR DESIGN -->
-      <section class="our-design">
-        <div class="container">
-          <div class="design-content">
-            <h2>OUR DESIGN</h2>
-            <p>Furniture designed by nature, whether statement or styles. Superbike-style wooden seats, retro-inspired upholstery and a unique design that makes this chair feel like a work of art. The seat is made from solid wood with a natural finish, and the backrest is upholstered in a soft, comfortable fabric. The tabletop is made from a high-quality wood, and the legs are made from a durable metal. The overall design is both stylish and functional, making this chair perfect for any home.</p>
-            <a href="#" class="btn btn-outline">Learn More</a>
-          </div>
-        </div>
-      </section>
+      <p class="hero-sub">Shop our new gold collection</p>
+      
+      <button class="btn-primary" id="shopNowBtn">Shop Now</button>
 
-      <!-- PROMOS -->
-      <section class="promo-section">
-        <div class="container promo-grid">
-          <div class="promo-card promo-winter">
-            <span>WINTER SALE</span>
-            <a href="#" data-view="products" class="btn btn-primary">SHOP NOW</a>
-          </div>
-          <div class="promo-card promo-bestsellers">
-            <span>BEST SELLERS</span>
-            <a href="#" data-view="products" class="btn btn-primary">SHOP NOW</a>
-          </div>
-        </div>
-      </section>
-
-      <!-- FEATURED PRODUCTS -->
-      <section class="section-products" id="featured">
-        <div class="container">
-          <div class="section-header">
-            <span class="section-tag">✦ BARCELONA ✦</span>
-            <h2>Featured Products</h2>
-            <p>Our handpicked selection for your interior</p>
-          </div>
-          <div class="products-grid" id="featuredGrid"></div>
-        </div>
-      </section>
-
-      <!-- VIP NEWSLETTER -->
-      <section class="vip-newsletter">
-        <div class="container vip-content">
-          <h2>JOIN OUR VIP</h2>
-          <p>Join our VIP program to get exclusive discounts and offers. Become a VIP today and enjoy all the benefits!</p>
-          <form id="vipForm">
-            <input type="email" placeholder="Enter your email" required />
-            <button type="submit" class="btn btn-primary">→</button>
-          </form>
-        </div>
-      </section>
-
-      <!-- SMALL WIP -->
-      <section class="small-wip">
-        <div class="container">
-          <p>LET'S ANNOUNCE SOMETHING SPECIAL... SMALL WIP</p>
-        </div>
-      </section>
-    </section>
-
-    <!-- COLLECTION -->
-    <section class="view" id="view-products">
-      <div class="container" style="padding: 60px 0;">
-        <h2 style="font-weight:300; font-size:2.8rem; letter-spacing:-1px; margin-bottom:12px;">Toute la collection</h2>
-        <p style="color:var(--mid-gray); margin-bottom:32px;">Des pièces uniques pour chaque espace</p>
-        <div class="products-grid" id="allProductsGrid"></div>
+      <div class="hero-note">
+        <span><i class="fas fa-check-circle"></i> 18K certifié</span>
+        <span><i class="fas fa-truck"></i> livraison offerte</span>
+        <span><i class="fas fa-undo-alt"></i> 30 jours</span>
       </div>
     </section>
 
-    <!-- À PROPOS -->
-    <section class="view" id="view-about">
-      <div class="container" style="padding: 80px 0; max-width:720px;">
-        <h2 style="font-weight:300; font-size:3rem; letter-spacing:-1px;">À propos de BARCELONA</h2>
-        <p style="color:var(--mid-gray); margin-top:20px; font-size:1.1rem;">BARCELONA est une marque qui célèbre l'art de vivre méditerranéen. Chaque pièce est conçue avec des matériaux nobles, inspirée par la lumière et les textures de la nature.</p>
-        <p style="color:var(--mid-gray); margin-top:12px;">Nous croyons en des intérieurs authentiques, où chaque objet raconte une histoire.</p>
-      </div>
-    </section>
+    <!-- CATÉGORIES -->
+    <div class="categories">
+      <span class="cat-item" data-category="Earrings">Earrings</span>
+      <span class="cat-item" data-category="Necklaces">Necklaces</span>
+      <span class="cat-item" data-category="Rings">Rings</span>
+      <span class="cat-item" data-category="Bracelets">Bracelets</span>
+      <span style="color: #ccc; font-weight: 100; font-size: 0.8rem;">|</span>
+      <span class="cat-item" style="color: #b4946a;" data-category="Silver Plated">Silver Plated</span>
+    </div>
 
-    <!-- PROFIL -->
-    <section class="view" id="view-profile">
-      <div class="container" style="padding: 60px 0; max-width:600px;">
-        <h2 style="font-weight:300; font-size:2.8rem;">Mon profil</h2>
-        <div style="background:var(--off-white); padding:30px; border:1px solid var(--border); margin-top:20px;">
-          <p><strong>Email :</strong> <span id="profileEmail">—</span></p>
-          <p><strong>UID :</strong> <span id="profileUid">—</span></p>
-          <button id="logoutBtnProfile" class="btn btn-primary" style="margin-top:20px;">Déconnexion</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- CONNEXION -->
-    <section class="view" id="view-login">
-      <div class="container" style="padding: 60px 0; max-width:400px; margin:0 auto;">
-        <h2 style="font-weight:300; text-align:center;">Connexion</h2>
-        <form id="loginForm" style="margin-top:30px;">
-          <div class="form-group">
-            <label>Email</label>
-            <input type="email" id="loginEmail" required placeholder="votre@email.com" />
-          </div>
-          <div class="form-group">
-            <label>Mot de passe</label>
-            <input type="password" id="loginPassword" required placeholder="••••••••" />
-          </div>
-          <button type="submit" class="btn btn-primary btn-block">Se connecter</button>
-          <p style="text-align:center; margin-top:16px; font-size:0.9rem; color:var(--mid-gray);">
-            Pas encore de compte ? <a href="#" data-view="register" style="color:var(--gold); font-weight:600;">Inscrivez-vous</a>
-          </p>
-        </form>
-        <div id="loginError" style="color:#b00020; margin-top:12px; text-align:center;"></div>
-      </div>
-    </section>
-
-    <!-- INSCRIPTION -->
-    <section class="view" id="view-register">
-      <div class="container" style="padding: 60px 0; max-width:400px; margin:0 auto;">
-        <h2 style="font-weight:300; text-align:center;">Inscription</h2>
-        <form id="registerForm" style="margin-top:30px;">
-          <div class="form-group">
-            <label>Email</label>
-            <input type="email" id="registerEmail" required placeholder="votre@email.com" />
-          </div>
-          <div class="form-group">
-            <label>Mot de passe</label>
-            <input type="password" id="registerPassword" required placeholder="Min. 6 caractères" minlength="6" />
-          </div>
-          <button type="submit" class="btn btn-primary btn-block">Créer mon compte</button>
-          <p style="text-align:center; margin-top:16px; font-size:0.9rem; color:var(--mid-gray);">
-            Déjà inscrit ? <a href="#" data-view="login" style="color:var(--gold); font-weight:600;">Connectez-vous</a>
-          </p>
-        </form>
-        <div id="registerError" style="color:#b00020; margin-top:12px; text-align:center;"></div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- FOOTER -->
-  <footer class="footer">
-    <div class="container footer-inner">
-      <p>&copy; 2026 BARCELONA. All rights reserved.</p>
-      <div class="social-icons">
-        <a href="#"><i class="fab fa-instagram"></i></a>
-        <a href="#"><i class="fab fa-pinterest"></i></a>
-        <a href="#"><i class="fab fa-facebook-f"></i></a>
+    <!-- SILVER PLATED COLLECTION -->
+    <div class="silver-section">
+      <div class="silver-content">
+        <h3><i class="fas fa-ring"></i> Silver Plated Collection</h3>
+        <p>Élégance argentée · entrée de gamme raffinée</p>
+        <button class="btn-secondary" id="silverBtn">Découvrir</button>
       </div>
     </div>
-  </footer>
 
-  <!-- PANIER -->
-  <div class="cart-overlay" id="cartOverlay"></div>
-  <aside class="cart-sidebar" id="cartSidebar">
-    <div class="cart-header">
-      <h3>Votre panier</h3>
-      <button class="close-cart" id="closeCartBtn"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="cart-items" id="cartItems">
-      <p class="empty-cart-msg">Votre panier est vide.</p>
-    </div>
-    <div class="cart-footer">
-      <div class="cart-total">
-        <span>Total</span>
-        <span id="cartTotalPrice">0.00 €</span>
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-links">
+        <a href="#" data-footer="about">À propos</a>
+        <a href="#" data-footer="faq">FAQ</a>
+        <a href="#" data-footer="shipping">Livraison</a>
+        <a href="#" data-footer="returns">Retours</a>
       </div>
-      <button class="btn btn-primary btn-block" id="checkoutBtn">Procéder au paiement</button>
-    </div>
-  </aside>
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span style="font-size: 0.6rem;">© 2026 LUNA</span>
+        <span style="color: #d4cfc6;">|</span>
+        <span style="font-size: 0.6rem; letter-spacing: 0.1em;">18K SOLID GOLD</span>
+      </div>
+      <div class="footer-social">
+        <i class="fab fa-instagram" data-social="instagram"></i>
+        <i class="fab fa-pinterest-p" data-social="pinterest"></i>
+        <i class="fab fa-youtube" data-social="youtube"></i>
+      </div>
+    </footer>
 
-  <!-- FIREBASE + SCRIPT -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  </div> <!-- fin wrapper -->
+
+  <!-- JavaScript -->
   <script src="script.js"></script>
 </body>
 </html>
