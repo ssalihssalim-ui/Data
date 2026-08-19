@@ -22,9 +22,7 @@
         <header class="header">
             <a href="#" class="logo" id="logoLink"><i class="fas fa-leaf"></i> MANORA</a>
             <nav class="nav-links">
-                <a href="#" data-page="dashboard" id="navDashboard">Dashboard</a>
-                <a href="#" data-page="categories" id="navCategories">Catégories</a>
-                <a href="#" data-page="products" id="navProducts">Produits</a>
+                <!-- Liens admin cachés par défaut -->
             </nav>
             <div class="header-icons">
                 <i class="fas fa-search" data-icon="search" id="searchIcon"></i>
@@ -36,7 +34,29 @@
 
     </div>
 
-    <!-- HERO SECTION AVEC IMAGE DE COUVERTURE -->
+    <!-- ============================================================ -->
+    <!-- STORE PUBLIC - S'ouvre quand on clique sur Shop Now -->
+    <!-- ============================================================ -->
+    <div id="storePage" style="display: none;">
+        <div class="store-header">
+            <h2><i class="fas fa-store"></i> Notre Boutique</h2>
+            <button class="btn-close-store" id="closeStore"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="store-content">
+            <!-- Catégories du store -->
+            <div class="store-categories" id="storeCategories">
+                <!-- Chargées dynamiquement -->
+            </div>
+            <!-- Produits du store -->
+            <div class="store-products" id="storeProducts">
+                <!-- Chargées dynamiquement -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- HERO SECTION -->
+    <!-- ============================================================ -->
     <section class="hero" id="heroSection">
         <div class="hero-overlay"></div>
         <div class="hero-content">
@@ -50,7 +70,7 @@
                 <span style="font-size: 0.6rem; letter-spacing: 0.1em; color: rgba(255,255,255,0.7);">édition limitée</span>
             </div>
             <p class="hero-sub">Découvrez notre nouvelle collection</p>
-            <button class="btn-primary" id="shopNowBtn">Shop Now</button>
+            <button class="btn-primary" id="shopNowBtn">🛍️ Shop Now</button>
             <div class="hero-note">
                 <span><i class="fas fa-check-circle"></i> 100% naturel</span>
                 <span><i class="fas fa-truck"></i> livraison offerte</span>
@@ -62,7 +82,7 @@
     <div class="wrapper">
 
         <!-- ============================================================ -->
-        <!-- SECTION CATÉGORIES (Affichage public) -->
+        <!-- SECTION CATÉGORIES (Affichage public sur la page d'accueil) -->
         <!-- ============================================================ -->
         <div id="publicCategories">
             <div class="categories" id="categoriesContainer">
@@ -70,7 +90,7 @@
             </div>
         </div>
 
-        <!-- SECTION PRODUITS (Affichage public) -->
+        <!-- SECTION PRODUITS (Affichage public sur la page d'accueil) -->
         <div id="publicProducts">
             <div class="products-grid" id="productsContainer">
                 <!-- Les produits seront chargés dynamiquement -->
@@ -78,195 +98,147 @@
         </div>
 
         <!-- ============================================================ -->
-        <!-- DASHBOARD ADMIN -->
+        <!-- ADMIN PANEL - Menu latéral gauche -->
         <!-- ============================================================ -->
-        <div id="dashboardPanel" style="display: none;">
-            <div class="dashboard-header">
-                <h2><i class="fas fa-chart-pie"></i> Tableau de bord</h2>
-                <div class="dashboard-stats" id="dashboardStats">
-                    <div class="stat-card">
-                        <span class="stat-number" id="statCategories">0</span>
-                        <span class="stat-label">Catégories</span>
+        <div id="adminPanel" style="display: none;">
+            <!-- Sidebar gauche -->
+            <div class="admin-sidebar">
+                <div class="sidebar-header">
+                    <h3><i class="fas fa-leaf"></i> MANORA</h3>
+                    <span class="sidebar-user" id="sidebarUser">Admin</span>
+                </div>
+                <nav class="sidebar-nav">
+                    <a href="#" data-page="dashboard" class="sidebar-link active" id="sideDashboard">
+                        <i class="fas fa-chart-pie"></i> Dashboard
+                    </a>
+                    <a href="#" data-page="categories" class="sidebar-link" id="sideCategories">
+                        <i class="fas fa-tags"></i> Catégories
+                    </a>
+                    <a href="#" data-page="products" class="sidebar-link" id="sideProducts">
+                        <i class="fas fa-box"></i> Produits
+                    </a>
+                    <a href="#" data-page="orders" class="sidebar-link" id="sideOrders">
+                        <i class="fas fa-shopping-cart"></i> Commandes
+                    </a>
+                    <a href="#" data-page="clients" class="sidebar-link" id="sideClients">
+                        <i class="fas fa-users"></i> Clients
+                    </a>
+                    <a href="#" class="sidebar-link" id="sideLogout">
+                        <i class="fas fa-sign-out-alt"></i> Déconnexion
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Contenu admin -->
+            <div class="admin-content">
+                <!-- Dashboard -->
+                <div id="dashboardPanel" class="admin-page active">
+                    <div class="dashboard-header">
+                        <h2><i class="fas fa-chart-pie"></i> Tableau de bord</h2>
+                        <div class="dashboard-stats" id="dashboardStats">
+                            <div class="stat-card">
+                                <span class="stat-number" id="statCategories">0</span>
+                                <span class="stat-label">Catégories</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number" id="statProducts">0</span>
+                                <span class="stat-label">Produits</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number" id="statStock">0</span>
+                                <span class="stat-label">Stock total</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number" id="statCA">0 €</span>
+                                <span class="stat-label">Chiffre d'affaires</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="stat-card">
-                        <span class="stat-number" id="statProducts">0</span>
-                        <span class="stat-label">Produits</span>
+                </div>
+
+                <!-- Gestion Catégories -->
+                <div id="categoriesPanel" class="admin-page">
+                    <div class="admin-panel-header">
+                        <h2><i class="fas fa-tags"></i> Gestion des Catégories</h2>
+                        <button class="btn-primary-small" id="btnAddCategory"><i class="fas fa-plus"></i> Ajouter</button>
                     </div>
-                    <div class="stat-card">
-                        <span class="stat-number" id="statStock">0</span>
-                        <span class="stat-label">Stock total</span>
+                    <div class="table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Nom</th>
+                                    <th>Description</th>
+                                    <th>Ordre</th>
+                                    <th>CA</th>
+                                    <th>Profit</th>
+                                    <th>Nb Produits</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="categoriesTableBody"></tbody>
+                        </table>
                     </div>
-                    <div class="stat-card">
-                        <span class="stat-number" id="statCA">0 €</span>
-                        <span class="stat-label">Chiffre d'affaires</span>
+                </div>
+
+                <!-- Gestion Produits -->
+                <div id="productsPanel" class="admin-page">
+                    <div class="admin-panel-header">
+                        <h2><i class="fas fa-box"></i> Gestion des Produits</h2>
+                        <button class="btn-primary-small" id="btnAddProduct"><i class="fas fa-plus"></i> Ajouter</button>
+                    </div>
+                    <div class="table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Nom</th>
+                                    <th>Catégorie</th>
+                                    <th>Marque</th>
+                                    <th>Prix Achat</th>
+                                    <th>Prix Vente</th>
+                                    <th>Profit</th>
+                                    <th>Stock</th>
+                                    <th>Prix Promo</th>
+                                    <th>Fournisseur</th>
+                                    <th>CA</th>
+                                    <th>Profit Total</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Commandes (placeholder) -->
+                <div id="ordersPanel" class="admin-page">
+                    <div class="admin-panel-header">
+                        <h2><i class="fas fa-shopping-cart"></i> Commandes</h2>
+                    </div>
+                    <div class="placeholder-content">
+                        <i class="fas fa-shopping-cart" style="font-size: 3rem; color: #e8a87c;"></i>
+                        <p>Gestion des commandes à venir</p>
+                    </div>
+                </div>
+
+                <!-- Clients (placeholder) -->
+                <div id="clientsPanel" class="admin-page">
+                    <div class="admin-panel-header">
+                        <h2><i class="fas fa-users"></i> Clients</h2>
+                    </div>
+                    <div class="placeholder-content">
+                        <i class="fas fa-users" style="font-size: 3rem; color: #e8a87c;"></i>
+                        <p>Gestion des clients à venir</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- ============================================================ -->
-        <!-- GESTION DES CATÉGORIES (Admin) -->
-        <!-- ============================================================ -->
-        <div id="categoriesPanel" style="display: none;">
-            <div class="admin-panel-header">
-                <h2><i class="fas fa-tags"></i> Gestion des Catégories</h2>
-                <button class="btn-primary-small" id="btnAddCategory"><i class="fas fa-plus"></i> Ajouter</button>
-            </div>
-            <div class="table-container">
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>Image</th>
-                            <th>Nom</th>
-                            <th>Description</th>
-                            <th>Ordre</th>
-                            <th>CA</th>
-                            <th>Profit</th>
-                            <th>Nb Produits</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="categoriesTableBody">
-                        <!-- Rempli dynamiquement -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- ============================================================ -->
-        <!-- GESTION DES PRODUITS (Admin) -->
-        <!-- ============================================================ -->
-        <div id="productsPanel" style="display: none;">
-            <div class="admin-panel-header">
-                <h2><i class="fas fa-box"></i> Gestion des Produits</h2>
-                <button class="btn-primary-small" id="btnAddProduct"><i class="fas fa-plus"></i> Ajouter</button>
-            </div>
-            <div class="table-container">
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>Image</th>
-                            <th>Nom</th>
-                            <th>Catégorie</th>
-                            <th>Marque</th>
-                            <th>Prix Achat</th>
-                            <th>Prix Vente</th>
-                            <th>Profit</th>
-                            <th>Stock</th>
-                            <th>Prix Promo</th>
-                            <th>Fournisseur</th>
-                            <th>CA</th>
-                            <th>Profit Total</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="productsTableBody">
-                        <!-- Rempli dynamiquement -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- ============================================================ -->
-        <!-- MODAL CATÉGORIE -->
-        <!-- ============================================================ -->
-        <div class="modal-overlay" id="categoryModal">
-            <div class="modal-content">
-                <button class="modal-close" id="closeCategoryModal"><i class="fas fa-times"></i></button>
-                <h3 id="categoryModalTitle">Ajouter une catégorie</h3>
-                <form id="categoryForm">
-                    <input type="hidden" id="categoryId" />
-                    <div class="form-group">
-                        <label>Nom de la catégorie</label>
-                        <input type="text" id="catName" placeholder="Ex: Soin" required />
-                    </div>
-                    <div class="form-group">
-                        <label>Description</label>
-                        <textarea id="catDescription" placeholder="Description de la catégorie" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>URL de l'image</label>
-                        <input type="text" id="catImage" placeholder="https://example.com/image.jpg" />
-                    </div>
-                    <div class="form-group">
-                        <label>Ordre d'affichage</label>
-                        <input type="number" id="catOrder" placeholder="1" value="0" />
-                    </div>
-                    <button type="submit" class="btn-primary" id="saveCategoryBtn">Enregistrer</button>
-                </form>
-            </div>
-        </div>
-
-        <!-- ============================================================ -->
-        <!-- MODAL PRODUIT -->
-        <!-- ============================================================ -->
-        <div class="modal-overlay" id="productModal">
-            <div class="modal-content modal-large">
-                <button class="modal-close" id="closeProductModal"><i class="fas fa-times"></i></button>
-                <h3 id="productModalTitle">Ajouter un produit</h3>
-                <form id="productForm">
-                    <input type="hidden" id="productId" />
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Nom du produit</label>
-                            <input type="text" id="prodName" placeholder="Nom du produit" required />
-                        </div>
-                        <div class="form-group">
-                            <label>Catégorie</label>
-                            <select id="prodCategory" required></select>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Marque</label>
-                            <input type="text" id="prodBrand" placeholder="Marque" />
-                        </div>
-                        <div class="form-group">
-                            <label>Fournisseur</label>
-                            <input type="text" id="prodSupplier" placeholder="Fournisseur" />
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Prix d'achat (€)</label>
-                            <input type="number" id="prodBuyPrice" placeholder="0.00" step="0.01" />
-                        </div>
-                        <div class="form-group">
-                            <label>Prix de vente (€)</label>
-                            <input type="number" id="prodSellPrice" placeholder="0.00" step="0.01" required />
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Stock</label>
-                            <input type="number" id="prodStock" placeholder="0" />
-                        </div>
-                        <div class="form-group">
-                            <label>Prix promo (€)</label>
-                            <input type="number" id="prodPromoPrice" placeholder="0.00" step="0.01" />
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>URL de l'image</label>
-                        <input type="text" id="prodImage" placeholder="https://example.com/product.jpg" />
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Chiffre d'affaires (€)</label>
-                            <input type="number" id="prodCA" placeholder="0.00" step="0.01" value="0" />
-                        </div>
-                        <div class="form-group">
-                            <label>Profit total (€)</label>
-                            <input type="number" id="prodProfit" placeholder="0.00" step="0.01" value="0" />
-                        </div>
-                    </div>
-                    <button type="submit" class="btn-primary" id="saveProductBtn">Enregistrer</button>
-                </form>
-            </div>
-        </div>
-
         <!-- COLLECTION SECTION -->
-        <div class="silver-section">
+        <!-- ============================================================ -->
+        <div class="silver-section" id="collectionSection">
             <div class="silver-content">
                 <h3><i class="fas fa-heart"></i> Collection Wellness</h3>
                 <p>Soin · beauté · bien-être · vitalité</p>
@@ -294,6 +266,104 @@
             </div>
         </footer>
 
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- MODALS -->
+    <!-- ============================================================ -->
+
+    <!-- MODAL CATÉGORIE -->
+    <div class="modal-overlay" id="categoryModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeCategoryModal"><i class="fas fa-times"></i></button>
+            <h3 id="categoryModalTitle">Ajouter une catégorie</h3>
+            <form id="categoryForm">
+                <input type="hidden" id="categoryId" />
+                <div class="form-group">
+                    <label>Nom de la catégorie</label>
+                    <input type="text" id="catName" placeholder="Ex: Soin" required />
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="catDescription" placeholder="Description de la catégorie" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>URL de l'image</label>
+                    <input type="text" id="catImage" placeholder="https://example.com/image.jpg" />
+                </div>
+                <div class="form-group">
+                    <label>Ordre d'affichage</label>
+                    <input type="number" id="catOrder" placeholder="1" value="0" />
+                </div>
+                <button type="submit" class="btn-primary" id="saveCategoryBtn">Enregistrer</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL PRODUIT -->
+    <div class="modal-overlay" id="productModal">
+        <div class="modal-content modal-large">
+            <button class="modal-close" id="closeProductModal"><i class="fas fa-times"></i></button>
+            <h3 id="productModalTitle">Ajouter un produit</h3>
+            <form id="productForm">
+                <input type="hidden" id="productId" />
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nom du produit</label>
+                        <input type="text" id="prodName" placeholder="Nom du produit" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Catégorie</label>
+                        <select id="prodCategory" required></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Marque</label>
+                        <input type="text" id="prodBrand" placeholder="Marque" />
+                    </div>
+                    <div class="form-group">
+                        <label>Fournisseur</label>
+                        <input type="text" id="prodSupplier" placeholder="Fournisseur" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Prix d'achat (€)</label>
+                        <input type="number" id="prodBuyPrice" placeholder="0.00" step="0.01" />
+                    </div>
+                    <div class="form-group">
+                        <label>Prix de vente (€)</label>
+                        <input type="number" id="prodSellPrice" placeholder="0.00" step="0.01" required />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Stock</label>
+                        <input type="number" id="prodStock" placeholder="0" />
+                    </div>
+                    <div class="form-group">
+                        <label>Prix promo (€)</label>
+                        <input type="number" id="prodPromoPrice" placeholder="0.00" step="0.01" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>URL de l'image</label>
+                    <input type="text" id="prodImage" placeholder="https://example.com/product.jpg" />
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Chiffre d'affaires (€)</label>
+                        <input type="number" id="prodCA" placeholder="0.00" step="0.01" value="0" />
+                    </div>
+                    <div class="form-group">
+                        <label>Profit total (€)</label>
+                        <input type="number" id="prodProfit" placeholder="0.00" step="0.01" value="0" />
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary" id="saveProductBtn">Enregistrer</button>
+            </form>
+        </div>
     </div>
 
     <!-- MODAL AUTHENTIFICATION -->
@@ -357,7 +427,7 @@
     </div>
 
     <!-- ============================================================ -->
-    <!-- ===== FIREBASE SDKs (Version 12.17.1 - Modulaire) ===== -->
+    <!-- ===== FIREBASE SDKs ===== -->
     <!-- ============================================================ -->
     <script type="importmap">
         {
