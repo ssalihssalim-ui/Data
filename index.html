@@ -123,7 +123,7 @@
                     <a href="#" data-page="clients" class="sidebar-link" id="sideClients">
                         <i class="fas fa-users"></i> Clients
                     </a>
-                    <a href="#" class="sidebar-link" id="sideLogout">
+                    <a href="#" class="sidebar-link logout" id="sideLogout">
                         <i class="fas fa-sign-out-alt"></i> Déconnexion
                     </a>
                 </nav>
@@ -288,8 +288,11 @@
                     <textarea id="catDescription" placeholder="Description de la catégorie" rows="3"></textarea>
                 </div>
                 <div class="form-group">
-                    <label>URL de l'image</label>
-                    <input type="text" id="catImage" placeholder="https://example.com/image.jpg" />
+                    <label>Image de la catégorie</label>
+                    <input type="file" id="catImageInput" accept="image/*" />
+                    <div id="catImagePreview" style="margin-top:10px;"></div>
+                    <input type="hidden" id="catImage" />
+                    <small style="font-size:0.6rem;color:#999;">Téléchargez une image (JPG, PNG, WEBP)</small>
                 </div>
                 <div class="form-group">
                     <label>Ordre d'affichage</label>
@@ -348,8 +351,11 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>URL de l'image</label>
-                    <input type="text" id="prodImage" placeholder="https://example.com/product.jpg" />
+                    <label>Image du produit</label>
+                    <input type="file" id="prodImageInput" accept="image/*" />
+                    <div id="prodImagePreview" style="margin-top:10px;"></div>
+                    <input type="hidden" id="prodImage" />
+                    <small style="font-size:0.6rem;color:#999;">Téléchargez une image (JPG, PNG, WEBP)</small>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -435,6 +441,7 @@
                 "firebase/app": "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js",
                 "firebase/auth": "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js",
                 "firebase/firestore": "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js",
+                "firebase/storage": "https://www.gstatic.com/firebasejs/12.17.1/firebase-storage.js",
                 "firebase/analytics": "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js"
             }
         }
