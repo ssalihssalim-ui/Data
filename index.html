@@ -20,28 +20,30 @@
 
         <!-- HEADER -->
         <header class="header">
-            <a href="index.html" class="logo" id="logoLink"><i class="fas fa-leaf"></i> MANORA</a>
+            <a href="#" class="logo" id="logoLink"><i class="fas fa-leaf"></i> MANORA</a>
             <nav class="nav-links">
-                <a href="index.html" class="active">Accueil</a>
-                <a href="#" id="navShop">Boutique</a>
-                <a href="#" id="navDashboard" style="display:none;">Dashboard</a>
+                <a href="#" data-page="dashboard" id="navDashboard">Dashboard</a>
+                <a href="#" data-page="categories" id="navCategories">Catégories</a>
+                <a href="#" data-page="products" id="navProducts">Produits</a>
             </nav>
             <div class="header-icons">
-                <i class="fas fa-search" data-icon="search"></i>
+                <i class="fas fa-search" data-icon="search" id="searchIcon"></i>
                 <i class="far fa-user" data-icon="user" id="userIcon"></i>
-                <i class="fas fa-shopping-bag" data-icon="bag"></i>
+                <i class="fas fa-shopping-bag" data-icon="bag" id="bagIcon"></i>
                 <span class="user-status" id="userStatus"></span>
             </div>
         </header>
 
     </div>
 
-    <!-- ===== PAGE ACCUEIL ===== -->
-    <section class="hero" id="pageHome">
+    <!-- HERO SECTION AVEC IMAGE DE COUVERTURE -->
+    <section class="hero" id="heroSection">
         <div class="hero-overlay"></div>
         <div class="hero-content">
             <div class="hero-tag"><i class="fas fa-star" style="color: #f5cba7; margin-right: 0.4rem;"></i> nouvelle collection</div>
-            <h1>Beauté <span class="gold-accent">&</span> Bien-être</h1>
+            <h1>
+                Beauté <span class="gold-accent">&</span> Bien-être
+            </h1>
             <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; justify-content: center; margin-top: 0.2rem;">
                 <span class="lunch-easter" id="lunchBadge"><i class="fas fa-spa" style="margin-right: 0.3rem;"></i> wellness</span>
                 <span style="font-size: 0.7rem; letter-spacing: 0.2em; color: #f5cba7;">✦</span>
@@ -57,107 +59,250 @@
         </div>
     </section>
 
-    <!-- ===== PAGE BOUTIQUE ===== -->
-    <div class="shop-page" id="pageShop" style="display: none;">
-        <div class="wrapper shop-wrapper">
-            <aside class="shop-sidebar">
-                <h3><i class="fas fa-list"></i> Catégories</h3>
-                <ul class="category-list" id="shopCategoryList">
-                    <li class="category-item active" data-category="all"><i class="fas fa-th"></i> Tous</li>
-                </ul>
-            </aside>
-            <main class="shop-content">
-                <div class="shop-header">
-                    <h2>Nos Produits</h2>
-                    <p id="productCount">0 produits</p>
-                </div>
-                <div class="products-grid" id="productsGrid"></div>
-            </main>
-        </div>
-    </div>
+    <div class="wrapper">
 
-    <!-- ===== PAGE DASHBOARD ===== -->
-    <div class="dashboard-page" id="pageDashboard" style="display: none;">
-        <div class="dashboard-container">
-            <aside class="dashboard-sidebar">
-                <div class="dashboard-user">
-                    <i class="fas fa-user-circle"></i>
-                    <span id="dashboardUserName">Utilisateur</span>
-                </div>
-                <nav class="dashboard-menu">
-                    <a href="#" class="dashboard-menu-item active" data-section="categories"><i class="fas fa-tags"></i> Catégories</a>
-                    <a href="#" class="dashboard-menu-item" data-section="produits"><i class="fas fa-box"></i> Produits</a>
-                    <a href="#" class="dashboard-menu-item" data-section="clients"><i class="fas fa-users"></i> Clients</a>
-                    <a href="#" class="dashboard-menu-item" data-section="fournisseurs"><i class="fas fa-truck"></i> Fournisseurs</a>
-                    <a href="#" class="dashboard-menu-item" data-section="ventes"><i class="fas fa-chart-line"></i> Ventes</a>
-                    <a href="#" class="dashboard-menu-item" data-section="credits"><i class="fas fa-credit-card"></i> Crédits</a>
-                    <a href="#" class="dashboard-menu-item" data-section="statistiques"><i class="fas fa-chart-pie"></i> Statistiques</a>
-                    <a href="#" class="dashboard-menu-item" data-section="depenses"><i class="fas fa-coins"></i> Dépenses</a>
-                    <a href="#" class="dashboard-menu-item" data-section="options"><i class="fas fa-cog"></i> Options</a>
-                </nav>
-                <button class="dashboard-logout" id="dashboardLogout"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
-            </aside>
-            <main class="dashboard-content">
-                <div class="dashboard-header">
-                    <h2 id="dashboardTitle">Tableau de bord</h2>
-                    <p id="dashboardSubtitle">Gestion complète</p>
-                </div>
-                <div class="dashboard-section-content" id="dashboardSectionContent">
-                    <div class="dashboard-placeholder">
-                        <i class="fas fa-chart-simple"></i>
-                        <h3>Sélectionnez une section</h3>
+        <!-- ============================================================ -->
+        <!-- SECTION CATÉGORIES (Affichage public) -->
+        <!-- ============================================================ -->
+        <div id="publicCategories">
+            <div class="categories" id="categoriesContainer">
+                <!-- Les catégories seront chargées dynamiquement -->
+            </div>
+        </div>
+
+        <!-- SECTION PRODUITS (Affichage public) -->
+        <div id="publicProducts">
+            <div class="products-grid" id="productsContainer">
+                <!-- Les produits seront chargés dynamiquement -->
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- DASHBOARD ADMIN -->
+        <!-- ============================================================ -->
+        <div id="dashboardPanel" style="display: none;">
+            <div class="dashboard-header">
+                <h2><i class="fas fa-chart-pie"></i> Tableau de bord</h2>
+                <div class="dashboard-stats" id="dashboardStats">
+                    <div class="stat-card">
+                        <span class="stat-number" id="statCategories">0</span>
+                        <span class="stat-label">Catégories</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" id="statProducts">0</span>
+                        <span class="stat-label">Produits</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" id="statStock">0</span>
+                        <span class="stat-label">Stock total</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" id="statCA">0 €</span>
+                        <span class="stat-label">Chiffre d'affaires</span>
                     </div>
                 </div>
-            </main>
-        </div>
-    </div>
-
-    <!-- ===== FOOTER ===== -->
-    <div class="wrapper">
-        <div class="categories" id="homeCategories">
-            <span class="cat-item">Soin</span>
-            <span class="cat-item">Maquillage</span>
-            <span class="cat-item">Vitamines</span>
-            <span class="cat-item">Ensemble</span>
-            <span class="cat-item">Coquet</span>
-            <span class="cat-item">Accessoires</span>
-            <span class="cat-item">Sport</span>
-        </div>
-        <div class="silver-section">
-            <div class="silver-content">
-                <h3><i class="fas fa-heart"></i> Collection Wellness</h3>
-                <p>Soin · beauté · bien-être · vitalité</p>
-                <button class="btn-secondary" id="silverBtn">Découvrir</button>
             </div>
         </div>
+
+        <!-- ============================================================ -->
+        <!-- GESTION DES CATÉGORIES (Admin) -->
+        <!-- ============================================================ -->
+        <div id="categoriesPanel" style="display: none;">
+            <div class="admin-panel-header">
+                <h2><i class="fas fa-tags"></i> Gestion des Catégories</h2>
+                <button class="btn-primary-small" id="btnAddCategory"><i class="fas fa-plus"></i> Ajouter</button>
+            </div>
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Nom</th>
+                            <th>Description</th>
+                            <th>Ordre</th>
+                            <th>CA</th>
+                            <th>Profit</th>
+                            <th>Nb Produits</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="categoriesTableBody">
+                        <!-- Rempli dynamiquement -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- GESTION DES PRODUITS (Admin) -->
+        <!-- ============================================================ -->
+        <div id="productsPanel" style="display: none;">
+            <div class="admin-panel-header">
+                <h2><i class="fas fa-box"></i> Gestion des Produits</h2>
+                <button class="btn-primary-small" id="btnAddProduct"><i class="fas fa-plus"></i> Ajouter</button>
+            </div>
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Nom</th>
+                            <th>Catégorie</th>
+                            <th>Marque</th>
+                            <th>Prix Achat</th>
+                            <th>Prix Vente</th>
+                            <th>Profit</th>
+                            <th>Stock</th>
+                            <th>Prix Promo</th>
+                            <th>Fournisseur</th>
+                            <th>CA</th>
+                            <th>Profit Total</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTableBody">
+                        <!-- Rempli dynamiquement -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- MODAL CATÉGORIE -->
+        <!-- ============================================================ -->
+        <div class="modal-overlay" id="categoryModal">
+            <div class="modal-content">
+                <button class="modal-close" id="closeCategoryModal"><i class="fas fa-times"></i></button>
+                <h3 id="categoryModalTitle">Ajouter une catégorie</h3>
+                <form id="categoryForm">
+                    <input type="hidden" id="categoryId" />
+                    <div class="form-group">
+                        <label>Nom de la catégorie</label>
+                        <input type="text" id="catName" placeholder="Ex: Soin" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="catDescription" placeholder="Description de la catégorie" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>URL de l'image</label>
+                        <input type="text" id="catImage" placeholder="https://example.com/image.jpg" />
+                    </div>
+                    <div class="form-group">
+                        <label>Ordre d'affichage</label>
+                        <input type="number" id="catOrder" placeholder="1" value="0" />
+                    </div>
+                    <button type="submit" class="btn-primary" id="saveCategoryBtn">Enregistrer</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- MODAL PRODUIT -->
+        <!-- ============================================================ -->
+        <div class="modal-overlay" id="productModal">
+            <div class="modal-content modal-large">
+                <button class="modal-close" id="closeProductModal"><i class="fas fa-times"></i></button>
+                <h3 id="productModalTitle">Ajouter un produit</h3>
+                <form id="productForm">
+                    <input type="hidden" id="productId" />
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nom du produit</label>
+                            <input type="text" id="prodName" placeholder="Nom du produit" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Catégorie</label>
+                            <select id="prodCategory" required></select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Marque</label>
+                            <input type="text" id="prodBrand" placeholder="Marque" />
+                        </div>
+                        <div class="form-group">
+                            <label>Fournisseur</label>
+                            <input type="text" id="prodSupplier" placeholder="Fournisseur" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Prix d'achat (€)</label>
+                            <input type="number" id="prodBuyPrice" placeholder="0.00" step="0.01" />
+                        </div>
+                        <div class="form-group">
+                            <label>Prix de vente (€)</label>
+                            <input type="number" id="prodSellPrice" placeholder="0.00" step="0.01" required />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Stock</label>
+                            <input type="number" id="prodStock" placeholder="0" />
+                        </div>
+                        <div class="form-group">
+                            <label>Prix promo (€)</label>
+                            <input type="number" id="prodPromoPrice" placeholder="0.00" step="0.01" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>URL de l'image</label>
+                        <input type="text" id="prodImage" placeholder="https://example.com/product.jpg" />
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Chiffre d'affaires (€)</label>
+                            <input type="number" id="prodCA" placeholder="0.00" step="0.01" value="0" />
+                        </div>
+                        <div class="form-group">
+                            <label>Profit total (€)</label>
+                            <input type="number" id="prodProfit" placeholder="0.00" step="0.01" value="0" />
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary" id="saveProductBtn">Enregistrer</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
         <footer class="footer">
             <div class="footer-links">
-                <a href="#">À propos</a>
-                <a href="#">FAQ</a>
-                <a href="#">Livraison</a>
-                <a href="#">Retours</a>
+                <a href="#" data-footer="about">À propos</a>
+                <a href="#" data-footer="faq">FAQ</a>
+                <a href="#" data-footer="shipping">Livraison</a>
+                <a href="#" data-footer="returns">Retours</a>
             </div>
-            <div><span>© 2026 MANORA</span><span style="color:#d4cfc6;">|</span><span>Beauty & Wellness</span></div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 0.6rem;">© 2026 MANORA</span>
+                <span style="color: #d4cfc6;">|</span>
+                <span style="font-size: 0.6rem; letter-spacing: 0.1em;">Beauty & Wellness</span>
+            </div>
             <div class="footer-social">
-                <i class="fab fa-instagram"></i>
-                <i class="fab fa-pinterest-p"></i>
-                <i class="fab fa-youtube"></i>
+                <i class="fab fa-instagram" data-social="instagram"></i>
+                <i class="fab fa-pinterest-p" data-social="pinterest"></i>
+                <i class="fab fa-youtube" data-social="youtube"></i>
             </div>
         </footer>
+
     </div>
 
-    <!-- ===== MODAL AUTH ===== -->
+    <!-- MODAL AUTHENTIFICATION -->
     <div class="auth-overlay" id="authOverlay">
         <div class="auth-modal">
             <button class="auth-close" id="authClose"><i class="fas fa-times"></i></button>
+
             <div class="auth-header">
                 <h2><i class="fas fa-leaf" style="color: #e8a87c;"></i> Bienvenue chez MANORA</h2>
                 <p>Connectez-vous ou créez un compte</p>
             </div>
+
             <div class="auth-tabs">
                 <button class="auth-tab active" data-tab="login">Connexion</button>
                 <button class="auth-tab" data-tab="register">Inscription</button>
             </div>
+
+            <!-- Connexion -->
             <form class="auth-form" id="loginForm">
                 <div class="form-group">
                     <label for="loginEmail"><i class="fas fa-envelope"></i> Email</label>
@@ -171,6 +316,8 @@
                 <button type="submit" class="auth-submit" id="loginBtn">Se connecter</button>
                 <p class="auth-forgot"><a href="#" id="resetPasswordLink">Mot de passe oublié ?</a></p>
             </form>
+
+            <!-- Inscription -->
             <form class="auth-form hidden" id="registerForm">
                 <div class="form-group">
                     <label for="registerName"><i class="fas fa-user"></i> Nom complet</label>
@@ -187,7 +334,7 @@
                 <div class="form-group">
                     <label for="registerPassword"><i class="fas fa-lock"></i> Mot de passe</label>
                     <input type="password" id="registerPassword" placeholder="••••••••" required />
-                    <small>Minimum 6 caractères</small>
+                    <small style="font-size: 0.6rem; color: #999;">Minimum 6 caractères</small>
                 </div>
                 <div class="form-group">
                     <label for="registerConfirm"><i class="fas fa-check-circle"></i> Confirmer</label>
@@ -195,24 +342,14 @@
                 </div>
                 <div id="registerError" class="auth-error hidden"></div>
                 <button type="submit" class="auth-submit" id="registerBtn">Créer mon compte</button>
-                <p class="auth-terms">En créant un compte, vous acceptez nos <a href="#">conditions</a></p>
+                <p class="auth-terms">En créant un compte, vous acceptez nos <a href="#">conditions d'utilisation</a></p>
             </form>
         </div>
     </div>
 
-    <!-- ===== MODAL CRUD ===== -->
-    <div class="crud-overlay" id="crudOverlay">
-        <div class="crud-modal">
-            <button class="crud-close" id="crudClose"><i class="fas fa-times"></i></button>
-            <h2 id="crudTitle">Ajouter</h2>
-            <form id="crudForm">
-                <div id="crudFields"></div>
-                <button type="submit" class="auth-submit" id="crudSubmit">Enregistrer</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- ===== FIREBASE ===== -->
+    <!-- ============================================================ -->
+    <!-- ===== FIREBASE SDKs (Version 12.17.1 - Modulaire) ===== -->
+    <!-- ============================================================ -->
     <script type="importmap">
         {
             "imports": {
@@ -225,7 +362,6 @@
     </script>
 
     <script type="module" src="script.js"></script>
-    <script type="module" src="admin.js"></script>
 
 </body>
 </html>
