@@ -14,20 +14,7 @@ import {
     browserLocalPersistence,
     updateProfile
 } from "firebase/auth";
-import {
-    getFirestore,
-    collection,
-    doc,
-    setDoc,
-    getDoc,
-    getDocs,
-    updateDoc,
-    deleteDoc,
-    query,
-    orderBy,
-    serverTimestamp,
-    onSnapshot
-} from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
 
 // ============================================================
 // CONFIGURATION FIREBASE
@@ -54,10 +41,13 @@ setPersistence(auth, browserLocalPersistence).catch(() => {});
 
 console.log('🔥 Firebase initialisé !');
 
+// Exporter pour admin.js
+export { app, auth, db };
+
 // ============================================================
 // TOAST SYSTEM
 // ============================================================
-function showToast(msg, isError = false) {
+window.showToast = function(msg, isError = false) {
     const existing = document.querySelector('.toast-luna');
     if (existing) existing.remove();
 
@@ -98,14 +88,14 @@ function showToast(msg, isError = false) {
         toast.style.transform = 'translateX(-50%) translateY(20px)';
         setTimeout(() => toast.remove(), 400);
     }, 4000);
-}
+};
 
 // ============================================================
 // VALIDATION EMAIL
 // ============================================================
-function isValidEmail(email) {
+window.isValidEmail = function(email) {
     return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
-}
+};
 
 // ============================================================
 // AUTH STATE
@@ -122,14 +112,15 @@ function updateUI(user) {
         userStatus.textContent = '👤 ' + displayName.split('@')[0];
         userStatus.className = 'user-status logged-in';
         userIcon.style.color = '#4caf50';
-        // Afficher les liens admin
         if (navDashboard) navDashboard.style.display = 'inline';
         if (navCategories) navCategories.style.display = 'inline';
         if (navProducts) navProducts.style.display = 'inline';
-        // Charger les données
-        loadCategories();
-        loadProducts();
-        updateDashboard();
+        // Charger les données admin via admin.js
+        import('./admin.js').then(module => {
+            module.loadCategories();
+            module.loadProducts();
+            module.updateDashboard();
+        });
     } else {
         userStatus.textContent = '';
         userStatus.className = 'user-status';
@@ -137,7 +128,6 @@ function updateUI(user) {
         if (navDashboard) navDashboard.style.display = 'none';
         if (navCategories) navCategories.style.display = 'none';
         if (navProducts) navProducts.style.display = 'none';
-        // Cacher les panels admin
         document.getElementById('dashboardPanel').style.display = 'none';
         document.getElementById('categoriesPanel').style.display = 'none';
         document.getElementById('productsPanel').style.display = 'none';
@@ -171,7 +161,7 @@ userIcon.addEventListener('click', function() {
     if (user) {
         if (confirm('Se déconnecter ?')) {
             signOut(auth);
-            showToast('👋 Déconnecté');
+            window.showToast('👋 Déconnecté');
         }
     } else {
         openAuthModal();
@@ -215,7 +205,7 @@ loginForm.addEventListener('submit', function(e) {
     const errorDiv = document.getElementById('loginError');
 
     errorDiv.classList.add('hidden');
-    if (!email || !isValidEmail(email)) {
+    if (!email || !window.isValidEmail(email)) {
         errorDiv.classList.remove('hidden');
         errorDiv.textContent = '⚠️ Email invalide';
         return;
@@ -233,8 +223,7 @@ loginForm.addEventListener('submit', function(e) {
     signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
             const user = userCredential.user;
-            updateDoc(doc(db, 'users', user.uid), { lastLogin: serverTimestamp() }).catch(() => {});
-            showToast('✅ Bienvenue ' + (user.displayName || user.email) + ' !');
+            window.showToast('✅ Bienvenue ' + (user.displayName || user.email) + ' !');
             closeAuthModal();
             loginForm.reset();
         })
@@ -249,7 +238,7 @@ loginForm.addEventListener('submit', function(e) {
                 default: message = error.message;
             }
             errorDiv.textContent = '⚠️ ' + message;
-            showToast('⚠️ ' + message, true);
+            window.showToast('⚠️ ' + message, true);
         })
         .finally(() => {
             loginBtn.disabled = false;
@@ -276,7 +265,7 @@ registerForm.addEventListener('submit', function(e) {
         errorDiv.textContent = '⚠️ Nom invalide';
         return;
     }
-    if (!email || !isValidEmail(email)) {
+    if (!email || !window.isValidEmail(email)) {
         errorDiv.classList.remove('hidden');
         errorDiv.textContent = '⚠️ Email invalide';
         return;
@@ -301,20 +290,8 @@ registerForm.addEventListener('submit', function(e) {
             const user = userCredential.user;
             return updateProfile(user, { displayName: name }).then(() => user);
         })
-        .then((user) => {
-            const userData = {
-                uid: user.uid, name, email, phone: phone || '',
-                role: 'admin',
-                createdAt: serverTimestamp(),
-                lastLogin: serverTimestamp(),
-                emailVerified: user.emailVerified || false,
-                preferences: { newsletter: false, promotions: false },
-                address: { line1: '', line2: '', city: '', postalCode: '', country: 'France' }
-            };
-            return setDoc(doc(db, 'users', user.uid), userData).then(() => user);
-        })
         .then(() => {
-            showToast('🎉 Bienvenue ' + name + ' !');
+            window.showToast('🎉 Bienvenue ' + name + ' !');
             closeAuthModal();
             registerForm.reset();
         })
@@ -328,7 +305,7 @@ registerForm.addEventListener('submit', function(e) {
                 default: message = error.message;
             }
             errorDiv.textContent = '⚠️ ' + message;
-            showToast('⚠️ ' + message, true);
+            window.showToast('⚠️ ' + message, true);
         })
         .finally(() => {
             registerBtn.disabled = false;
@@ -342,14 +319,14 @@ registerForm.addEventListener('submit', function(e) {
 document.getElementById('resetPasswordLink').addEventListener('click', function(e) {
     e.preventDefault();
     const email = document.getElementById('loginEmail').value.trim();
-    if (!email || !isValidEmail(email)) {
-        showToast('⚠️ Email valide requis', true);
+    if (!email || !window.isValidEmail(email)) {
+        window.showToast('⚠️ Email valide requis', true);
         document.getElementById('loginEmail').focus();
         return;
     }
     sendPasswordResetEmail(auth, email)
-        .then(() => showToast('📧 Email envoyé à ' + email))
-        .catch((error) => showToast('⚠️ ' + error.message, true));
+        .then(() => window.showToast('📧 Email envoyé à ' + email))
+        .catch((error) => window.showToast('⚠️ ' + error.message, true));
 });
 
 // ============================================================
@@ -365,7 +342,6 @@ function showPanel(panel) {
     const categories = document.getElementById('categoriesPanel');
     const products = document.getElementById('productsPanel');
 
-    // Cacher tout
     hero.style.display = 'none';
     publicCat.style.display = 'none';
     publicProd.style.display = 'none';
@@ -373,395 +349,41 @@ function showPanel(panel) {
     categories.style.display = 'none';
     products.style.display = 'none';
 
-    // Afficher le panel demandé
     if (panel === 'public') {
         hero.style.display = 'flex';
         publicCat.style.display = 'block';
         publicProd.style.display = 'block';
     } else if (panel === 'dashboard') {
         dashboard.style.display = 'block';
-        updateDashboard();
+        import('./admin.js').then(module => module.updateDashboard());
     } else if (panel === 'categories') {
         categories.style.display = 'block';
-        loadCategoriesTable();
+        import('./admin.js').then(module => module.loadCategoriesTable());
     } else if (panel === 'products') {
         products.style.display = 'block';
-        loadProductsTable();
+        import('./admin.js').then(module => module.loadProductsTable());
     }
     currentPanel = panel;
 }
 
+window.showPanel = showPanel;
+
 document.getElementById('navDashboard').addEventListener('click', (e) => {
     e.preventDefault();
-    if (!auth.currentUser) { showToast('🔐 Connectez-vous', true); openAuthModal(); return; }
+    if (!auth.currentUser) { window.showToast('🔐 Connectez-vous', true); openAuthModal(); return; }
     showPanel('dashboard');
 });
 
 document.getElementById('navCategories').addEventListener('click', (e) => {
     e.preventDefault();
-    if (!auth.currentUser) { showToast('🔐 Connectez-vous', true); openAuthModal(); return; }
+    if (!auth.currentUser) { window.showToast('🔐 Connectez-vous', true); openAuthModal(); return; }
     showPanel('categories');
 });
 
 document.getElementById('navProducts').addEventListener('click', (e) => {
     e.preventDefault();
-    if (!auth.currentUser) { showToast('🔐 Connectez-vous', true); openAuthModal(); return; }
+    if (!auth.currentUser) { window.showToast('🔐 Connectez-vous', true); openAuthModal(); return; }
     showPanel('products');
-});
-
-// ============================================================
-// CRUD CATÉGORIES
-// ============================================================
-let categoriesData = [];
-
-async function loadCategories() {
-    try {
-        const q = query(collection(db, 'categories'), orderBy('order', 'asc'));
-        const snapshot = await getDocs(q);
-        categoriesData = [];
-        snapshot.forEach(doc => {
-            categoriesData.push({ id: doc.id, ...doc.data() });
-        });
-        renderCategories();
-    } catch (error) {
-        console.error('Erreur chargement catégories:', error);
-    }
-}
-
-function renderCategories() {
-    const container = document.getElementById('categoriesContainer');
-    if (!container) return;
-    container.innerHTML = '';
-    categoriesData.forEach(cat => {
-        const span = document.createElement('span');
-        span.className = 'cat-item';
-        span.dataset.category = cat.id;
-        span.innerHTML = cat.image ? `<img src="${cat.image}" alt="${cat.name}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:6px;">` : '';
-        span.innerHTML += cat.name;
-        container.appendChild(span);
-    });
-}
-
-async function loadCategoriesTable() {
-    try {
-        const q = query(collection(db, 'categories'), orderBy('order', 'asc'));
-        const snapshot = await getDocs(q);
-        const tbody = document.getElementById('categoriesTableBody');
-        tbody.innerHTML = '';
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${data.image ? `<img src="${data.image}" class="table-img">` : '-'}</td>
-                <td><strong>${data.name}</strong></td>
-                <td>${data.description || '-'}</td>
-                <td>${data.order || 0}</td>
-                <td>${data.ca || 0} €</td>
-                <td>${data.profit || 0} €</td>
-                <td>${data.productCount || 0}</td>
-                <td>
-                    <div class="action-btns">
-                        <button class="btn-edit-small" onclick="editCategory('${doc.id}')"><i class="fas fa-edit"></i></button>
-                        <button class="btn-danger-small" onclick="deleteCategory('${doc.id}')"><i class="fas fa-trash"></i></button>
-                    </div>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-    } catch (error) {
-        console.error('Erreur chargement table catégories:', error);
-    }
-}
-
-window.editCategory = function(id) {
-    const data = categoriesData.find(c => c.id === id);
-    if (!data) return;
-    document.getElementById('categoryId').value = id;
-    document.getElementById('catName').value = data.name || '';
-    document.getElementById('catDescription').value = data.description || '';
-    document.getElementById('catImage').value = data.image || '';
-    document.getElementById('catOrder').value = data.order || 0;
-    document.getElementById('categoryModalTitle').textContent = 'Modifier la catégorie';
-    document.getElementById('categoryModal').classList.add('active');
-};
-
-window.deleteCategory = async function(id) {
-    if (!confirm('Supprimer cette catégorie ?')) return;
-    try {
-        await deleteDoc(doc(db, 'categories', id));
-        showToast('✅ Catégorie supprimée');
-        loadCategories();
-        loadCategoriesTable();
-        updateDashboard();
-    } catch (error) {
-        showToast('⚠️ ' + error.message, true);
-    }
-};
-
-// ============================================================
-// CRUD PRODUITS
-// ============================================================
-let productsData = [];
-
-async function loadProducts() {
-    try {
-        const snapshot = await getDocs(collection(db, 'products'));
-        productsData = [];
-        snapshot.forEach(doc => {
-            productsData.push({ id: doc.id, ...doc.data() });
-        });
-        renderProducts();
-    } catch (error) {
-        console.error('Erreur chargement produits:', error);
-    }
-}
-
-function renderProducts() {
-    const container = document.getElementById('productsContainer');
-    if (!container) return;
-    container.innerHTML = '';
-    productsData.forEach(prod => {
-        const card = document.createElement('div');
-        card.className = 'product-card';
-        const promo = prod.promoPrice && prod.promoPrice > 0 && prod.promoPrice < prod.sellPrice;
-        card.innerHTML = `
-            <img src="${prod.image || 'https://via.placeholder.com/200x200?text=MANORA'}" alt="${prod.name}">
-            <div class="product-info">
-                <h4>${prod.name}</h4>
-                <span class="product-category">${prod.category || ''}</span>
-                <div class="product-price">${promo ? `<span style="text-decoration:line-through;color:#999;font-size:0.7rem;">${prod.sellPrice}€</span> ${prod.promoPrice}€` : prod.sellPrice + '€'}</div>
-                <div style="font-size:0.6rem;color:#999;">Stock: ${prod.stock || 0}</div>
-            </div>
-        `;
-        container.appendChild(card);
-    });
-}
-
-async function loadProductsTable() {
-    try {
-        const snapshot = await getDocs(collection(db, 'products'));
-        const tbody = document.getElementById('productsTableBody');
-        tbody.innerHTML = '';
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            const profit = (data.sellPrice || 0) - (data.buyPrice || 0);
-            const totalProfit = (data.profit || 0) * (data.stock || 0);
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${data.image ? `<img src="${data.image}" class="table-img">` : '-'}</td>
-                <td><strong>${data.name}</strong></td>
-                <td>${data.category || '-'}</td>
-                <td>${data.brand || '-'}</td>
-                <td>${data.buyPrice || 0} €</td>
-                <td>${data.sellPrice || 0} €</td>
-                <td style="color:${profit >= 0 ? '#27ae60' : '#e74c3c'}">${profit.toFixed(2)} €</td>
-                <td>${data.stock || 0}</td>
-                <td>${data.promoPrice && data.promoPrice > 0 ? data.promoPrice + ' €' : '-'}</td>
-                <td>${data.supplier || '-'}</td>
-                <td>${data.ca || 0} €</td>
-                <td>${data.profit || 0} €</td>
-                <td>
-                    <div class="action-btns">
-                        <button class="btn-edit-small" onclick="editProduct('${doc.id}')"><i class="fas fa-edit"></i></button>
-                        <button class="btn-danger-small" onclick="deleteProduct('${doc.id}')"><i class="fas fa-trash"></i></button>
-                    </div>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-    } catch (error) {
-        console.error('Erreur chargement table produits:', error);
-    }
-}
-
-window.editProduct = function(id) {
-    const data = productsData.find(p => p.id === id);
-    if (!data) return;
-    document.getElementById('productId').value = id;
-    document.getElementById('prodName').value = data.name || '';
-    document.getElementById('prodCategory').value = data.category || '';
-    document.getElementById('prodBrand').value = data.brand || '';
-    document.getElementById('prodSupplier').value = data.supplier || '';
-    document.getElementById('prodBuyPrice').value = data.buyPrice || '';
-    document.getElementById('prodSellPrice').value = data.sellPrice || '';
-    document.getElementById('prodStock').value = data.stock || '';
-    document.getElementById('prodPromoPrice').value = data.promoPrice || '';
-    document.getElementById('prodImage').value = data.image || '';
-    document.getElementById('prodCA').value = data.ca || 0;
-    document.getElementById('prodProfit').value = data.profit || 0;
-    document.getElementById('productModalTitle').textContent = 'Modifier le produit';
-    document.getElementById('productModal').classList.add('active');
-};
-
-window.deleteProduct = async function(id) {
-    if (!confirm('Supprimer ce produit ?')) return;
-    try {
-        await deleteDoc(doc(db, 'products', id));
-        showToast('✅ Produit supprimé');
-        loadProducts();
-        loadProductsTable();
-        updateDashboard();
-    } catch (error) {
-        showToast('⚠️ ' + error.message, true);
-    }
-};
-
-// ============================================================
-// DASHBOARD
-// ============================================================
-async function updateDashboard() {
-    try {
-        const catSnapshot = await getDocs(collection(db, 'categories'));
-        const prodSnapshot = await getDocs(collection(db, 'products'));
-        
-        let totalStock = 0;
-        let totalCA = 0;
-        let totalProfit = 0;
-        
-        prodSnapshot.forEach(doc => {
-            const data = doc.data();
-            totalStock += data.stock || 0;
-            totalCA += data.ca || 0;
-            totalProfit += data.profit || 0;
-        });
-        
-        document.getElementById('statCategories').textContent = catSnapshot.size;
-        document.getElementById('statProducts').textContent = prodSnapshot.size;
-        document.getElementById('statStock').textContent = totalStock;
-        document.getElementById('statCA').textContent = totalCA.toFixed(2) + ' €';
-    } catch (error) {
-        console.error('Erreur dashboard:', error);
-    }
-}
-
-// ============================================================
-// MODALS CATÉGORIE
-// ============================================================
-document.getElementById('btnAddCategory').addEventListener('click', () => {
-    document.getElementById('categoryId').value = '';
-    document.getElementById('catName').value = '';
-    document.getElementById('catDescription').value = '';
-    document.getElementById('catImage').value = '';
-    document.getElementById('catOrder').value = '0';
-    document.getElementById('categoryModalTitle').textContent = 'Ajouter une catégorie';
-    document.getElementById('categoryModal').classList.add('active');
-});
-
-document.getElementById('closeCategoryModal').addEventListener('click', () => {
-    document.getElementById('categoryModal').classList.remove('active');
-});
-
-document.getElementById('categoryModal').addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) {
-        document.getElementById('categoryModal').classList.remove('active');
-    }
-});
-
-document.getElementById('categoryForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const id = document.getElementById('categoryId').value;
-    const data = {
-        name: document.getElementById('catName').value.trim(),
-        description: document.getElementById('catDescription').value.trim(),
-        image: document.getElementById('catImage').value.trim(),
-        order: parseInt(document.getElementById('catOrder').value) || 0,
-        updatedAt: serverTimestamp()
-    };
-
-    try {
-        if (id) {
-            await updateDoc(doc(db, 'categories', id), data);
-            showToast('✅ Catégorie mise à jour');
-        } else {
-            await setDoc(doc(collection(db, 'categories')), data);
-            showToast('✅ Catégorie créée');
-        }
-        document.getElementById('categoryModal').classList.remove('active');
-        loadCategories();
-        loadCategoriesTable();
-        updateDashboard();
-    } catch (error) {
-        showToast('⚠️ ' + error.message, true);
-    }
-});
-
-// ============================================================
-// MODALS PRODUIT
-// ============================================================
-document.getElementById('btnAddProduct').addEventListener('click', async () => {
-    document.getElementById('productId').value = '';
-    document.getElementById('prodName').value = '';
-    document.getElementById('prodCategory').value = '';
-    document.getElementById('prodBrand').value = '';
-    document.getElementById('prodSupplier').value = '';
-    document.getElementById('prodBuyPrice').value = '';
-    document.getElementById('prodSellPrice').value = '';
-    document.getElementById('prodStock').value = '';
-    document.getElementById('prodPromoPrice').value = '';
-    document.getElementById('prodImage').value = '';
-    document.getElementById('prodCA').value = '0';
-    document.getElementById('prodProfit').value = '0';
-    document.getElementById('productModalTitle').textContent = 'Ajouter un produit';
-    
-    // Charger les catégories dans le select
-    const select = document.getElementById('prodCategory');
-    select.innerHTML = '<option value="">Sélectionner</option>';
-    const snapshot = await getDocs(collection(db, 'categories'));
-    snapshot.forEach(doc => {
-        const data = doc.data();
-        select.innerHTML += `<option value="${doc.id}">${data.name}</option>`;
-    });
-    
-    document.getElementById('productModal').classList.add('active');
-});
-
-document.getElementById('closeProductModal').addEventListener('click', () => {
-    document.getElementById('productModal').classList.remove('active');
-});
-
-document.getElementById('productModal').addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) {
-        document.getElementById('productModal').classList.remove('active');
-    }
-});
-
-document.getElementById('productForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const id = document.getElementById('productId').value;
-    const buyPrice = parseFloat(document.getElementById('prodBuyPrice').value) || 0;
-    const sellPrice = parseFloat(document.getElementById('prodSellPrice').value) || 0;
-    const profit = sellPrice - buyPrice;
-    
-    const data = {
-        name: document.getElementById('prodName').value.trim(),
-        category: document.getElementById('prodCategory').value,
-        brand: document.getElementById('prodBrand').value.trim(),
-        supplier: document.getElementById('prodSupplier').value.trim(),
-        buyPrice: buyPrice,
-        sellPrice: sellPrice,
-        stock: parseInt(document.getElementById('prodStock').value) || 0,
-        promoPrice: parseFloat(document.getElementById('prodPromoPrice').value) || 0,
-        image: document.getElementById('prodImage').value.trim(),
-        ca: parseFloat(document.getElementById('prodCA').value) || 0,
-        profit: parseFloat(document.getElementById('prodProfit').value) || 0,
-        updatedAt: serverTimestamp()
-    };
-
-    try {
-        if (id) {
-            await updateDoc(doc(db, 'products', id), data);
-            showToast('✅ Produit mis à jour');
-        } else {
-            await setDoc(doc(collection(db, 'products')), data);
-            showToast('✅ Produit créé');
-        }
-        document.getElementById('productModal').classList.remove('active');
-        loadProducts();
-        loadProductsTable();
-        updateDashboard();
-    } catch (error) {
-        showToast('⚠️ ' + error.message, true);
-    }
 });
 
 // ============================================================
@@ -769,39 +391,39 @@ document.getElementById('productForm').addEventListener('submit', async function
 // ============================================================
 document.getElementById('shopNowBtn').addEventListener('click', function(e) {
     e.preventDefault();
-    if (!auth.currentUser) { showToast('🔐 Connectez-vous', true); openAuthModal(); return; }
-    showToast('✨ Produit ajouté au panier');
+    if (!auth.currentUser) { window.showToast('🔐 Connectez-vous', true); openAuthModal(); return; }
+    window.showToast('✨ Produit ajouté au panier');
 });
 
 document.getElementById('silverBtn').addEventListener('click', function() {
-    if (!auth.currentUser) { showToast('🔐 Connectez-vous', true); openAuthModal(); return; }
-    showToast('🌿 Collection Wellness');
+    if (!auth.currentUser) { window.showToast('🔐 Connectez-vous', true); openAuthModal(); return; }
+    window.showToast('🌿 Collection Wellness');
 });
 
-document.getElementById('lunchBadge').addEventListener('click', () => showToast('🌿 Wellness & Bien-être'));
+document.getElementById('lunchBadge').addEventListener('click', () => window.showToast('🌿 Wellness & Bien-être'));
 document.getElementById('logoLink').addEventListener('click', (e) => { e.preventDefault(); showPanel('public'); });
 
 document.querySelectorAll('.header-icons i').forEach(icon => {
     if (icon.id === 'userIcon') return;
     icon.addEventListener('click', function() {
         if (!auth.currentUser && this.dataset.icon !== 'search') {
-            showToast('🔐 Connectez-vous', true);
+            window.showToast('🔐 Connectez-vous', true);
             openAuthModal();
             return;
         }
-        showToast('🛍️ Bientôt disponible');
+        window.showToast('🛍️ Bientôt disponible');
     });
 });
 
 document.querySelectorAll('.footer-links a').forEach(link => {
     link.addEventListener('click', (e) => {
         e.preventDefault();
-        showToast('📄 Page en construction');
+        window.showToast('📄 Page en construction');
     });
 });
 
 document.querySelectorAll('.footer-social i').forEach(icon => {
-    icon.addEventListener('click', () => showToast('📱 Bientôt disponible'));
+    icon.addEventListener('click', () => window.showToast('📱 Bientôt disponible'));
 });
 
 // ============================================================
@@ -822,5 +444,5 @@ onAuthStateChanged(auth, (user) => {
 // ============================================================
 showPanel('public');
 
-console.log('🌿 MANORA · Gestion Catégories & Produits');
-console.log('📊 Firebase Auth + Firestore actif');
+console.log('🌿 MANORA · Beauty & Wellness');
+console.log('📊 Firebase Auth actif');
