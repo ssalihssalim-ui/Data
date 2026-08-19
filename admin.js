@@ -31,57 +31,42 @@ function imageToBase64(file) {
 }
 
 // ============================================================
-// CONFIGURATION DES SECTIONS AVEC VOS CHAMPS
+// CONFIGURATION DES SECTIONS
 // ============================================================
 const SECTIONS = {
-    // ===== 1. CATÉGORIES (VOS CHAMPS) =====
     categories: {
         label: 'Catégories',
         icon: '🏷️',
         collection: 'categories',
         fields: [
-            { 
-                name: 'image', 
-                label: 'Image de la catégorie', 
-                type: 'file', 
-                required: false,
-                accept: 'image/*'
-            },
-            { name: 'name', label: 'Nom de la catégorie', type: 'text', required: true },
+            { name: 'image', label: 'Image', type: 'file', required: false, accept: 'image/*' },
+            { name: 'name', label: 'Nom', type: 'text', required: true },
             { name: 'description', label: 'Description', type: 'text', required: false },
-            { name: 'chiffreAffaire', label: 'Chiffre d\'affaires (MAD)', type: 'text', required: false },
-            { name: 'nbProduits', label: 'Nombre de produits', type: 'number', required: false },
+            { name: 'chiffreAffaire', label: 'CA (MAD)', type: 'text', required: false },
+            { name: 'nbProduits', label: 'Nb Produits', type: 'number', required: false },
             { name: 'profit', label: 'Profit (MAD)', type: 'text', required: false }
         ],
         displayFields: ['image', 'name', 'description', 'chiffreAffaire', 'nbProduits', 'profit']
     },
 
-    // ===== 2. PRODUITS (VOS CHAMPS) =====
     produits: {
         label: 'Produits',
         icon: '📦',
         collection: 'produits',
         fields: [
-            { 
-                name: 'image', 
-                label: 'Image du produit', 
-                type: 'file', 
-                required: false,
-                accept: 'image/*'
-            },
+            { name: 'image', label: 'Image', type: 'file', required: false, accept: 'image/*' },
             { name: 'name', label: 'Nom du produit', type: 'text', required: true },
             { name: 'description', label: 'Description', type: 'text', required: false },
             { name: 'prixAchat', label: "Prix d'achat (MAD)", type: 'text', required: true },
             { name: 'prixVente', label: 'Prix de vente (MAD)', type: 'text', required: true },
-            { name: 'profit', label: 'Profit (MAD)', type: 'text', required: false, placeholder: 'Calculé automatiquement' },
-            { name: 'chiffreAffaire', label: 'Chiffre d\'affaires (MAD)', type: 'text', required: false },
+            { name: 'profit', label: 'Profit (MAD)', type: 'text', required: false },
+            { name: 'chiffreAffaire', label: 'CA (MAD)', type: 'text', required: false },
             { name: 'category', label: 'Catégorie', type: 'text', required: false },
-            { name: 'stock', label: 'Quantité en stock', type: 'number', required: false }
+            { name: 'stock', label: 'Stock', type: 'number', required: false }
         ],
         displayFields: ['image', 'name', 'prixAchat', 'prixVente', 'profit', 'chiffreAffaire']
     },
 
-    // ===== 3. CLIENTS =====
     clients: {
         label: 'Clients',
         icon: '👥',
@@ -96,13 +81,12 @@ const SECTIONS = {
         displayFields: ['name', 'email', 'phone', 'city']
     },
 
-    // ===== 4. FOURNISSEURS =====
     fournisseurs: {
         label: 'Fournisseurs',
         icon: '🚚',
         collection: 'fournisseurs',
         fields: [
-            { name: 'name', label: 'Nom du fournisseur', type: 'text', required: true },
+            { name: 'name', label: 'Nom', type: 'text', required: true },
             { name: 'email', label: 'Email', type: 'email', required: false },
             { name: 'phone', label: 'Téléphone', type: 'text', required: false },
             { name: 'address', label: 'Adresse', type: 'text', required: false },
@@ -111,13 +95,12 @@ const SECTIONS = {
         displayFields: ['name', 'email', 'phone', 'productType']
     },
 
-    // ===== 5. VENTES =====
     ventes: {
         label: 'Ventes',
         icon: '📈',
         collection: 'ventes',
         fields: [
-            { name: 'clientName', label: 'Nom du client', type: 'text', required: true },
+            { name: 'clientName', label: 'Client', type: 'text', required: true },
             { name: 'productName', label: 'Produit', type: 'text', required: true },
             { name: 'quantity', label: 'Quantité', type: 'number', required: true },
             { name: 'unitPrice', label: 'Prix unitaire (MAD)', type: 'text', required: true },
@@ -127,15 +110,14 @@ const SECTIONS = {
         displayFields: ['clientName', 'productName', 'totalPrice', 'status']
     },
 
-    // ===== 6. CRÉDITS =====
     credits: {
         label: 'Crédits',
         icon: '💳',
         collection: 'credits',
         fields: [
-            { name: 'clientName', label: 'Nom du client', type: 'text', required: true },
+            { name: 'clientName', label: 'Client', type: 'text', required: true },
             { name: 'amount', label: 'Montant (MAD)', type: 'text', required: true },
-            { name: 'dueDate', label: "Date d'échéance", type: 'date', required: false },
+            { name: 'dueDate', label: "Échéance", type: 'date', required: false },
             { name: 'status', label: 'Statut', type: 'select', required: true, options: ['En cours', 'Payé', 'En retard'] }
         ],
         displayFields: ['clientName', 'amount', 'dueDate', 'status']
@@ -143,7 +125,7 @@ const SECTIONS = {
 };
 
 // ============================================================
-// LE RESTE DU CODE
+// LE RESTE DU CODE...
 // ============================================================
 let currentSection = 'categories';
 let editingId = null;
@@ -251,7 +233,7 @@ export async function loadSection(section) {
                                     ${config.displayFields.map(f => {
                                         if (f === 'image') {
                                             if (item.image && item.image.startsWith('data:image')) {
-                                                return `<td><img src="${item.image}" style="width:50px;height:50px;object-fit:cover;border-radius:4px;" /></td>`;
+                                                return `<td><img src="${item.image}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;" /></td>`;
                                             }
                                             return `<td>${item.image || '📦'}</td>`;
                                         }
@@ -312,18 +294,14 @@ window.openCrudModal = function(section, id = null) {
                 </select>
             ` : f.type === 'file' ? `
                 <input type="file" id="crud_${f.name}" accept="${f.accept || 'image/*'}" />
-                <div id="preview_${f.name}" style="margin-top:5px;"></div>
-                <small style="color:#999;font-size:0.6rem;">Sélectionnez une image (JPG, PNG, GIF)</small>
-            ` : f.type === 'textarea' ? `
-                <textarea id="crud_${f.name}" ${f.required ? 'required' : ''}></textarea>
+                <div class="image-preview" id="preview_${f.name}"></div>
+                <small style="color:#999;font-size:0.6rem;">JPG, PNG, GIF</small>
             ` : `
                 <input type="${f.type}" id="crud_${f.name}" placeholder="${f.placeholder || ''}" ${f.required ? 'required' : ''} />
             `}
-            ${f.name === 'profit' ? `<small style="color:#999;font-size:0.6rem;">💰 Profit = Prix vente - Prix achat (calculé automatiquement)</small>` : ''}
         </div>
     `).join('');
 
-    // Ajouter un aperçu de l'image pour le champ file
     config.fields.forEach(f => {
         if (f.type === 'file') {
             const input = document.getElementById(`crud_${f.name}`);
@@ -334,7 +312,7 @@ window.openCrudModal = function(section, id = null) {
                     if (file) {
                         const reader = new FileReader();
                         reader.onload = function(event) {
-                            preview.innerHTML = `<img src="${event.target.result}" style="max-width:150px;max-height:150px;object-fit:cover;border-radius:4px;border:1px solid #ddd;padding:4px;" />`;
+                            preview.innerHTML = `<img src="${event.target.result}" />`;
                         };
                         reader.readAsDataURL(file);
                     } else {
@@ -345,7 +323,6 @@ window.openCrudModal = function(section, id = null) {
         }
     });
 
-    // Si modification, charger les données
     if (id) {
         loadItemData(section, id);
     }
@@ -359,8 +336,7 @@ window.closeCrudModal = function() {
     document.body.style.overflow = '';
     editingId = null;
     crudForm.reset();
-    // Vider les aperçus
-    document.querySelectorAll('[id^="preview_"]').forEach(el => el.innerHTML = '');
+    document.querySelectorAll('.image-preview').forEach(el => el.innerHTML = '');
 };
 
 crudClose?.addEventListener('click', window.closeCrudModal);
@@ -388,10 +364,9 @@ async function loadItemData(section, id) {
                 const el = document.getElementById(`crud_${f.name}`);
                 if (el) {
                     if (f.type === 'file') {
-                        // Afficher l'image existante
                         const preview = document.getElementById(`preview_${f.name}`);
                         if (preview && data[f.name] && data[f.name].startsWith('data:image')) {
-                            preview.innerHTML = `<img src="${data[f.name]}" style="max-width:150px;max-height:150px;object-fit:cover;border-radius:4px;border:1px solid #ddd;padding:4px;" />`;
+                            preview.innerHTML = `<img src="${data[f.name]}" />`;
                         }
                     } else {
                         el.value = data[f.name] || '';
@@ -406,7 +381,7 @@ async function loadItemData(section, id) {
 }
 
 // ============================================================
-// SAUVEGARDER AVEC UPLOAD D'IMAGES
+// SAUVEGARDER
 // ============================================================
 crudForm?.addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -416,7 +391,6 @@ crudForm?.addEventListener('submit', async function(e) {
     const data = {};
     let valid = true;
 
-    // Récupérer les valeurs des champs
     for (const f of config.fields) {
         const el = document.getElementById(`crud_${f.name}`);
         if (el) {
@@ -427,20 +401,14 @@ crudForm?.addEventListener('submit', async function(e) {
                         const base64 = await imageToBase64(file);
                         data[f.name] = base64;
                     } catch (error) {
-                        showToast('⚠️ Erreur lors de la conversion de l\'image', true);
+                        showToast('⚠️ Erreur conversion image', true);
                         return;
                     }
-                } else {
-                    // Si pas de nouvelle image, on garde l'ancienne
-                    if (editingId) {
-                        const docRef = doc(db, config.collection, editingId);
-                        const docSnap = await getDoc(docRef);
-                        if (docSnap.exists()) {
-                            const oldData = docSnap.data();
-                            if (oldData[f.name]) {
-                                data[f.name] = oldData[f.name];
-                            }
-                        }
+                } else if (editingId) {
+                    const docRef = doc(db, config.collection, editingId);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists() && docSnap.data()[f.name]) {
+                        data[f.name] = docSnap.data()[f.name];
                     }
                 }
             } else {
@@ -460,7 +428,6 @@ crudForm?.addEventListener('submit', async function(e) {
         return;
     }
 
-    // Calcul automatique du profit pour les produits
     if (currentSection === 'produits' && data.prixVente && data.prixAchat) {
         const profit = parseFloat(data.prixVente) - parseFloat(data.prixAchat);
         data.profit = profit.toFixed(2);
@@ -474,17 +441,17 @@ crudForm?.addEventListener('submit', async function(e) {
     try {
         if (editingId) {
             await updateDoc(doc(db, config.collection, editingId), data);
-            showToast(`✅ ${config.label} modifié avec succès !`);
+            showToast(`✅ ${config.label} modifié !`);
         } else {
             data.createdAt = serverTimestamp();
             await addDoc(collection(db, config.collection), data);
-            showToast(`✅ ${config.label} ajouté avec succès !`);
+            showToast(`✅ ${config.label} ajouté !`);
         }
         window.closeCrudModal();
         loadSection(currentSection);
     } catch (error) {
         console.error('Erreur sauvegarde:', error);
-        showToast(`⚠️ Erreur lors de l'enregistrement`, true);
+        showToast('⚠️ Erreur lors de l\'enregistrement', true);
     } finally {
         crudSubmit.disabled = false;
         crudSubmit.textContent = editingId ? 'Mettre à jour' : 'Ajouter';
@@ -495,16 +462,14 @@ crudForm?.addEventListener('submit', async function(e) {
 // SUPPRIMER
 // ============================================================
 window.deleteItem = async function(section, id) {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cet élément ?')) return;
-
+    if (!confirm('Supprimer cet élément ?')) return;
     const config = SECTIONS[section];
     try {
         await deleteDoc(doc(db, config.collection, id));
-        showToast(`✅ ${config.label} supprimé avec succès !`);
+        showToast(`✅ ${config.label} supprimé !`);
         loadSection(section);
     } catch (error) {
-        console.error('Erreur suppression:', error);
-        showToast(`⚠️ Erreur lors de la suppression`, true);
+        showToast('⚠️ Erreur lors de la suppression', true);
     }
 };
 
@@ -531,12 +496,11 @@ loadSection = async function(section) {
         const subtitle = document.getElementById('dashboardSubtitle');
 
         title.textContent = '📊 Statistiques';
-        subtitle.textContent = 'Tableau de bord et rapports';
+        subtitle.textContent = 'Tableau de bord';
 
         const collections = ['categories', 'produits', 'clients', 'fournisseurs', 'ventes', 'credits'];
         const counts = {};
-        let totalCA = 0;
-        let totalProfit = 0;
+        let totalCA = 0, totalProfit = 0;
 
         for (const col of collections) {
             try {
@@ -589,80 +553,12 @@ loadSection = async function(section) {
                     <p style="color:#999;font-size:0.75rem;">Profit Total</p>
                 </div>
             </div>
-            <div style="background:#f8f7f3;padding:1.5rem;border-radius:8px;text-align:center;color:#999;">
-                <i class="fas fa-chart-simple" style="font-size:2rem;display:block;color:#ddd;margin-bottom:0.5rem;"></i>
-                <p>Rapports détaillés disponibles prochainement</p>
-            </div>
         `;
         return;
     }
 
-    if (section === 'depenses') {
-        const content = document.getElementById('dashboardSectionContent');
-        const title = document.getElementById('dashboardTitle');
-        const subtitle = document.getElementById('dashboardSubtitle');
-
-        title.textContent = '💰 Dépenses';
-        subtitle.textContent = 'Suivi des dépenses';
-
-        content.innerHTML = `
-            <div class="dashboard-toolbar">
-                <h3>Liste des dépenses</h3>
-                <button class="btn-add" onclick="showToast('🛠️ Fonctionnalité en développement')">
-                    <i class="fas fa-plus"></i> Ajouter
-                </button>
-            </div>
-            <div class="empty-state">
-                <i class="fas fa-coins"></i>
-                <p>Aucune dépense enregistrée</p>
-                <p style="font-size:0.75rem;margin-top:0.5rem;">Cette section sera disponible prochainement</p>
-            </div>
-        `;
-        return;
-    }
-
-    if (section === 'options') {
-        const content = document.getElementById('dashboardSectionContent');
-        const title = document.getElementById('dashboardTitle');
-        const subtitle = document.getElementById('dashboardSubtitle');
-
-        title.textContent = '⚙️ Options';
-        subtitle.textContent = 'Paramètres et configuration';
-
-        content.innerHTML = `
-            <div style="display:grid;gap:1rem;max-width:600px;">
-                <div style="background:#f8f7f3;padding:1rem;border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
-                    <span>Notifications par email</span>
-                    <label style="position:relative;display:inline-block;width:50px;height:26px;">
-                        <input type="checkbox" checked style="opacity:0;width:0;height:0;">
-                        <span style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#e8a87c;transition:.4s;border-radius:26px;"></span>
-                    </label>
-                </div>
-                <div style="background:#f8f7f3;padding:1rem;border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
-                    <span>Mode sombre</span>
-                    <label style="position:relative;display:inline-block;width:50px;height:26px;">
-                        <input type="checkbox" style="opacity:0;width:0;height:0;">
-                        <span style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#ccc;transition:.4s;border-radius:26px;"></span>
-                    </label>
-                </div>
-                <div style="background:#f8f7f3;padding:1rem;border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
-                    <span>Devise</span>
-                    <select style="padding:0.3rem 0.8rem;border:1px solid #ddd;border-radius:4px;">
-                        <option selected>MAD (Dirham)</option>
-                        <option>€ Euro</option>
-                        <option>$ Dollar</option>
-                    </select>
-                </div>
-                <div style="background:#f8f7f3;padding:1rem;border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
-                    <span>Langue</span>
-                    <select style="padding:0.3rem 0.8rem;border:1px solid #ddd;border-radius:4px;">
-                        <option selected>Français</option>
-                        <option>Anglais</option>
-                        <option>Arabe</option>
-                    </select>
-                </div>
-            </div>
-        `;
+    if (section === 'depenses' || section === 'options') {
+        originalLoadSection(section);
         return;
     }
 
@@ -678,4 +574,4 @@ document.getElementById('dashboardLogout').addEventListener('click', function() 
     setTimeout(() => window.location.reload(), 500);
 });
 
-console.log('📊 Admin.js chargé - CRUD avec upload d\'images (Base64)');
+console.log('📊 Admin.js chargé - CRUD avec upload d\'images');
