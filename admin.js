@@ -1,5 +1,5 @@
 // ============================================================
-// ADMIN.JS - CRUD COMPLET AVEC VOS CHAMPS PERSONNALISÉS
+// ADMIN.JS - CRUD COMPLET AVEC UPLOAD D'IMAGES (Base64)
 // ============================================================
 import { auth, db, showToast } from './script.js';
 import { onAuthStateChanged, signOut } from "firebase/auth";
@@ -16,7 +16,19 @@ import {
     addDoc
 } from "firebase/firestore";
 
-console.log('📊 Admin.js chargé - CRUD avec vos champs');
+console.log('📊 Admin.js chargé - CRUD avec upload d\'images');
+
+// ============================================================
+// FONCTION POUR CONVERTIR UNE IMAGE EN BASE64
+// ============================================================
+function imageToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+}
 
 // ============================================================
 // CONFIGURATION DES SECTIONS AVEC VOS CHAMPS
@@ -28,7 +40,13 @@ const SECTIONS = {
         icon: '🏷️',
         collection: 'categories',
         fields: [
-            { name: 'image', label: 'Image (emoji ou URL)', type: 'text', required: false, placeholder: 'ex: 🌿 ou https://...' },
+            { 
+                name: 'image', 
+                label: 'Image de la catégorie', 
+                type: 'file', 
+                required: false,
+                accept: 'image/*'
+            },
             { name: 'name', label: 'Nom de la catégorie', type: 'text', required: true },
             { name: 'description', label: 'Description', type: 'text', required: false },
             { name: 'chiffreAffaire', label: 'Chiffre d\'affaires (MAD)', type: 'text', required: false },
@@ -44,7 +62,13 @@ const SECTIONS = {
         icon: '📦',
         collection: 'produits',
         fields: [
-            { name: 'image', label: 'Image (emoji ou URL)', type: 'text', required: false, placeholder: 'ex: 🧴 ou https://...' },
+            { 
+                name: 'image', 
+                label: 'Image du produit', 
+                type: 'file', 
+                required: false,
+                accept: 'image/*'
+            },
             { name: 'name', label: 'Nom du produit', type: 'text', required: true },
             { name: 'description', label: 'Description', type: 'text', required: false },
             { name: 'prixAchat', label: "Prix d'achat (MAD)", type: 'text', required: true },
@@ -119,7 +143,7 @@ const SECTIONS = {
 };
 
 // ============================================================
-// LE RESTE DU CODE (loadSection, CRUD modal, etc.)
+// LE RESTE DU CODE
 // ============================================================
 let currentSection = 'categories';
 let editingId = null;
@@ -172,7 +196,6 @@ export async function loadSection(section) {
             items.push({ id: doc.id, ...doc.data() });
         });
 
-        // Générer les en-têtes du tableau
         const headers = config.displayFields.map(f => {
             const labels = {
                 'image': 'Image',
@@ -227,7 +250,10 @@ export async function loadSection(section) {
                                 <tr>
                                     ${config.displayFields.map(f => {
                                         if (f === 'image') {
-                                            return `<td>${item[f] || '📦'}</td>`;
+                                            if (item.image && item.image.startsWith('data:image')) {
+                                                return `<td><img src="${item.image}" style="width:50px;height:50px;object-fit:cover;border-radius:4px;" /></td>`;
+                                            }
+                                            return `<td>${item.image || '📦'}</td>`;
                                         }
                                         if (f === 'profit' && item.prixVente && item.prixAchat) {
                                             const profit = parseFloat(item.prixVente) - parseFloat(item.prixAchat);
@@ -259,7 +285,7 @@ export async function loadSection(section) {
 }
 
 // ============================================================
-// CRUD MODAL
+// CRUD MODAL AVEC UPLOAD D'IMAGES
 // ============================================================
 const crudOverlay = document.getElementById('crudOverlay');
 const crudClose = document.getElementById('crudClose');
@@ -284,6 +310,10 @@ window.openCrudModal = function(section, id = null) {
                     <option value="">Sélectionner...</option>
                     ${f.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
                 </select>
+            ` : f.type === 'file' ? `
+                <input type="file" id="crud_${f.name}" accept="${f.accept || 'image/*'}" />
+                <div id="preview_${f.name}" style="margin-top:5px;"></div>
+                <small style="color:#999;font-size:0.6rem;">Sélectionnez une image (JPG, PNG, GIF)</small>
             ` : f.type === 'textarea' ? `
                 <textarea id="crud_${f.name}" ${f.required ? 'required' : ''}></textarea>
             ` : `
@@ -292,6 +322,28 @@ window.openCrudModal = function(section, id = null) {
             ${f.name === 'profit' ? `<small style="color:#999;font-size:0.6rem;">💰 Profit = Prix vente - Prix achat (calculé automatiquement)</small>` : ''}
         </div>
     `).join('');
+
+    // Ajouter un aperçu de l'image pour le champ file
+    config.fields.forEach(f => {
+        if (f.type === 'file') {
+            const input = document.getElementById(`crud_${f.name}`);
+            const preview = document.getElementById(`preview_${f.name}`);
+            if (input && preview) {
+                input.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            preview.innerHTML = `<img src="${event.target.result}" style="max-width:150px;max-height:150px;object-fit:cover;border-radius:4px;border:1px solid #ddd;padding:4px;" />`;
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        preview.innerHTML = '';
+                    }
+                });
+            }
+        }
+    });
 
     // Si modification, charger les données
     if (id) {
@@ -307,6 +359,8 @@ window.closeCrudModal = function() {
     document.body.style.overflow = '';
     editingId = null;
     crudForm.reset();
+    // Vider les aperçus
+    document.querySelectorAll('[id^="preview_"]').forEach(el => el.innerHTML = '');
 };
 
 crudClose?.addEventListener('click', window.closeCrudModal);
@@ -332,7 +386,17 @@ async function loadItemData(section, id) {
             const data = docSnap.data();
             config.fields.forEach(f => {
                 const el = document.getElementById(`crud_${f.name}`);
-                if (el) el.value = data[f.name] || '';
+                if (el) {
+                    if (f.type === 'file') {
+                        // Afficher l'image existante
+                        const preview = document.getElementById(`preview_${f.name}`);
+                        if (preview && data[f.name] && data[f.name].startsWith('data:image')) {
+                            preview.innerHTML = `<img src="${data[f.name]}" style="max-width:150px;max-height:150px;object-fit:cover;border-radius:4px;border:1px solid #ddd;padding:4px;" />`;
+                        }
+                    } else {
+                        el.value = data[f.name] || '';
+                    }
+                }
             });
         }
     } catch (error) {
@@ -342,7 +406,7 @@ async function loadItemData(section, id) {
 }
 
 // ============================================================
-// SAUVEGARDER
+// SAUVEGARDER AVEC UPLOAD D'IMAGES
 // ============================================================
 crudForm?.addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -351,18 +415,45 @@ crudForm?.addEventListener('submit', async function(e) {
 
     const data = {};
     let valid = true;
-    config.fields.forEach(f => {
+
+    // Récupérer les valeurs des champs
+    for (const f of config.fields) {
         const el = document.getElementById(`crud_${f.name}`);
         if (el) {
-            data[f.name] = el.value.trim();
-            if (f.required && !data[f.name]) {
-                valid = false;
-                el.style.borderColor = '#c0392b';
+            if (f.type === 'file') {
+                const file = el.files[0];
+                if (file) {
+                    try {
+                        const base64 = await imageToBase64(file);
+                        data[f.name] = base64;
+                    } catch (error) {
+                        showToast('⚠️ Erreur lors de la conversion de l\'image', true);
+                        return;
+                    }
+                } else {
+                    // Si pas de nouvelle image, on garde l'ancienne
+                    if (editingId) {
+                        const docRef = doc(db, config.collection, editingId);
+                        const docSnap = await getDoc(docRef);
+                        if (docSnap.exists()) {
+                            const oldData = docSnap.data();
+                            if (oldData[f.name]) {
+                                data[f.name] = oldData[f.name];
+                            }
+                        }
+                    }
+                }
             } else {
-                el.style.borderColor = '';
+                data[f.name] = el.value.trim();
+                if (f.required && !data[f.name]) {
+                    valid = false;
+                    el.style.borderColor = '#c0392b';
+                } else {
+                    el.style.borderColor = '';
+                }
             }
         }
-    });
+    }
 
     if (!valid) {
         showToast('⚠️ Veuillez remplir tous les champs obligatoires', true);
@@ -587,4 +678,4 @@ document.getElementById('dashboardLogout').addEventListener('click', function() 
     setTimeout(() => window.location.reload(), 500);
 });
 
-console.log('📊 Admin.js chargé - CRUD avec vos champs personnalisés');
+console.log('📊 Admin.js chargé - CRUD avec upload d\'images (Base64)');
