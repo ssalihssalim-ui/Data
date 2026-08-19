@@ -41,7 +41,6 @@ setPersistence(auth, browserLocalPersistence).catch(() => {});
 
 console.log('🔥 Firebase initialisé !');
 
-// Exporter pour admin.js
 export { app, auth, db };
 
 // ============================================================
@@ -103,38 +102,190 @@ window.isValidEmail = function(email) {
 function updateUI(user) {
     const userStatus = document.getElementById('userStatus');
     const userIcon = document.getElementById('userIcon');
-    const navDashboard = document.getElementById('navDashboard');
-    const navCategories = document.getElementById('navCategories');
-    const navProducts = document.getElementById('navProducts');
 
     if (user) {
         const displayName = user.displayName || user.email || 'Utilisateur';
         userStatus.textContent = '👤 ' + displayName.split('@')[0];
         userStatus.className = 'user-status logged-in';
         userIcon.style.color = '#4caf50';
-        if (navDashboard) navDashboard.style.display = 'inline';
-        if (navCategories) navCategories.style.display = 'inline';
-        if (navProducts) navProducts.style.display = 'inline';
-        // Charger les données admin via admin.js
-        import('./admin.js').then(module => {
-            module.loadCategories();
-            module.loadProducts();
-            module.updateDashboard();
-        });
+        // Ouvrir admin panel
+        openAdminPanel(user);
     } else {
         userStatus.textContent = '';
         userStatus.className = 'user-status';
         userIcon.style.color = '';
-        if (navDashboard) navDashboard.style.display = 'none';
-        if (navCategories) navCategories.style.display = 'none';
-        if (navProducts) navProducts.style.display = 'none';
-        document.getElementById('dashboardPanel').style.display = 'none';
-        document.getElementById('categoriesPanel').style.display = 'none';
-        document.getElementById('productsPanel').style.display = 'none';
-        document.getElementById('publicCategories').style.display = 'block';
-        document.getElementById('publicProducts').style.display = 'block';
-        document.getElementById('heroSection').style.display = 'flex';
+        closeAdminPanel();
     }
+}
+
+// ============================================================
+// ADMIN PANEL
+// ============================================================
+function openAdminPanel(user) {
+    const adminPanel = document.getElementById('adminPanel');
+    const sidebarUser = document.getElementById('sidebarUser');
+    const hero = document.getElementById('heroSection');
+    const publicCat = document.getElementById('publicCategories');
+    const publicProd = document.getElementById('publicProducts');
+    const collection = document.getElementById('collectionSection');
+    
+    if (user) {
+        adminPanel.classList.add('active');
+        adminPanel.style.display = 'flex';
+        sidebarUser.textContent = user.displayName || user.email || 'Admin';
+        hero.style.display = 'none';
+        publicCat.style.display = 'none';
+        publicProd.style.display = 'none';
+        collection.style.display = 'none';
+        
+        // Charger les données admin
+        import('./admin.js').then(module => {
+            module.loadCategories();
+            module.loadProducts();
+            module.updateDashboard();
+            module.loadCategoriesTable();
+            module.loadProductsTable();
+        });
+    }
+}
+
+function closeAdminPanel() {
+    const adminPanel = document.getElementById('adminPanel');
+    const hero = document.getElementById('heroSection');
+    const publicCat = document.getElementById('publicCategories');
+    const publicProd = document.getElementById('publicProducts');
+    const collection = document.getElementById('collectionSection');
+    
+    adminPanel.classList.remove('active');
+    adminPanel.style.display = 'none';
+    hero.style.display = 'flex';
+    publicCat.style.display = 'block';
+    publicProd.style.display = 'block';
+    collection.style.display = 'block';
+}
+
+// ============================================================
+// SIDEBAR NAVIGATION
+// ============================================================
+document.querySelectorAll('.sidebar-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const page = this.dataset.page;
+        
+        // Logout
+        if (this.id === 'sideLogout') {
+            signOut(auth);
+            window.showToast('👋 Déconnecté');
+            return;
+        }
+        
+        // Active link
+        document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Show page
+        document.querySelectorAll('.admin-page').forEach(p => p.classList.remove('active'));
+        const targetMap = {
+            'dashboard': 'dashboardPanel',
+            'categories': 'categoriesPanel',
+            'products': 'productsPanel',
+            'orders': 'ordersPanel',
+            'clients': 'clientsPanel'
+        };
+        const target = document.getElementById(targetMap[page]);
+        if (target) target.classList.add('active');
+        
+        // Rafraîchir les données
+        if (page === 'categories') {
+            import('./admin.js').then(module => module.loadCategoriesTable());
+        } else if (page === 'products') {
+            import('./admin.js').then(module => module.loadProductsTable());
+        } else if (page === 'dashboard') {
+            import('./admin.js').then(module => module.updateDashboard());
+        }
+    });
+});
+
+// ============================================================
+// STORE PAGE
+// ============================================================
+const storePage = document.getElementById('storePage');
+
+document.getElementById('shopNowBtn').addEventListener('click', function() {
+    openStore();
+});
+
+document.getElementById('closeStore').addEventListener('click', function() {
+    closeStore();
+});
+
+function openStore() {
+    storePage.classList.add('active');
+    storePage.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    loadStoreData();
+}
+
+function closeStore() {
+    storePage.classList.remove('active');
+    storePage.style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+async function loadStoreData() {
+    const { collection, getDocs } = await import('firebase/firestore');
+    
+    // Charger catégories
+    const catSnapshot = await getDocs(collection(db, 'categories'));
+    const catContainer = document.getElementById('storeCategories');
+    catContainer.innerHTML = '<button class="store-category-btn active" data-category="all">Tous</button>';
+    catSnapshot.forEach(doc => {
+        const data = doc.data();
+        const btn = document.createElement('button');
+        btn.className = 'store-category-btn';
+        btn.dataset.category = doc.id;
+        btn.textContent = data.name;
+        catContainer.appendChild(btn);
+    });
+    
+    // Charger produits
+    const prodSnapshot = await getDocs(collection(db, 'products'));
+    const prodContainer = document.getElementById('storeProducts');
+    prodContainer.innerHTML = '';
+    prodSnapshot.forEach(doc => {
+        const data = doc.data();
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.dataset.category = data.category || '';
+        const promo = data.promoPrice && data.promoPrice > 0 && data.promoPrice < data.sellPrice;
+        const imgSrc = data.image || 'https://via.placeholder.com/200x200?text=MANORA';
+        card.innerHTML = `
+            <img src="${imgSrc}" alt="${data.name}">
+            <div class="product-info">
+                <h4>${data.name || ''}</h4>
+                <span class="product-category">${data.category || ''}</span>
+                <div class="product-price">${promo ? `<span>${data.sellPrice}€</span> ${data.promoPrice}€` : (data.sellPrice || 0) + '€'}</div>
+                <div style="font-size:0.6rem;color:#999;">Stock: ${data.stock || 0}</div>
+            </div>
+        `;
+        prodContainer.appendChild(card);
+    });
+    
+    // Filtrage par catégorie
+    document.querySelectorAll('.store-category-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.store-category-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            const cat = this.dataset.category;
+            document.querySelectorAll('.store-products .product-card').forEach(card => {
+                if (cat === 'all' || card.dataset.category === cat) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    });
 }
 
 // ============================================================
@@ -330,87 +481,18 @@ document.getElementById('resetPasswordLink').addEventListener('click', function(
 });
 
 // ============================================================
-// NAVIGATION ADMIN
-// ============================================================
-let currentPanel = 'public';
-
-function showPanel(panel) {
-    const hero = document.getElementById('heroSection');
-    const publicCat = document.getElementById('publicCategories');
-    const publicProd = document.getElementById('publicProducts');
-    const dashboard = document.getElementById('dashboardPanel');
-    const categories = document.getElementById('categoriesPanel');
-    const products = document.getElementById('productsPanel');
-
-    hero.style.display = 'none';
-    publicCat.style.display = 'none';
-    publicProd.style.display = 'none';
-    dashboard.style.display = 'none';
-    categories.style.display = 'none';
-    products.style.display = 'none';
-
-    if (panel === 'public') {
-        hero.style.display = 'flex';
-        publicCat.style.display = 'block';
-        publicProd.style.display = 'block';
-    } else if (panel === 'dashboard') {
-        dashboard.style.display = 'block';
-        import('./admin.js').then(module => module.updateDashboard());
-    } else if (panel === 'categories') {
-        categories.style.display = 'block';
-        import('./admin.js').then(module => module.loadCategoriesTable());
-    } else if (panel === 'products') {
-        products.style.display = 'block';
-        import('./admin.js').then(module => module.loadProductsTable());
-    }
-    currentPanel = panel;
-}
-
-window.showPanel = showPanel;
-
-document.getElementById('navDashboard').addEventListener('click', (e) => {
-    e.preventDefault();
-    if (!auth.currentUser) { window.showToast('🔐 Connectez-vous', true); openAuthModal(); return; }
-    showPanel('dashboard');
-});
-
-document.getElementById('navCategories').addEventListener('click', (e) => {
-    e.preventDefault();
-    if (!auth.currentUser) { window.showToast('🔐 Connectez-vous', true); openAuthModal(); return; }
-    showPanel('categories');
-});
-
-document.getElementById('navProducts').addEventListener('click', (e) => {
-    e.preventDefault();
-    if (!auth.currentUser) { window.showToast('🔐 Connectez-vous', true); openAuthModal(); return; }
-    showPanel('products');
-});
-
-// ============================================================
 // AUTRES ÉVÉNEMENTS
 // ============================================================
-document.getElementById('shopNowBtn').addEventListener('click', function(e) {
-    e.preventDefault();
-    if (!auth.currentUser) { window.showToast('🔐 Connectez-vous', true); openAuthModal(); return; }
-    window.showToast('✨ Produit ajouté au panier');
-});
-
 document.getElementById('silverBtn').addEventListener('click', function() {
-    if (!auth.currentUser) { window.showToast('🔐 Connectez-vous', true); openAuthModal(); return; }
-    window.showToast('🌿 Collection Wellness');
+    openStore();
 });
 
 document.getElementById('lunchBadge').addEventListener('click', () => window.showToast('🌿 Wellness & Bien-être'));
-document.getElementById('logoLink').addEventListener('click', (e) => { e.preventDefault(); showPanel('public'); });
+document.getElementById('logoLink').addEventListener('click', (e) => { e.preventDefault(); });
 
 document.querySelectorAll('.header-icons i').forEach(icon => {
     if (icon.id === 'userIcon') return;
     icon.addEventListener('click', function() {
-        if (!auth.currentUser && this.dataset.icon !== 'search') {
-            window.showToast('🔐 Connectez-vous', true);
-            openAuthModal();
-            return;
-        }
         window.showToast('🛍️ Bientôt disponible');
     });
 });
@@ -431,18 +513,10 @@ document.querySelectorAll('.footer-social i').forEach(icon => {
 // ============================================================
 onAuthStateChanged(auth, (user) => {
     updateUI(user);
-    if (user) {
-        if (authOverlay.classList.contains('active')) closeAuthModal();
-        if (currentPanel === 'public') showPanel('public');
-    } else {
-        showPanel('public');
-    }
 });
 
 // ============================================================
 // INITIALISATION
 // ============================================================
-showPanel('public');
-
-console.log('🌿 MANORA · Beauty & Wellness');
+console.log('🌿 MANORA · Store + Admin');
 console.log('📊 Firebase Auth actif');
