@@ -14,7 +14,8 @@ import {
     browserLocalPersistence,
     updateProfile
 } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, collection, getDocs, query, orderBy } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 // ============================================================
 // CONFIGURATION FIREBASE
@@ -36,12 +37,13 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 setPersistence(auth, browserLocalPersistence).catch(() => {});
 
 console.log('🔥 Firebase initialisé !');
 
-export { app, auth, db };
+export { app, auth, db, storage };
 
 // ============================================================
 // TOAST SYSTEM
@@ -97,6 +99,168 @@ window.isValidEmail = function(email) {
 };
 
 // ============================================================
+// LOAD PUBLIC DATA (Accueil)
+// ============================================================
+async function loadPublicData() {
+    try {
+        // Charger catégories
+        const catSnapshot = await getDocs(query(collection(db, 'categories'), orderBy('order', 'asc')));
+        const catContainer = document.getElementById('categoriesContainer');
+        catContainer.innerHTML = '';
+        catSnapshot.forEach(doc => {
+            const data = doc.data();
+            const span = document.createElement('span');
+            span.className = 'cat-item';
+            if (data.image) {
+                span.innerHTML = `<img src="${data.image}" alt="${data.name}">${data.name}`;
+            } else {
+                span.innerHTML = data.name;
+            }
+            catContainer.appendChild(span);
+        });
+
+        // Charger produits
+        const prodSnapshot = await getDocs(collection(db, 'products'));
+        const prodContainer = document.getElementById('productsContainer');
+        prodContainer.innerHTML = '';
+        prodSnapshot.forEach(doc => {
+            const data = doc.data();
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            const promo = data.promoPrice && data.promoPrice > 0 && data.promoPrice < data.sellPrice;
+            const imgSrc = data.image || 'https://via.placeholder.com/200x200?text=MANORA';
+            card.innerHTML = `
+                <img src="${imgSrc}" alt="${data.name}">
+                <div class="product-info">
+                    <h4>${data.name || ''}</h4>
+                    <span class="product-category">${data.category || ''}</span>
+                    <div class="product-price">${promo ? `<span>${data.sellPrice}€</span> ${data.promoPrice}€` : (data.sellPrice || 0) + '€'}</div>
+                    <div style="font-size:0.6rem;color:#999;">Stock: ${data.stock || 0}</div>
+                </div>
+            `;
+            prodContainer.appendChild(card);
+        });
+    } catch (error) {
+        console.error('Erreur chargement données publiques:', error);
+    }
+}
+
+// ============================================================
+// STORE PAGE
+// ============================================================
+const storePage = document.getElementById('storePage');
+
+document.getElementById('shopNowBtn').addEventListener('click', function() {
+    openStore();
+});
+
+document.getElementById('closeStore').addEventListener('click', function() {
+    closeStore();
+});
+
+document.getElementById('silverBtn').addEventListener('click', function() {
+    openStore();
+});
+
+async function openStore() {
+    storePage.classList.add('active');
+    storePage.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    await loadStoreData();
+}
+
+function closeStore() {
+    storePage.classList.remove('active');
+    storePage.style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+async function loadStoreData() {
+    try {
+        // Charger catégories
+        const catSnapshot = await getDocs(query(collection(db, 'categories'), orderBy('order', 'asc')));
+        const catContainer = document.getElementById('storeCategories');
+        catContainer.innerHTML = '<button class="store-category-btn active" data-category="all">📋 Tous</button>';
+        
+        catSnapshot.forEach(doc => {
+            const data = doc.data();
+            const btn = document.createElement('button');
+            btn.className = 'store-category-btn';
+            btn.dataset.category = doc.id;
+            if (data.image) {
+                btn.innerHTML = `<img src="${data.image}"> ${data.name}`;
+            } else {
+                btn.textContent = data.name;
+            }
+            catContainer.appendChild(btn);
+        });
+
+        // Charger produits
+        const prodSnapshot = await getDocs(collection(db, 'products'));
+        const prodContainer = document.getElementById('storeProducts');
+        prodContainer.innerHTML = '';
+        
+        if (prodSnapshot.empty) {
+            prodContainer.innerHTML = `
+                <div style="grid-column:1/-1;text-align:center;padding:3rem;color:#999;">
+                    <i class="fas fa-box-open" style="font-size:3rem;display:block;margin-bottom:1rem;color:#e8a87c;"></i>
+                    <p>Aucun produit disponible pour le moment.</p>
+                    <p style="font-size:0.8rem;margin-top:0.5rem;">Connectez-vous en tant qu'admin pour ajouter des produits.</p>
+                </div>
+            `;
+        } else {
+            prodSnapshot.forEach(doc => {
+                const data = doc.data();
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.dataset.category = data.category || '';
+                const promo = data.promoPrice && data.promoPrice > 0 && data.promoPrice < data.sellPrice;
+                const imgSrc = data.image || 'https://via.placeholder.com/200x200?text=MANORA';
+                card.innerHTML = `
+                    <img src="${imgSrc}" alt="${data.name}">
+                    <div class="product-info">
+                        <h4>${data.name || 'Sans nom'}</h4>
+                        <span class="product-category">${data.category || 'Non catégorisé'}</span>
+                        <div class="product-price">${promo ? `<span>${data.sellPrice}€</span> ${data.promoPrice}€` : (data.sellPrice || 0) + '€'}</div>
+                        <div style="font-size:0.6rem;color:#999;">📦 Stock: ${data.stock || 0}</div>
+                        ${data.brand ? `<div style="font-size:0.6rem;color:#999;">🏷️ ${data.brand}</div>` : ''}
+                    </div>
+                `;
+                prodContainer.appendChild(card);
+            });
+        }
+
+        // Filtrage
+        document.querySelectorAll('.store-category-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.store-category-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const cat = this.dataset.category;
+                document.querySelectorAll('#storeProducts .product-card').forEach(card => {
+                    if (cat === 'all' || card.dataset.category === cat) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        console.log('✅ Store chargé avec succès !');
+    } catch (error) {
+        console.error('❌ Erreur chargement store:', error);
+        document.getElementById('storeProducts').innerHTML = `
+            <div style="grid-column:1/-1;text-align:center;padding:3rem;color:#c0392b;">
+                <i class="fas fa-exclamation-triangle" style="font-size:3rem;display:block;margin-bottom:1rem;"></i>
+                <p>Erreur lors du chargement des produits.</p>
+                <p style="font-size:0.8rem;margin-top:0.5rem;">${error.message}</p>
+            </div>
+        `;
+        window.showToast('⚠️ Erreur chargement du store', true);
+    }
+}
+
+// ============================================================
 // AUTH STATE
 // ============================================================
 function updateUI(user) {
@@ -108,7 +272,6 @@ function updateUI(user) {
         userStatus.textContent = '👤 ' + displayName.split('@')[0];
         userStatus.className = 'user-status logged-in';
         userIcon.style.color = '#4caf50';
-        // Ouvrir admin panel
         openAdminPanel(user);
     } else {
         userStatus.textContent = '';
@@ -138,7 +301,6 @@ function openAdminPanel(user) {
         publicProd.style.display = 'none';
         collection.style.display = 'none';
         
-        // Charger les données admin
         import('./admin.js').then(module => {
             module.loadCategories();
             module.loadProducts();
@@ -172,18 +334,15 @@ document.querySelectorAll('.sidebar-link').forEach(link => {
         e.preventDefault();
         const page = this.dataset.page;
         
-        // Logout
         if (this.id === 'sideLogout') {
             signOut(auth);
             window.showToast('👋 Déconnecté');
             return;
         }
         
-        // Active link
         document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
         this.classList.add('active');
         
-        // Show page
         document.querySelectorAll('.admin-page').forEach(p => p.classList.remove('active'));
         const targetMap = {
             'dashboard': 'dashboardPanel',
@@ -195,7 +354,6 @@ document.querySelectorAll('.sidebar-link').forEach(link => {
         const target = document.getElementById(targetMap[page]);
         if (target) target.classList.add('active');
         
-        // Rafraîchir les données
         if (page === 'categories') {
             import('./admin.js').then(module => module.loadCategoriesTable());
         } else if (page === 'products') {
@@ -205,88 +363,6 @@ document.querySelectorAll('.sidebar-link').forEach(link => {
         }
     });
 });
-
-// ============================================================
-// STORE PAGE
-// ============================================================
-const storePage = document.getElementById('storePage');
-
-document.getElementById('shopNowBtn').addEventListener('click', function() {
-    openStore();
-});
-
-document.getElementById('closeStore').addEventListener('click', function() {
-    closeStore();
-});
-
-function openStore() {
-    storePage.classList.add('active');
-    storePage.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-    loadStoreData();
-}
-
-function closeStore() {
-    storePage.classList.remove('active');
-    storePage.style.display = 'none';
-    document.body.style.overflow = '';
-}
-
-async function loadStoreData() {
-    const { collection, getDocs } = await import('firebase/firestore');
-    
-    // Charger catégories
-    const catSnapshot = await getDocs(collection(db, 'categories'));
-    const catContainer = document.getElementById('storeCategories');
-    catContainer.innerHTML = '<button class="store-category-btn active" data-category="all">Tous</button>';
-    catSnapshot.forEach(doc => {
-        const data = doc.data();
-        const btn = document.createElement('button');
-        btn.className = 'store-category-btn';
-        btn.dataset.category = doc.id;
-        btn.textContent = data.name;
-        catContainer.appendChild(btn);
-    });
-    
-    // Charger produits
-    const prodSnapshot = await getDocs(collection(db, 'products'));
-    const prodContainer = document.getElementById('storeProducts');
-    prodContainer.innerHTML = '';
-    prodSnapshot.forEach(doc => {
-        const data = doc.data();
-        const card = document.createElement('div');
-        card.className = 'product-card';
-        card.dataset.category = data.category || '';
-        const promo = data.promoPrice && data.promoPrice > 0 && data.promoPrice < data.sellPrice;
-        const imgSrc = data.image || 'https://via.placeholder.com/200x200?text=MANORA';
-        card.innerHTML = `
-            <img src="${imgSrc}" alt="${data.name}">
-            <div class="product-info">
-                <h4>${data.name || ''}</h4>
-                <span class="product-category">${data.category || ''}</span>
-                <div class="product-price">${promo ? `<span>${data.sellPrice}€</span> ${data.promoPrice}€` : (data.sellPrice || 0) + '€'}</div>
-                <div style="font-size:0.6rem;color:#999;">Stock: ${data.stock || 0}</div>
-            </div>
-        `;
-        prodContainer.appendChild(card);
-    });
-    
-    // Filtrage par catégorie
-    document.querySelectorAll('.store-category-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.querySelectorAll('.store-category-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            const cat = this.dataset.category;
-            document.querySelectorAll('.store-products .product-card').forEach(card => {
-                if (cat === 'all' || card.dataset.category === cat) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        });
-    });
-}
 
 // ============================================================
 // MODAL AUTH
@@ -483,10 +559,6 @@ document.getElementById('resetPasswordLink').addEventListener('click', function(
 // ============================================================
 // AUTRES ÉVÉNEMENTS
 // ============================================================
-document.getElementById('silverBtn').addEventListener('click', function() {
-    openStore();
-});
-
 document.getElementById('lunchBadge').addEventListener('click', () => window.showToast('🌿 Wellness & Bien-être'));
 document.getElementById('logoLink').addEventListener('click', (e) => { e.preventDefault(); });
 
@@ -513,10 +585,14 @@ document.querySelectorAll('.footer-social i').forEach(icon => {
 // ============================================================
 onAuthStateChanged(auth, (user) => {
     updateUI(user);
+    loadPublicData();
 });
 
 // ============================================================
 // INITIALISATION
 // ============================================================
+loadPublicData();
+
 console.log('🌿 MANORA · Store + Admin');
-console.log('📊 Firebase Auth actif');
+console.log('📊 Firebase Auth + Firestore + Storage actif');
+console.log('🛍️ Store disponible avec les données Firebase');
