@@ -19,10 +19,7 @@ body {
 }
 
 /* ===== TYPOGRAPHIE ===== */
-h1,
-h2,
-h3,
-p {
+h1, h2, h3, p {
     font-weight: 300;
     letter-spacing: 0.04em;
 }
@@ -139,7 +136,7 @@ p {
     color: #4caf50;
 }
 
-/* ===== HERO SECTION ===== */
+/* ===== HERO SECTION AVEC IMAGE ===== */
 .hero {
     position: relative;
     display: flex;
@@ -160,7 +157,7 @@ p {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url('cover.jpg');
+    background-image: url('manora.jpeg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
