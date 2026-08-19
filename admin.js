@@ -12,13 +12,61 @@ import {
     orderBy,
     serverTimestamp
 } from "firebase/firestore";
-import { db } from "./script.js";
+import { 
+    getStorage,
+    ref,
+    uploadBytes,
+    getDownloadURL,
+    deleteObject
+} from "firebase/storage";
+import { db, app } from "./script.js";
+
+// ============================================================
+// INITIALISATION STORAGE
+// ============================================================
+const storage = getStorage(app);
 
 // ============================================================
 // VARIABLES GLOBALES
 // ============================================================
 let categoriesData = [];
 let productsData = [];
+
+// ============================================================
+// FONCTIONS UPLOAD IMAGE
+// ============================================================
+async function uploadImage(file, path) {
+    if (!file) return null;
+    
+    try {
+        const timestamp = Date.now();
+        const fileName = `${timestamp}_${file.name}`;
+        const storageRef = ref(storage, `${path}/${fileName}`);
+        
+        const snapshot = await uploadBytes(storageRef, file);
+        console.log('📤 Image uploadée:', snapshot.metadata.fullPath);
+        
+        const url = await getDownloadURL(storageRef);
+        console.log('🔗 URL:', url);
+        
+        return url;
+    } catch (error) {
+        console.error('❌ Erreur upload image:', error);
+        window.showToast('⚠️ Erreur upload image: ' + error.message, true);
+        return null;
+    }
+}
+
+async function deleteImage(url) {
+    if (!url) return;
+    try {
+        const storageRef = ref(storage, url);
+        await deleteObject(storageRef);
+        console.log('🗑️ Image supprimée:', url);
+    } catch (error) {
+        console.warn('⚠️ Erreur suppression image:', error.message);
+    }
+}
 
 // ============================================================
 // CRUD CATÉGORIES
@@ -95,11 +143,22 @@ window.editCategory = function(id) {
     document.getElementById('catOrder').value = data.order || 0;
     document.getElementById('categoryModalTitle').textContent = 'Modifier la catégorie';
     document.getElementById('categoryModal').classList.add('active');
+    
+    const preview = document.getElementById('catImagePreview');
+    if (data.image) {
+        preview.innerHTML = `<img src="${data.image}" style="max-width:150px;max-height:150px;border-radius:4px;">`;
+    } else {
+        preview.innerHTML = '';
+    }
 };
 
 window.deleteCategory = async function(id) {
     if (!confirm('Supprimer cette catégorie ?')) return;
     try {
+        const data = categoriesData.find(c => c.id === id);
+        if (data?.image) {
+            await deleteImage(data.image);
+        }
         await deleteDoc(doc(db, 'categories', id));
         window.showToast('✅ Catégorie supprimée');
         loadCategories();
@@ -201,11 +260,22 @@ window.editProduct = function(id) {
     document.getElementById('prodProfit').value = data.profit || 0;
     document.getElementById('productModalTitle').textContent = 'Modifier le produit';
     document.getElementById('productModal').classList.add('active');
+    
+    const preview = document.getElementById('prodImagePreview');
+    if (data.image) {
+        preview.innerHTML = `<img src="${data.image}" style="max-width:150px;max-height:150px;border-radius:4px;">`;
+    } else {
+        preview.innerHTML = '';
+    }
 };
 
 window.deleteProduct = async function(id) {
     if (!confirm('Supprimer ce produit ?')) return;
     try {
+        const data = productsData.find(p => p.id === id);
+        if (data?.image) {
+            await deleteImage(data.image);
+        }
         await deleteDoc(doc(db, 'products', id));
         window.showToast('✅ Produit supprimé');
         loadProducts();
@@ -243,7 +313,7 @@ export async function updateDashboard() {
 }
 
 // ============================================================
-// MODALS CATÉGORIE
+// MODALS CATÉGORIE AVEC UPLOAD
 // ============================================================
 document.getElementById('btnAddCategory').addEventListener('click', () => {
     document.getElementById('categoryId').value = '';
@@ -251,6 +321,8 @@ document.getElementById('btnAddCategory').addEventListener('click', () => {
     document.getElementById('catDescription').value = '';
     document.getElementById('catImage').value = '';
     document.getElementById('catOrder').value = '0';
+    document.getElementById('catImageInput').value = '';
+    document.getElementById('catImagePreview').innerHTML = '';
     document.getElementById('categoryModalTitle').textContent = 'Ajouter une catégorie';
     document.getElementById('categoryModal').classList.add('active');
 });
@@ -265,13 +337,36 @@ document.getElementById('categoryModal').addEventListener('click', (e) => {
     }
 });
 
+document.getElementById('catImageInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            document.getElementById('catImagePreview').innerHTML = 
+                `<img src="${event.target.result}" style="max-width:150px;max-height:150px;border-radius:4px;">`;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
 document.getElementById('categoryForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const id = document.getElementById('categoryId').value;
+    const fileInput = document.getElementById('catImageInput');
+    const file = fileInput.files[0];
+    
+    let imageUrl = document.getElementById('catImage').value;
+    if (file) {
+        const uploadedUrl = await uploadImage(file, 'categories');
+        if (uploadedUrl) {
+            imageUrl = uploadedUrl;
+        }
+    }
+    
     const data = {
         name: document.getElementById('catName').value.trim(),
         description: document.getElementById('catDescription').value.trim(),
-        image: document.getElementById('catImage').value.trim(),
+        image: imageUrl || '',
         order: parseInt(document.getElementById('catOrder').value) || 0,
         updatedAt: serverTimestamp()
     };
@@ -294,7 +389,7 @@ document.getElementById('categoryForm').addEventListener('submit', async functio
 });
 
 // ============================================================
-// MODALS PRODUIT
+// MODALS PRODUIT AVEC UPLOAD
 // ============================================================
 document.getElementById('btnAddProduct').addEventListener('click', async () => {
     document.getElementById('productId').value = '';
@@ -307,6 +402,8 @@ document.getElementById('btnAddProduct').addEventListener('click', async () => {
     document.getElementById('prodStock').value = '';
     document.getElementById('prodPromoPrice').value = '';
     document.getElementById('prodImage').value = '';
+    document.getElementById('prodImageInput').value = '';
+    document.getElementById('prodImagePreview').innerHTML = '';
     document.getElementById('prodCA').value = '0';
     document.getElementById('prodProfit').value = '0';
     document.getElementById('productModalTitle').textContent = 'Ajouter un produit';
@@ -332,9 +429,32 @@ document.getElementById('productModal').addEventListener('click', (e) => {
     }
 });
 
+document.getElementById('prodImageInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            document.getElementById('prodImagePreview').innerHTML = 
+                `<img src="${event.target.result}" style="max-width:150px;max-height:150px;border-radius:4px;">`;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
 document.getElementById('productForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const id = document.getElementById('productId').value;
+    const fileInput = document.getElementById('prodImageInput');
+    const file = fileInput.files[0];
+    
+    let imageUrl = document.getElementById('prodImage').value;
+    if (file) {
+        const uploadedUrl = await uploadImage(file, 'products');
+        if (uploadedUrl) {
+            imageUrl = uploadedUrl;
+        }
+    }
+    
     const buyPrice = parseFloat(document.getElementById('prodBuyPrice').value) || 0;
     const sellPrice = parseFloat(document.getElementById('prodSellPrice').value) || 0;
     
@@ -347,7 +467,7 @@ document.getElementById('productForm').addEventListener('submit', async function
         sellPrice: sellPrice,
         stock: parseInt(document.getElementById('prodStock').value) || 0,
         promoPrice: parseFloat(document.getElementById('prodPromoPrice').value) || 0,
-        image: document.getElementById('prodImage').value.trim(),
+        image: imageUrl || '',
         ca: parseFloat(document.getElementById('prodCA').value) || 0,
         profit: parseFloat(document.getElementById('prodProfit').value) || 0,
         updatedAt: serverTimestamp()
@@ -370,4 +490,4 @@ document.getElementById('productForm').addEventListener('submit', async function
     }
 });
 
-console.log('📊 Admin.js chargé - Gestion Catégories & Produits');
+console.log('📊 Admin.js chargé - Gestion Catégories & Produits avec Firebase Storage');
