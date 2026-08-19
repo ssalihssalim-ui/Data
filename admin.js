@@ -63,14 +63,13 @@ export async function loadCategoriesTable() {
         snapshot.forEach(doc => {
             const data = doc.data();
             const tr = document.createElement('tr');
-            const profit = (data.profit || 0);
             tr.innerHTML = `
                 <td>${data.image ? `<img src="${data.image}" class="table-img">` : '-'}</td>
                 <td><strong>${data.name || ''}</strong></td>
                 <td>${data.description || '-'}</td>
                 <td>${data.order || 0}</td>
                 <td>${data.ca || 0} €</td>
-                <td>${profit} €</td>
+                <td>${data.profit || 0} €</td>
                 <td>${data.productCount || 0}</td>
                 <td>
                     <div class="action-btns">
@@ -157,7 +156,6 @@ export async function loadProductsTable() {
         snapshot.forEach(doc => {
             const data = doc.data();
             const profit = (data.sellPrice || 0) - (data.buyPrice || 0);
-            const totalProfit = (data.profit || 0);
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${data.image ? `<img src="${data.image}" class="table-img">` : '-'}</td>
@@ -171,7 +169,7 @@ export async function loadProductsTable() {
                 <td>${data.promoPrice && data.promoPrice > 0 ? data.promoPrice + ' €' : '-'}</td>
                 <td>${data.supplier || '-'}</td>
                 <td>${data.ca || 0} €</td>
-                <td>${totalProfit} €</td>
+                <td>${data.profit || 0} €</td>
                 <td>
                     <div class="action-btns">
                         <button class="btn-edit-small" onclick="window.editProduct('${doc.id}')"><i class="fas fa-edit"></i></button>
@@ -228,13 +226,11 @@ export async function updateDashboard() {
         
         let totalStock = 0;
         let totalCA = 0;
-        let totalProfit = 0;
         
         prodSnapshot.forEach(doc => {
             const data = doc.data();
             totalStock += data.stock || 0;
             totalCA += data.ca || 0;
-            totalProfit += data.profit || 0;
         });
         
         document.getElementById('statCategories').textContent = catSnapshot.size;
@@ -341,7 +337,6 @@ document.getElementById('productForm').addEventListener('submit', async function
     const id = document.getElementById('productId').value;
     const buyPrice = parseFloat(document.getElementById('prodBuyPrice').value) || 0;
     const sellPrice = parseFloat(document.getElementById('prodSellPrice').value) || 0;
-    const profit = sellPrice - buyPrice;
     
     const data = {
         name: document.getElementById('prodName').value.trim(),
