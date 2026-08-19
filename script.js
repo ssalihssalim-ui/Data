@@ -1,5 +1,5 @@
 // ============================================================
-// SCRIPT.JS - Navigation, Auth, Catalogue
+// SCRIPT.JS - Navigation, Auth, Catalogue, Panier
 // ============================================================
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
@@ -185,6 +185,9 @@ function loadShopCategories() {
     });
 }
 
+// ============================================================
+// AFFICHAGE DES PRODUITS AVEC BOUTON "AJOUTER AU PANIER"
+// ============================================================
 function renderProducts(category = 'all') {
     const grid = document.getElementById('productsGrid');
     const count = document.getElementById('productCount');
@@ -197,17 +200,231 @@ function renderProducts(category = 'all') {
         return;
     }
 
-    grid.innerHTML = filtered.map(p => `
-        <div class="product-card" data-id="${p.id}">
-            <div class="product-image">${p.image || '📦'}</div>
-            <div class="product-info">
-                <h4>${p.name}</h4>
-                <p>${p.description || ''}</p>
-                <div class="product-price">${p.price || '0 MAD'}</div>
+    grid.innerHTML = filtered.map(p => {
+        const displayPrice = p.prixVente || p.price || '0';
+        const priceValue = parseFloat(displayPrice) || 0;
+        
+        let imageHtml = p.image || '📦';
+        if (p.image && p.image.startsWith('data:image')) {
+            imageHtml = `<img src="${p.image}" style="width:100%;height:100%;object-fit:cover;" />`;
+        }
+
+        return `
+            <div class="product-card" data-id="${p.id}">
+                <div class="product-image">${imageHtml}</div>
+                <div class="product-info">
+                    <h4>${p.name}</h4>
+                    <p>${p.description || ''}</p>
+                    <div class="product-price">${priceValue.toFixed(2)} MAD</div>
+                    <button class="btn-add-cart" data-id="${p.id}" data-name="${p.name}" data-price="${priceValue}" data-image="${p.image || '📦'}">
+                        <i class="fas fa-cart-plus"></i> Ajouter
+                    </button>
+                </div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
+
+    // Ajouter les événements "Ajouter au panier"
+    document.querySelectorAll('.btn-add-cart').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const product = {
+                id: this.dataset.id,
+                name: this.dataset.name,
+                prixVente: this.dataset.price,
+                image: this.dataset.image
+            };
+            addToCart(product);
+        });
+    });
 }
+
+// ============================================================
+// PANIER - GESTION COMPLÈTE
+// ============================================================
+let cart = [];
+const cartBadge = document.getElementById('cartBadge');
+const cartOverlay = document.getElementById('cartOverlay');
+const cartItems = document.getElementById('cartItems');
+const cartTotalPrice = document.getElementById('cartTotalPrice');
+const cartFooter = document.getElementById('cartFooter');
+const bagIcon = document.getElementById('bagIcon');
+const cartClose = document.getElementById('cartClose');
+
+// Ajouter au panier
+function addToCart(product) {
+    const existing = cart.find(item => item.id === product.id);
+    
+    if (existing) {
+        existing.quantity += 1;
+    } else {
+        cart.push({
+            id: product.id,
+            name: product.name,
+            price: parseFloat(product.prixVente) || 0,
+            image: product.image || '📦',
+            quantity: 1
+        });
+    }
+    
+    updateCartUI();
+    showToast(`🛒 ${product.name} ajouté au panier`);
+}
+
+// Retirer du panier
+function removeFromCart(productId) {
+    cart = cart.filter(item => item.id !== productId);
+    updateCartUI();
+    showToast('🗑️ Produit retiré du panier');
+}
+
+// Modifier la quantité
+function updateQuantity(productId, newQuantity) {
+    const item = cart.find(i => i.id === productId);
+    if (item) {
+        if (newQuantity <= 0) {
+            removeFromCart(productId);
+            return;
+        }
+        item.quantity = newQuantity;
+        updateCartUI();
+    }
+}
+
+// Mettre à jour l'UI du panier
+function updateCartUI() {
+    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    if (cartBadge) {
+        cartBadge.textContent = totalItems;
+        cartBadge.style.display = totalItems > 0 ? 'block' : 'none';
+    }
+    
+    if (cart.length === 0) {
+        cartItems.innerHTML = `
+            <div class="cart-empty">
+                <i class="fas fa-shopping-bag"></i>
+                <p>Votre panier est vide</p>
+            </div>
+        `;
+        cartFooter.style.display = 'none';
+        return;
+    }
+    
+    cartItems.innerHTML = cart.map(item => {
+        let imageHtml = item.image || '📦';
+        if (item.image && item.image.startsWith('data:image')) {
+            imageHtml = `<img src="${item.image}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;" />`;
+        }
+        return `
+            <div class="cart-item" data-id="${item.id}">
+                <div class="cart-item-image">${imageHtml}</div>
+                <div class="cart-item-info">
+                    <h4>${item.name}</h4>
+                    <div class="cart-item-qty">
+                        <button onclick="window.decreaseQty('${item.id}')">-</button>
+                        <span>${item.quantity}</span>
+                        <button onclick="window.increaseQty('${item.id}')">+</button>
+                    </div>
+                </div>
+                <div class="cart-item-price">${(item.price * item.quantity).toFixed(2)} MAD</div>
+                <button class="cart-item-remove" onclick="window.removeFromCart('${item.id}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+    }).join('');
+    
+    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    cartTotalPrice.textContent = total.toFixed(2) + ' MAD';
+    cartFooter.style.display = 'block';
+}
+
+// Exposer les fonctions au global
+window.addToCart = addToCart;
+window.removeFromCart = removeFromCart;
+window.updateQuantity = updateQuantity;
+
+window.increaseQty = function(productId) {
+    const item = cart.find(i => i.id === productId);
+    if (item) {
+        item.quantity += 1;
+        updateCartUI();
+    }
+};
+
+window.decreaseQty = function(productId) {
+    const item = cart.find(i => i.id === productId);
+    if (item) {
+        if (item.quantity <= 1) {
+            removeFromCart(productId);
+        } else {
+            item.quantity -= 1;
+            updateCartUI();
+        }
+    }
+};
+
+// Ouvrir / Fermer le panier
+function openCart() {
+    cartOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeCart() {
+    cartOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+bagIcon?.addEventListener('click', openCart);
+cartClose?.addEventListener('click', closeCart);
+cartOverlay?.addEventListener('click', function(e) {
+    if (e.target === cartOverlay) closeCart();
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && cartOverlay?.classList.contains('active')) {
+        closeCart();
+    }
+});
+
+// Bouton commander
+document.getElementById('checkoutBtn')?.addEventListener('click', function() {
+    const user = auth.currentUser;
+    if (!user) {
+        showToast('🔐 Connectez-vous pour passer commande', true);
+        closeCart();
+        openAuthModal();
+        return;
+    }
+    
+    if (cart.length === 0) {
+        showToast('⚠️ Votre panier est vide', true);
+        return;
+    }
+    
+    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    const orderData = {
+        userId: user.uid,
+        userName: user.displayName || user.email,
+        items: cart,
+        total: total,
+        status: 'En attente',
+        createdAt: serverTimestamp()
+    };
+    
+    addDoc(collection(db, 'commandes'), orderData)
+        .then(() => {
+            showToast('✅ Commande passée avec succès !');
+            cart = [];
+            updateCartUI();
+            closeCart();
+        })
+        .catch((error) => {
+            console.error('Erreur commande:', error);
+            showToast('⚠️ Erreur lors de la commande', true);
+        });
+});
 
 // ============================================================
 // AUTH UI
@@ -489,6 +706,7 @@ document.querySelectorAll('#homeCategories .cat-item').forEach(item => {
 // ============================================================
 document.querySelectorAll('.header-icons i').forEach(icon => {
     if (icon.id === 'userIcon') return;
+    if (icon.id === 'bagIcon') return;
     icon.addEventListener('click', function() {
         const user = auth.currentUser;
         if (!user && this.dataset.icon === 'bag') {
@@ -499,9 +717,8 @@ document.querySelectorAll('.header-icons i').forEach(icon => {
         const iconType = this.dataset.icon || '';
         let label = 'Action';
         if (iconType === 'search') label = 'Recherche';
-        else if (iconType === 'bag') label = 'Panier';
         showToast(`🛍️ ${label} — bientôt disponible`);
     });
 });
 
-console.log('🌿 MANORA · Script principal chargé');
+console.log('🌿 MANORA · Script principal chargé avec panier');
