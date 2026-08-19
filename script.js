@@ -1,10 +1,10 @@
 // ============================================================
-// IMPORTS FIREBASE
+// SCRIPT.JS - Navigation, Auth, Catalogue
 // ============================================================
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { 
-    getAuth, 
+import {
+    getAuth,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     sendPasswordResetEmail,
@@ -14,8 +14,20 @@ import {
     browserLocalPersistence,
     updateProfile
 } from "firebase/auth";
-import { getFirestore, collection, getDocs, query, orderBy } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import {
+    getFirestore,
+    collection,
+    doc,
+    setDoc,
+    getDocs,
+    getDoc,
+    updateDoc,
+    deleteDoc,
+    serverTimestamp,
+    query,
+    orderBy,
+    addDoc
+} from "firebase/firestore";
 
 // ============================================================
 // CONFIGURATION FIREBASE
@@ -35,20 +47,18 @@ const firebaseConfig = {
 // ============================================================
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
+export const auth = getAuth(app);
+export const db = getFirestore(app);
 
-setPersistence(auth, browserLocalPersistence).catch(() => {});
+setPersistence(auth, browserLocalPersistence)
+    .catch((error) => console.warn('Erreur persistance:', error));
 
 console.log('🔥 Firebase initialisé !');
-
-export { app, auth, db, storage };
 
 // ============================================================
 // TOAST SYSTEM
 // ============================================================
-window.showToast = function(msg, isError = false) {
+export function showToast(msg, isError = false) {
     const existing = document.querySelector('.toast-luna');
     if (existing) existing.remove();
 
@@ -89,181 +99,120 @@ window.showToast = function(msg, isError = false) {
         toast.style.transform = 'translateX(-50%) translateY(20px)';
         setTimeout(() => toast.remove(), 400);
     }, 4000);
-};
+}
 
 // ============================================================
 // VALIDATION EMAIL
 // ============================================================
-window.isValidEmail = function(email) {
+export function isValidEmail(email) {
     return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
-};
+}
 
 // ============================================================
-// LOAD PUBLIC DATA (Accueil)
+// NAVIGATION
 // ============================================================
-async function loadPublicData() {
+const pageHome = document.getElementById('pageHome');
+const pageShop = document.getElementById('pageShop');
+const pageDashboard = document.getElementById('pageDashboard');
+
+const navShop = document.getElementById('navShop');
+const navDashboard = document.getElementById('navDashboard');
+
+export function showPage(page) {
+    pageHome.style.display = page === 'home' ? 'block' : 'none';
+    pageShop.style.display = page === 'shop' ? 'block' : 'none';
+    pageDashboard.style.display = page === 'dashboard' ? 'block' : 'none';
+
+    document.querySelectorAll('.nav-links a').forEach(link => link.classList.remove('active'));
+    if (page === 'home') document.querySelector('.nav-links a[href="index.html"]')?.classList.add('active');
+    if (page === 'shop') navShop?.classList.add('active');
+    if (page === 'dashboard') navDashboard?.classList.add('active');
+}
+
+navShop?.addEventListener('click', (e) => {
+    e.preventDefault();
+    showPage('shop');
+    loadShopProducts();
+});
+
+navDashboard?.addEventListener('click', (e) => {
+    e.preventDefault();
+    const user = auth.currentUser;
+    if (!user) {
+        showToast('🔐 Connectez-vous pour accéder au dashboard', true);
+        openAuthModal();
+        return;
+    }
+    showPage('dashboard');
+});
+
+// ============================================================
+// BOUTIQUE - CHARGER PRODUITS DEPUIS FIRESTORE
+// ============================================================
+let products = [];
+
+export async function loadShopProducts(category = 'all') {
     try {
-        // Charger catégories
-        const catSnapshot = await getDocs(query(collection(db, 'categories'), orderBy('order', 'asc')));
-        const catContainer = document.getElementById('categoriesContainer');
-        catContainer.innerHTML = '';
-        catSnapshot.forEach(doc => {
-            const data = doc.data();
-            const span = document.createElement('span');
-            span.className = 'cat-item';
-            if (data.image) {
-                span.innerHTML = `<img src="${data.image}" alt="${data.name}">${data.name}`;
-            } else {
-                span.innerHTML = data.name;
-            }
-            catContainer.appendChild(span);
+        const q = query(collection(db, 'produits'), orderBy('name'));
+        const snapshot = await getDocs(q);
+        products = [];
+        snapshot.forEach(doc => {
+            products.push({ id: doc.id, ...doc.data() });
         });
-
-        // Charger produits
-        const prodSnapshot = await getDocs(collection(db, 'products'));
-        const prodContainer = document.getElementById('productsContainer');
-        prodContainer.innerHTML = '';
-        prodSnapshot.forEach(doc => {
-            const data = doc.data();
-            const card = document.createElement('div');
-            card.className = 'product-card';
-            const promo = data.promoPrice && data.promoPrice > 0 && data.promoPrice < data.sellPrice;
-            const imgSrc = data.image || 'https://via.placeholder.com/200x200?text=MANORA';
-            card.innerHTML = `
-                <img src="${imgSrc}" alt="${data.name}">
-                <div class="product-info">
-                    <h4>${data.name || ''}</h4>
-                    <span class="product-category">${data.category || ''}</span>
-                    <div class="product-price">${promo ? `<span>${data.sellPrice}€</span> ${data.promoPrice}€` : (data.sellPrice || 0) + '€'}</div>
-                    <div style="font-size:0.6rem;color:#999;">Stock: ${data.stock || 0}</div>
-                </div>
-            `;
-            prodContainer.appendChild(card);
-        });
+        renderProducts(category);
+        loadShopCategories();
     } catch (error) {
-        console.error('Erreur chargement données publiques:', error);
+        console.error('Erreur chargement produits:', error);
+        showToast('⚠️ Erreur chargement produits', true);
     }
 }
 
-// ============================================================
-// STORE PAGE
-// ============================================================
-const storePage = document.getElementById('storePage');
-
-document.getElementById('shopNowBtn').addEventListener('click', function() {
-    openStore();
-});
-
-document.getElementById('closeStore').addEventListener('click', function() {
-    closeStore();
-});
-
-document.getElementById('silverBtn').addEventListener('click', function() {
-    openStore();
-});
-
-async function openStore() {
-    storePage.classList.add('active');
-    storePage.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-    await loadStoreData();
+function loadShopCategories() {
+    const list = document.getElementById('shopCategoryList');
+    const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
+    list.innerHTML = `
+        <li class="category-item active" data-category="all"><i class="fas fa-th"></i> Tous</li>
+        ${categories.map(cat => `
+            <li class="category-item" data-category="${cat}"><i class="fas fa-tag"></i> ${cat}</li>
+        `).join('')}
+    `;
+    document.querySelectorAll('#shopCategoryList .category-item').forEach(item => {
+        item.addEventListener('click', function() {
+            document.querySelectorAll('#shopCategoryList .category-item').forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            renderProducts(this.dataset.category);
+        });
+    });
 }
 
-function closeStore() {
-    storePage.classList.remove('active');
-    storePage.style.display = 'none';
-    document.body.style.overflow = '';
-}
+function renderProducts(category = 'all') {
+    const grid = document.getElementById('productsGrid');
+    const count = document.getElementById('productCount');
+    const filtered = category === 'all' ? products : products.filter(p => p.category === category);
 
-async function loadStoreData() {
-    try {
-        // Charger catégories
-        const catSnapshot = await getDocs(query(collection(db, 'categories'), orderBy('order', 'asc')));
-        const catContainer = document.getElementById('storeCategories');
-        catContainer.innerHTML = '<button class="store-category-btn active" data-category="all">📋 Tous</button>';
-        
-        catSnapshot.forEach(doc => {
-            const data = doc.data();
-            const btn = document.createElement('button');
-            btn.className = 'store-category-btn';
-            btn.dataset.category = doc.id;
-            if (data.image) {
-                btn.innerHTML = `<img src="${data.image}"> ${data.name}`;
-            } else {
-                btn.textContent = data.name;
-            }
-            catContainer.appendChild(btn);
-        });
+    count.textContent = `${filtered.length} produits`;
 
-        // Charger produits
-        const prodSnapshot = await getDocs(collection(db, 'products'));
-        const prodContainer = document.getElementById('storeProducts');
-        prodContainer.innerHTML = '';
-        
-        if (prodSnapshot.empty) {
-            prodContainer.innerHTML = `
-                <div style="grid-column:1/-1;text-align:center;padding:3rem;color:#999;">
-                    <i class="fas fa-box-open" style="font-size:3rem;display:block;margin-bottom:1rem;color:#e8a87c;"></i>
-                    <p>Aucun produit disponible pour le moment.</p>
-                    <p style="font-size:0.8rem;margin-top:0.5rem;">Connectez-vous en tant qu'admin pour ajouter des produits.</p>
-                </div>
-            `;
-        } else {
-            prodSnapshot.forEach(doc => {
-                const data = doc.data();
-                const card = document.createElement('div');
-                card.className = 'product-card';
-                card.dataset.category = data.category || '';
-                const promo = data.promoPrice && data.promoPrice > 0 && data.promoPrice < data.sellPrice;
-                const imgSrc = data.image || 'https://via.placeholder.com/200x200?text=MANORA';
-                card.innerHTML = `
-                    <img src="${imgSrc}" alt="${data.name}">
-                    <div class="product-info">
-                        <h4>${data.name || 'Sans nom'}</h4>
-                        <span class="product-category">${data.category || 'Non catégorisé'}</span>
-                        <div class="product-price">${promo ? `<span>${data.sellPrice}€</span> ${data.promoPrice}€` : (data.sellPrice || 0) + '€'}</div>
-                        <div style="font-size:0.6rem;color:#999;">📦 Stock: ${data.stock || 0}</div>
-                        ${data.brand ? `<div style="font-size:0.6rem;color:#999;">🏷️ ${data.brand}</div>` : ''}
-                    </div>
-                `;
-                prodContainer.appendChild(card);
-            });
-        }
+    if (filtered.length === 0) {
+        grid.innerHTML = `<div class="empty-state"><i class="fas fa-box-open"></i><p>Aucun produit</p></div>`;
+        return;
+    }
 
-        // Filtrage
-        document.querySelectorAll('.store-category-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.store-category-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                const cat = this.dataset.category;
-                document.querySelectorAll('#storeProducts .product-card').forEach(card => {
-                    if (cat === 'all' || card.dataset.category === cat) {
-                        card.style.display = 'block';
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
-            });
-        });
-
-        console.log('✅ Store chargé avec succès !');
-    } catch (error) {
-        console.error('❌ Erreur chargement store:', error);
-        document.getElementById('storeProducts').innerHTML = `
-            <div style="grid-column:1/-1;text-align:center;padding:3rem;color:#c0392b;">
-                <i class="fas fa-exclamation-triangle" style="font-size:3rem;display:block;margin-bottom:1rem;"></i>
-                <p>Erreur lors du chargement des produits.</p>
-                <p style="font-size:0.8rem;margin-top:0.5rem;">${error.message}</p>
+    grid.innerHTML = filtered.map(p => `
+        <div class="product-card" data-id="${p.id}">
+            <div class="product-image">${p.image || '📦'}</div>
+            <div class="product-info">
+                <h4>${p.name}</h4>
+                <p>${p.description || ''}</p>
+                <div class="product-price">${p.price || '0 MAD'}</div>
             </div>
-        `;
-        window.showToast('⚠️ Erreur chargement du store', true);
-    }
+        </div>
+    `).join('');
 }
 
 // ============================================================
-// AUTH STATE
+// AUTH UI
 // ============================================================
-function updateUI(user) {
+export function updateUI(user) {
     const userStatus = document.getElementById('userStatus');
     const userIcon = document.getElementById('userIcon');
 
@@ -272,97 +221,14 @@ function updateUI(user) {
         userStatus.textContent = '👤 ' + displayName.split('@')[0];
         userStatus.className = 'user-status logged-in';
         userIcon.style.color = '#4caf50';
-        openAdminPanel(user);
+        if (navDashboard) navDashboard.style.display = 'inline';
     } else {
         userStatus.textContent = '';
         userStatus.className = 'user-status';
         userIcon.style.color = '';
-        closeAdminPanel();
+        if (navDashboard) navDashboard.style.display = 'none';
     }
 }
-
-// ============================================================
-// ADMIN PANEL
-// ============================================================
-function openAdminPanel(user) {
-    const adminPanel = document.getElementById('adminPanel');
-    const sidebarUser = document.getElementById('sidebarUser');
-    const hero = document.getElementById('heroSection');
-    const publicCat = document.getElementById('publicCategories');
-    const publicProd = document.getElementById('publicProducts');
-    const collection = document.getElementById('collectionSection');
-    
-    if (user) {
-        adminPanel.classList.add('active');
-        adminPanel.style.display = 'flex';
-        sidebarUser.textContent = user.displayName || user.email || 'Admin';
-        hero.style.display = 'none';
-        publicCat.style.display = 'none';
-        publicProd.style.display = 'none';
-        collection.style.display = 'none';
-        
-        import('./admin.js').then(module => {
-            module.loadCategories();
-            module.loadProducts();
-            module.updateDashboard();
-            module.loadCategoriesTable();
-            module.loadProductsTable();
-        });
-    }
-}
-
-function closeAdminPanel() {
-    const adminPanel = document.getElementById('adminPanel');
-    const hero = document.getElementById('heroSection');
-    const publicCat = document.getElementById('publicCategories');
-    const publicProd = document.getElementById('publicProducts');
-    const collection = document.getElementById('collectionSection');
-    
-    adminPanel.classList.remove('active');
-    adminPanel.style.display = 'none';
-    hero.style.display = 'flex';
-    publicCat.style.display = 'block';
-    publicProd.style.display = 'block';
-    collection.style.display = 'block';
-}
-
-// ============================================================
-// SIDEBAR NAVIGATION
-// ============================================================
-document.querySelectorAll('.sidebar-link').forEach(link => {
-    link.addEventListener('click', function(e) {
-        e.preventDefault();
-        const page = this.dataset.page;
-        
-        if (this.id === 'sideLogout') {
-            signOut(auth);
-            window.showToast('👋 Déconnecté');
-            return;
-        }
-        
-        document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
-        this.classList.add('active');
-        
-        document.querySelectorAll('.admin-page').forEach(p => p.classList.remove('active'));
-        const targetMap = {
-            'dashboard': 'dashboardPanel',
-            'categories': 'categoriesPanel',
-            'products': 'productsPanel',
-            'orders': 'ordersPanel',
-            'clients': 'clientsPanel'
-        };
-        const target = document.getElementById(targetMap[page]);
-        if (target) target.classList.add('active');
-        
-        if (page === 'categories') {
-            import('./admin.js').then(module => module.loadCategoriesTable());
-        } else if (page === 'products') {
-            import('./admin.js').then(module => module.loadProductsTable());
-        } else if (page === 'dashboard') {
-            import('./admin.js').then(module => module.updateDashboard());
-        }
-    });
-});
 
 // ============================================================
 // MODAL AUTH
@@ -371,37 +237,40 @@ const authOverlay = document.getElementById('authOverlay');
 const userIcon = document.getElementById('userIcon');
 const authClose = document.getElementById('authClose');
 
-function openAuthModal() {
+export function openAuthModal() {
     authOverlay.classList.add('active');
     document.body.style.overflow = 'hidden';
 }
 
-function closeAuthModal() {
+export function closeAuthModal() {
     authOverlay.classList.remove('active');
     document.body.style.overflow = '';
     document.getElementById('loginError').classList.add('hidden');
     document.getElementById('registerError').classList.add('hidden');
 }
 
-userIcon.addEventListener('click', function() {
+userIcon?.addEventListener('click', function() {
     const user = auth.currentUser;
     if (user) {
         if (confirm('Se déconnecter ?')) {
             signOut(auth);
-            window.showToast('👋 Déconnecté');
+            showToast('👋 Déconnexion réussie');
         }
     } else {
         openAuthModal();
     }
 });
 
-authClose.addEventListener('click', closeAuthModal);
-authOverlay.addEventListener('click', (e) => { if (e.target === authOverlay) closeAuthModal(); });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && authOverlay.classList.contains('active')) closeAuthModal(); });
+authClose?.addEventListener('click', closeAuthModal);
+authOverlay?.addEventListener('click', function(e) {
+    if (e.target === authOverlay) closeAuthModal();
+});
 
-// ============================================================
-// TABS AUTH
-// ============================================================
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && authOverlay?.classList.contains('active')) closeAuthModal();
+});
+
+// Tabs
 const tabs = document.querySelectorAll('.auth-tab');
 const loginForm = document.getElementById('loginForm');
 const registerForm = document.getElementById('registerForm');
@@ -410,7 +279,8 @@ tabs.forEach(tab => {
     tab.addEventListener('click', function() {
         tabs.forEach(t => t.classList.remove('active'));
         this.classList.add('active');
-        if (this.dataset.tab === 'login') {
+        const tabName = this.dataset.tab;
+        if (tabName === 'login') {
             loginForm.classList.remove('hidden');
             registerForm.classList.add('hidden');
         } else {
@@ -423,60 +293,9 @@ tabs.forEach(tab => {
 });
 
 // ============================================================
-// LOGIN
+// INSCRIPTION
 // ============================================================
-loginForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    const email = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value;
-    const errorDiv = document.getElementById('loginError');
-
-    errorDiv.classList.add('hidden');
-    if (!email || !window.isValidEmail(email)) {
-        errorDiv.classList.remove('hidden');
-        errorDiv.textContent = '⚠️ Email invalide';
-        return;
-    }
-    if (!password) {
-        errorDiv.classList.remove('hidden');
-        errorDiv.textContent = '⚠️ Mot de passe requis';
-        return;
-    }
-
-    const loginBtn = document.getElementById('loginBtn');
-    loginBtn.disabled = true;
-    loginBtn.textContent = 'Connexion...';
-
-    signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-            const user = userCredential.user;
-            window.showToast('✅ Bienvenue ' + (user.displayName || user.email) + ' !');
-            closeAuthModal();
-            loginForm.reset();
-        })
-        .catch((error) => {
-            errorDiv.classList.remove('hidden');
-            let message = 'Erreur de connexion';
-            switch (error.code) {
-                case 'auth/user-not-found': message = 'Aucun compte trouvé'; break;
-                case 'auth/wrong-password': message = 'Mot de passe incorrect'; break;
-                case 'auth/invalid-email': message = 'Email invalide'; break;
-                case 'auth/too-many-requests': message = 'Trop de tentatives'; break;
-                default: message = error.message;
-            }
-            errorDiv.textContent = '⚠️ ' + message;
-            window.showToast('⚠️ ' + message, true);
-        })
-        .finally(() => {
-            loginBtn.disabled = false;
-            loginBtn.textContent = 'Se connecter';
-        });
-});
-
-// ============================================================
-// REGISTER
-// ============================================================
-registerForm.addEventListener('submit', function(e) {
+document.getElementById('registerBtn')?.addEventListener('click', function(e) {
     e.preventDefault();
     const name = document.getElementById('registerName').value.trim();
     const email = document.getElementById('registerEmail').value.trim();
@@ -489,110 +308,200 @@ registerForm.addEventListener('submit', function(e) {
 
     if (!name || name.length < 2) {
         errorDiv.classList.remove('hidden');
-        errorDiv.textContent = '⚠️ Nom invalide';
+        errorDiv.textContent = '⚠️ Nom valide requis';
+        showToast('⚠️ Nom invalide', true);
         return;
     }
-    if (!email || !window.isValidEmail(email)) {
+    if (!email || !isValidEmail(email)) {
         errorDiv.classList.remove('hidden');
         errorDiv.textContent = '⚠️ Email invalide';
+        showToast('⚠️ Email invalide', true);
         return;
     }
     if (!password || password.length < 6) {
         errorDiv.classList.remove('hidden');
-        errorDiv.textContent = '⚠️ Mot de passe minimum 6 caractères';
+        errorDiv.textContent = '⚠️ Mot de passe min 6 caractères';
+        showToast('⚠️ Mot de passe trop court', true);
         return;
     }
     if (password !== confirm) {
         errorDiv.classList.remove('hidden');
         errorDiv.textContent = '⚠️ Les mots de passe ne correspondent pas';
+        showToast('⚠️ Les mots de passe ne correspondent pas', true);
         return;
     }
 
-    const registerBtn = document.getElementById('registerBtn');
-    registerBtn.disabled = true;
-    registerBtn.textContent = 'Création...';
+    this.disabled = true;
+    this.textContent = 'Création...';
 
     createUserWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-            const user = userCredential.user;
+        .then((cred) => {
+            const user = cred.user;
             return updateProfile(user, { displayName: name }).then(() => user);
         })
+        .then((user) => {
+            return setDoc(doc(db, 'users', user.uid), {
+                uid: user.uid,
+                name: name,
+                email: email,
+                phone: phone || '',
+                role: 'admin',
+                createdAt: serverTimestamp(),
+                lastLogin: serverTimestamp()
+            }).then(() => user);
+        })
         .then(() => {
-            window.showToast('🎉 Bienvenue ' + name + ' !');
+            showToast('🎉 Bienvenue ' + name + ' !');
             closeAuthModal();
             registerForm.reset();
         })
         .catch((error) => {
             errorDiv.classList.remove('hidden');
             let message = 'Erreur';
-            switch (error.code) {
-                case 'auth/email-already-in-use': message = 'Email déjà utilisé'; break;
-                case 'auth/invalid-email': message = 'Email invalide'; break;
-                case 'auth/weak-password': message = 'Mot de passe trop faible'; break;
-                default: message = error.message;
-            }
+            if (error.code === 'auth/email-already-in-use') message = 'Email déjà utilisé';
+            else if (error.code === 'auth/invalid-email') message = 'Email invalide';
+            else if (error.code === 'auth/weak-password') message = 'Mot de passe trop faible';
+            else message = error.message;
             errorDiv.textContent = '⚠️ ' + message;
-            window.showToast('⚠️ ' + message, true);
+            showToast('⚠️ ' + message, true);
         })
         .finally(() => {
-            registerBtn.disabled = false;
-            registerBtn.textContent = 'Créer mon compte';
+            this.disabled = false;
+            this.textContent = 'Créer mon compte';
+        });
+});
+
+// ============================================================
+// CONNEXION
+// ============================================================
+document.getElementById('loginBtn')?.addEventListener('click', function(e) {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const errorDiv = document.getElementById('loginError');
+
+    errorDiv.classList.add('hidden');
+
+    if (!email || !isValidEmail(email)) {
+        errorDiv.classList.remove('hidden');
+        errorDiv.textContent = '⚠️ Email invalide';
+        showToast('⚠️ Email invalide', true);
+        return;
+    }
+    if (!password) {
+        errorDiv.classList.remove('hidden');
+        errorDiv.textContent = '⚠️ Mot de passe requis';
+        showToast('⚠️ Mot de passe requis', true);
+        return;
+    }
+
+    this.disabled = true;
+    this.textContent = 'Connexion...';
+
+    signInWithEmailAndPassword(auth, email, password)
+        .then((cred) => {
+            const user = cred.user;
+            updateDoc(doc(db, 'users', user.uid), { lastLogin: serverTimestamp() }).catch(() => {});
+            showToast('✅ Bienvenue ' + (user.displayName || user.email) + ' !');
+            closeAuthModal();
+            loginForm.reset();
+        })
+        .catch((error) => {
+            errorDiv.classList.remove('hidden');
+            let message = 'Erreur';
+            if (error.code === 'auth/user-not-found') message = 'Aucun compte trouvé';
+            else if (error.code === 'auth/wrong-password') message = 'Mot de passe incorrect';
+            else if (error.code === 'auth/invalid-email') message = 'Email invalide';
+            else if (error.code === 'auth/too-many-requests') message = 'Trop de tentatives';
+            else message = error.message;
+            errorDiv.textContent = '⚠️ ' + message;
+            showToast('⚠️ ' + message, true);
+        })
+        .finally(() => {
+            this.disabled = false;
+            this.textContent = 'Se connecter';
         });
 });
 
 // ============================================================
 // RESET PASSWORD
 // ============================================================
-document.getElementById('resetPasswordLink').addEventListener('click', function(e) {
+document.getElementById('resetPasswordLink')?.addEventListener('click', function(e) {
     e.preventDefault();
     const email = document.getElementById('loginEmail').value.trim();
-    if (!email || !window.isValidEmail(email)) {
-        window.showToast('⚠️ Email valide requis', true);
+    if (!email || !isValidEmail(email)) {
+        showToast('⚠️ Entrez un email valide', true);
         document.getElementById('loginEmail').focus();
         return;
     }
     sendPasswordResetEmail(auth, email)
-        .then(() => window.showToast('📧 Email envoyé à ' + email))
-        .catch((error) => window.showToast('⚠️ ' + error.message, true));
+        .then(() => showToast('📧 Email de réinitialisation envoyé'))
+        .catch((error) => showToast('⚠️ ' + error.message, true));
 });
 
 // ============================================================
-// AUTRES ÉVÉNEMENTS
-// ============================================================
-document.getElementById('lunchBadge').addEventListener('click', () => window.showToast('🌿 Wellness & Bien-être'));
-document.getElementById('logoLink').addEventListener('click', (e) => { e.preventDefault(); });
-
-document.querySelectorAll('.header-icons i').forEach(icon => {
-    if (icon.id === 'userIcon') return;
-    icon.addEventListener('click', function() {
-        window.showToast('🛍️ Bientôt disponible');
-    });
-});
-
-document.querySelectorAll('.footer-links a').forEach(link => {
-    link.addEventListener('click', (e) => {
-        e.preventDefault();
-        window.showToast('📄 Page en construction');
-    });
-});
-
-document.querySelectorAll('.footer-social i').forEach(icon => {
-    icon.addEventListener('click', () => window.showToast('📱 Bientôt disponible'));
-});
-
-// ============================================================
-// AUTH STATE LISTENER
+// SURVEILLANCE AUTH
 // ============================================================
 onAuthStateChanged(auth, (user) => {
     updateUI(user);
-    loadPublicData();
+    if (user && authOverlay?.classList.contains('active')) {
+        closeAuthModal();
+    }
 });
 
 // ============================================================
-// INITIALISATION
+// BOUTONS ACCUEIL
 // ============================================================
-loadPublicData();
+document.getElementById('shopNowBtn')?.addEventListener('click', () => {
+    showPage('shop');
+    loadShopProducts('all');
+});
 
-console.log('🌿 MANORA · Store + Admin');
-console.log('📊 Firebase Auth + Firestore + Storage actif');
-console.log('🛍️ Store disponible avec les données Firebase');
+document.getElementById('silverBtn')?.addEventListener('click', () => {
+    showPage('shop');
+    loadShopProducts('all');
+});
+
+document.getElementById('lunchBadge')?.addEventListener('click', () => {
+    showToast('🌿 Wellness & Bien-être — MANORA');
+});
+
+// ============================================================
+// CATÉGORIES ACCUEIL
+// ============================================================
+document.querySelectorAll('#homeCategories .cat-item').forEach(item => {
+    item.addEventListener('click', function() {
+        const category = this.textContent.trim();
+        showPage('shop');
+        loadShopProducts('all');
+        setTimeout(() => {
+            const items = document.querySelectorAll('#shopCategoryList .category-item');
+            items.forEach(el => {
+                el.classList.toggle('active', el.textContent.trim() === category);
+            });
+            renderProducts(category);
+        }, 300);
+    });
+});
+
+// ============================================================
+// ICÔNES HEADER
+// ============================================================
+document.querySelectorAll('.header-icons i').forEach(icon => {
+    if (icon.id === 'userIcon') return;
+    icon.addEventListener('click', function() {
+        const user = auth.currentUser;
+        if (!user && this.dataset.icon === 'bag') {
+            showToast('🛍️ Connectez-vous pour commander', true);
+            openAuthModal();
+            return;
+        }
+        const iconType = this.dataset.icon || '';
+        let label = 'Action';
+        if (iconType === 'search') label = 'Recherche';
+        else if (iconType === 'bag') label = 'Panier';
+        showToast(`🛍️ ${label} — bientôt disponible`);
+    });
+});
+
+console.log('🌿 MANORA · Script principal chargé');
