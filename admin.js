@@ -1,5 +1,5 @@
 // ============================================================
-// ADMIN.JS - CRUD COMPLET AVEC UPLOAD D'IMAGES
+// ADMIN.JS - CRUD COMPLET AVEC MULTI-IMAGES (5 photos)
 // ============================================================
 import { auth, db, showToast } from './script.js';
 import { onAuthStateChanged, signOut } from "firebase/auth";
@@ -16,7 +16,7 @@ import {
     addDoc
 } from "firebase/firestore";
 
-console.log('📊 Admin.js chargé - CRUD avec upload d\'images');
+console.log('📊 Admin.js chargé - CRUD avec multi-images (5 photos)');
 
 // ============================================================
 // FONCTION CONVERSION IMAGE EN BASE64
@@ -54,7 +54,6 @@ const SECTIONS = {
         icon: '📦',
         collection: 'produits',
         fields: [
-            { name: 'image', label: 'Image', type: 'file', required: false, accept: 'image/*' },
             { name: 'name', label: 'Nom du produit', type: 'text', required: true },
             { name: 'description', label: 'Description', type: 'text', required: false },
             { name: 'prixAchat', label: "Prix d'achat (MAD)", type: 'text', required: true },
@@ -66,7 +65,15 @@ const SECTIONS = {
             { name: 'stock', label: 'Stock', type: 'number', required: false },
             { name: 'videoUrl', label: 'URL Vidéo YouTube', type: 'text', required: false, placeholder: 'https://www.youtube.com/watch?v=...' }
         ],
-        displayFields: ['image', 'name', 'prixAchat', 'prixVente', 'profit', 'chiffreAffaire']
+        displayFields: ['name', 'prixAchat', 'prixVente', 'profit', 'chiffreAffaire', 'stock'],
+        // Champs multi-images (5 photos max)
+        imageFields: [
+            { name: 'image1', label: 'Photo 1', type: 'file', required: false, accept: 'image/*' },
+            { name: 'image2', label: 'Photo 2', type: 'file', required: false, accept: 'image/*' },
+            { name: 'image3', label: 'Photo 3', type: 'file', required: false, accept: 'image/*' },
+            { name: 'image4', label: 'Photo 4', type: 'file', required: false, accept: 'image/*' },
+            { name: 'image5', label: 'Photo 5', type: 'file', required: false, accept: 'image/*' }
+        ]
     },
 
     clients: {
@@ -175,6 +182,9 @@ export async function loadSection(section) {
                 `<table class="dashboard-table"><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}<th>Actions</th></tr></thead><tbody>
                 ${items.map(item => `<tr>${config.displayFields.map(f => {
                     if (f === 'image') {
+                        if (item.images && item.images.length > 0) {
+                            return `<td><img src="${item.images[0]}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;" /></td>`;
+                        }
                         if (item.image && item.image.startsWith('data:image')) return `<td><img src="${item.image}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;" /></td>`;
                         return `<td>${item.image || '📦'}</td>`;
                     }
@@ -190,7 +200,7 @@ export async function loadSection(section) {
 }
 
 // ============================================================
-// CRUD MODAL
+// CRUD MODAL AVEC MULTI-IMAGES (5 photos)
 // ============================================================
 const crudOverlay = document.getElementById('crudOverlay');
 const crudClose = document.getElementById('crudClose');
@@ -206,7 +216,8 @@ window.openCrudModal = function(section, id = null) {
     crudTitle.textContent = id ? `✏️ Modifier ${config.label}` : `➕ Ajouter ${config.label}`;
     crudSubmit.textContent = id ? 'Mettre à jour' : 'Ajouter';
 
-    crudFields.innerHTML = config.fields.map(f => `
+    // Générer les champs normaux
+    let fieldsHtml = config.fields.map(f => `
         <div class="form-group">
             <label for="crud_${f.name}">${f.label} ${f.required ? '*' : ''}</label>
             ${f.type === 'select' ? `<select id="crud_${f.name}" ${f.required ? 'required' : ''}><option value="">Sélectionner...</option>${f.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}</select>` :
@@ -215,20 +226,39 @@ window.openCrudModal = function(section, id = null) {
         </div>
     `).join('');
 
-    config.fields.forEach(f => {
-        if (f.type === 'file') {
-            const input = document.getElementById(`crud_${f.name}`);
-            const preview = document.getElementById(`preview_${f.name}`);
-            if (input && preview) {
-                input.addEventListener('change', function(e) {
-                    const file = e.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = function(event) { preview.innerHTML = `<img src="${event.target.result}" />`; };
-                        reader.readAsDataURL(file);
-                    } else { preview.innerHTML = ''; }
-                });
-            }
+    // Ajouter les champs d'images (jusqu'à 5) pour les produits
+    if (section === 'produits' && config.imageFields) {
+        fieldsHtml += `<div style="border-top:1px solid #eee;padding-top:1rem;margin-top:1rem;">
+            <h4 style="font-weight:400;margin-bottom:1rem;">📸 Photos du produit (max 5)</h4>
+            ${config.imageFields.map((f, index) => `
+                <div class="form-group">
+                    <label for="crud_${f.name}">${f.label}</label>
+                    <input type="file" id="crud_${f.name}" accept="${f.accept || 'image/*'}" />
+                    <div class="image-preview" id="preview_${f.name}"></div>
+                </div>
+            `).join('')}
+        </div>`;
+    }
+
+    crudFields.innerHTML = fieldsHtml;
+
+    // Gérer les aperçus d'images
+    document.querySelectorAll('#crudFields input[type="file"]').forEach(input => {
+        const previewId = input.id.replace('crud_', 'preview_');
+        const preview = document.getElementById(previewId);
+        if (preview) {
+            input.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        preview.innerHTML = `<img src="${event.target.result}" />`;
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    preview.innerHTML = '';
+                }
+            });
         }
     });
 
@@ -255,6 +285,8 @@ async function loadItemData(section, id) {
         const docSnap = await getDoc(doc(db, config.collection, id));
         if (docSnap.exists()) {
             const data = docSnap.data();
+            
+            // Charger les champs normaux
             config.fields.forEach(f => {
                 const el = document.getElementById(`crud_${f.name}`);
                 if (el) {
@@ -268,6 +300,19 @@ async function loadItemData(section, id) {
                     }
                 }
             });
+
+            // Charger les images supplémentaires (produits)
+            if (section === 'produits' && config.imageFields) {
+                config.imageFields.forEach(f => {
+                    const preview = document.getElementById(`preview_${f.name}`);
+                    if (preview && data.images) {
+                        const index = parseInt(f.name.replace('image', '')) - 1;
+                        if (data.images[index]) {
+                            preview.innerHTML = `<img src="${data.images[index]}" />`;
+                        }
+                    }
+                });
+            }
         }
     } catch (error) { console.error('Erreur chargement:', error); showToast('⚠️ Erreur chargement données', true); }
 }
@@ -279,6 +324,7 @@ crudForm?.addEventListener('submit', async function(e) {
     const data = {};
     let valid = true;
 
+    // Récupérer les champs normaux
     for (const f of config.fields) {
         const el = document.getElementById(`crud_${f.name}`);
         if (el) {
@@ -293,6 +339,48 @@ crudForm?.addEventListener('submit', async function(e) {
             } else {
                 data[f.name] = el.value.trim();
                 if (f.required && !data[f.name]) { valid = false; el.style.borderColor = '#c0392b'; } else { el.style.borderColor = ''; }
+            }
+        }
+    }
+
+    // Récupérer les images supplémentaires (produits)
+    if (currentSection === 'produits' && config.imageFields) {
+        const images = [];
+        for (const f of config.imageFields) {
+            const el = document.getElementById(`crud_${f.name}`);
+            if (el && el.files[0]) {
+                try {
+                    const base64 = await imageToBase64(el.files[0]);
+                    images.push(base64);
+                } catch { showToast('⚠️ Erreur conversion image', true); return; }
+            }
+        }
+        if (images.length > 0) {
+            // Si des images existent déjà, les conserver + ajouter les nouvelles
+            if (editingId) {
+                const docSnap = await getDoc(doc(db, config.collection, editingId));
+                if (docSnap.exists() && docSnap.data().images) {
+                    const existingImages = docSnap.data().images || [];
+                    // Ne garder que les images existantes qui n'ont pas été remplacées
+                    const finalImages = [...existingImages];
+                    // Remplacer les images aux mêmes indices
+                    for (let i = 0; i < images.length && i < 5; i++) {
+                        if (images[i]) {
+                            finalImages[i] = images[i];
+                        }
+                    }
+                    data.images = finalImages.filter(img => img);
+                } else {
+                    data.images = images;
+                }
+            } else {
+                data.images = images;
+            }
+        } else if (editingId) {
+            // Si pas de nouvelles images, garder les anciennes
+            const docSnap = await getDoc(doc(db, config.collection, editingId));
+            if (docSnap.exists() && docSnap.data().images) {
+                data.images = docSnap.data().images;
             }
         }
     }
@@ -439,4 +527,4 @@ document.getElementById('dashboardLogout').addEventListener('click', function() 
     setTimeout(() => window.location.reload(), 500);
 });
 
-console.log('📊 Admin.js chargé - CRUD avec upload d\'images');
+console.log('📊 Admin.js chargé - CRUD avec multi-images (5 photos)');
