@@ -1,5 +1,5 @@
 // ============================================================
-// SCRIPT.JS - Navigation, Auth, Catalogue, Panier, Détails
+// SCRIPT.JS - Navigation, Auth, Catalogue, Panier
 // ============================================================
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
@@ -22,16 +22,15 @@ import {
     getDocs,
     getDoc,
     updateDoc,
-    deleteDoc,
     serverTimestamp,
     query,
     orderBy,
-    addDoc
+    addDoc,
+    limit
 } from "firebase/firestore";
 
 // ============================================================
-// CONFIGURATION FIREBASE
-// ============================================================
+// CONFIGURATION FIREBASE// ============================================================
 const firebaseConfig = {
     apiKey: "AIzaSyBuaSbWc0yIBvILjduH3K5NlJqpC1npX1E",
     authDomain: "manora-4281c.firebaseapp.com",
@@ -125,20 +124,21 @@ export function showPage(page) {
     pageDashboard.style.display = page === 'dashboard' ? 'block' : 'none';
 
     document.querySelectorAll('.nav-links a').forEach(link => link.classList.remove('active'));
-    if (page === 'home') navHome?.classList.add('active');
-    if (page === 'shop') navShop?.classList.add('active');
-    if (page === 'dashboard') navDashboard?.classList.add('active');
+    if (page === 'home' && navHome) navHome.classList.add('active');
+    if (page === 'shop' && navShop) navShop.classList.add('active');
+    if (page === 'dashboard' && navDashboard) navDashboard.classList.add('active');
 }
 
 navHome?.addEventListener('click', (e) => {
     e.preventDefault();
     showPage('home');
+    loadHomeProducts();
 });
 
 navShop?.addEventListener('click', (e) => {
     e.preventDefault();
     showPage('shop');
-    loadShopProducts();
+    loadAllProducts();
 });
 
 navDashboard?.addEventListener('click', (e) => {
@@ -150,23 +150,104 @@ navDashboard?.addEventListener('click', (e) => {
         return;
     }
     showPage('dashboard');
+    if (typeof loadSection === 'function') {
+        loadSection('statistiques');
+    }
 });
 
 // ============================================================
-// BOUTIQUE - CHARGER PRODUITS ET CATÉGORIES
+// PAGE ACCUEIL - NOUVEAUTÉS & PLUS VENDUS
 // ============================================================
-let products = [];
+export async function loadHomeProducts() {
+    try {
+        // Nouveautés (les 4 plus récents)
+        const newQuery = query(collection(db, 'produits'), orderBy('createdAt', 'desc'), limit(4));
+        const newSnapshot = await getDocs(newQuery);
+        const newProducts = [];
+        newSnapshot.forEach(doc => {
+            newProducts.push({ id: doc.id, ...doc.data() });
+        });
+        renderHomeProducts('newProductsGrid', newProducts, '✨ Nouveauté');
 
-export async function loadShopProducts(category = 'all') {
+        // Plus vendus (exemple: produits avec prix le plus élevé ou avec un champ "sold")
+        // Pour l'exemple, on prend 4 produits aléatoires ou les plus chers
+        const featuredQuery = query(collection(db, 'produits'), orderBy('prixVente', 'desc'), limit(4));
+        const featuredSnapshot = await getDocs(featuredQuery);
+        const featuredProducts = [];
+        featuredSnapshot.forEach(doc => {
+            featuredProducts.push({ id: doc.id, ...doc.data() });
+        });
+        renderHomeProducts('featuredProductsGrid', featuredProducts, '🔥 Best-seller');
+
+    } catch (error) {
+        console.error('Erreur chargement home:', error);
+    }
+}
+
+function renderHomeProducts(containerId, products, badge) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    if (products.length === 0) {
+        container.innerHTML = `<div class="empty-state"><i class="fas fa-box-open"></i><p>Aucun produit</p></div>`;
+        return;
+    }
+
+    container.innerHTML = products.map(p => {
+        const displayPrice = p.prixVente || p.price || '0';
+        const priceValue = parseFloat(displayPrice) || 0;
+
+        let imageHtml = '📦';
+        if (p.images && p.images.length > 0 && p.images[0]) {
+            imageHtml = `<img src="${p.images[0]}" alt="${p.name}" />`;
+        } else if (p.image && p.image.startsWith('data:image')) {
+            imageHtml = `<img src="${p.image}" alt="${p.name}" />`;
+        }
+
+        const desc = p.description || '';
+        const descShort = desc.length > 50 ? desc.substring(0, 50) + '...' : desc;
+
+        return `
+            <div class="product-card" data-id="${p.id}">
+                <div class="product-image">
+                    ${imageHtml}
+                    <span class="product-badge">${badge}</span>
+                </div>
+                <div class="product-info">
+                    <h4>${p.name}</h4>
+                    <div class="product-desc">${descShort}</div>
+                    <div class="product-price">${priceValue.toFixed(2)} MAD</div>
+                    <div class="product-actions">
+                        <button class="btn-add-cart" data-id="${p.id}" data-name="${p.name}" data-price="${priceValue}" data-image="${p.images && p.images[0] ? p.images[0] : p.image || '📦'}">
+                            <i class="fas fa-cart-plus"></i> Ajouter
+                        </button>
+                        <button class="btn-detail" data-id="${p.id}">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    attachProductEvents(container);
+}
+
+// ============================================================
+// BOUTIQUE - TOUS LES PRODUITS
+// ============================================================
+let allProducts = [];
+
+export async function loadAllProducts(category = 'all') {
     try {
         const q = query(collection(db, 'produits'), orderBy('name'));
         const snapshot = await getDocs(q);
-        products = [];
+        allProducts = [];
         snapshot.forEach(doc => {
-            products.push({ id: doc.id, ...doc.data() });
+            allProducts.push({ id: doc.id, ...doc.data() });
         });
-        renderProducts(category);
-        await loadShopCategories();
+        renderShopProducts(category);
+        loadShopCategories();
     } catch (error) {
         console.error('Erreur chargement produits:', error);
         showToast('⚠️ Erreur chargement produits', true);
@@ -181,27 +262,15 @@ async function loadShopCategories() {
         snapshot.forEach(doc => {
             const data = doc.data();
             if (data.name) {
-                categories.push({
-                    id: doc.id,
-                    name: data.name,
-                    image: data.image || '🏷️'
-                });
+                categories.push({ id: doc.id, name: data.name, image: data.image || '🏷️' });
             }
         });
 
         if (categories.length === 0) {
-            const productCategories = [...new Set(products.map(p => p.category).filter(Boolean))];
+            const productCategories = [...new Set(allProducts.map(p => p.category).filter(Boolean))];
             productCategories.forEach(cat => {
                 categories.push({ id: cat, name: cat, image: '🏷️' });
             });
-        }
-
-        if (categories.length === 0) {
-            list.innerHTML = `
-                <li class="category-item active" data-category="all"><i class="fas fa-th"></i> Tous</li>
-                <li style="padding:0.5rem;color:#999;font-size:0.75rem;text-align:center;">Aucune catégorie</li>
-            `;
-            return;
         }
 
         list.innerHTML = `
@@ -209,8 +278,8 @@ async function loadShopCategories() {
             ${categories.map(cat => `
                 <li class="category-item" data-category="${cat.name}">
                     ${cat.image && cat.image.startsWith('data:image') 
-                        ? `<img src="${cat.image}" style="width:20px;height:20px;object-fit:cover;border-radius:50%;margin-right:0.5rem;" />` 
-                        : `<span style="margin-right:0.5rem;">${cat.image || '🏷️'}</span>`}
+                        ? `<img src="${cat.image}" />` 
+                        : `<span>${cat.image || '🏷️'}</span>`}
                     ${cat.name}
                 </li>
             `).join('')}
@@ -220,36 +289,26 @@ async function loadShopCategories() {
             item.addEventListener('click', function() {
                 document.querySelectorAll('#shopCategoryList .category-item').forEach(c => c.classList.remove('active'));
                 this.classList.add('active');
-                renderProducts(this.dataset.category);
+                renderShopProducts(this.dataset.category);
             });
         });
 
     } catch (error) {
-        console.error('Erreur chargement catégories:', error);
-        const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
-        list.innerHTML = `
-            <li class="category-item active" data-category="all"><i class="fas fa-th"></i> Tous</li>
-            ${categories.map(cat => `
-                <li class="category-item" data-category="${cat}"><i class="fas fa-tag"></i> ${cat}</li>
-            `).join('')}
-        `;
-        document.querySelectorAll('#shopCategoryList .category-item').forEach(item => {
-            item.addEventListener('click', function() {
-                document.querySelectorAll('#shopCategoryList .category-item').forEach(c => c.classList.remove('active'));
-                this.classList.add('active');
-                renderProducts(this.dataset.category);
-            });
-        });
+        console.error('Erreur catégories:', error);
     }
 }
 
-// ============================================================
-// AFFICHAGE DES PRODUITS
-// ============================================================
-function renderProducts(category = 'all') {
+function renderShopProducts(category = 'all') {
     const grid = document.getElementById('productsGrid');
     const count = document.getElementById('productCount');
-    const filtered = category === 'all' ? products : products.filter(p => p.category === category);
+
+    let filtered = category === 'all' ? allProducts : allProducts.filter(p => p.category === category);
+
+    // Trier
+    const sortValue = document.getElementById('sortSelect')?.value || 'name';
+    if (sortValue === 'price-asc') filtered.sort((a, b) => (parseFloat(a.prixVente) || 0) - (parseFloat(b.prixVente) || 0));
+    else if (sortValue === 'price-desc') filtered.sort((a, b) => (parseFloat(b.prixVente) || 0) - (parseFloat(a.prixVente) || 0));
+    else filtered.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
     count.textContent = `${filtered.length} produits`;
 
@@ -262,14 +321,11 @@ function renderProducts(category = 'all') {
         const displayPrice = p.prixVente || p.price || '0';
         const priceValue = parseFloat(displayPrice) || 0;
 
-        // Afficher la première image ou une image par défaut
         let imageHtml = '📦';
         if (p.images && p.images.length > 0 && p.images[0]) {
             imageHtml = `<img src="${p.images[0]}" alt="${p.name}" />`;
         } else if (p.image && p.image.startsWith('data:image')) {
             imageHtml = `<img src="${p.image}" alt="${p.name}" />`;
-        } else if (p.image) {
-            imageHtml = p.image;
         }
 
         const desc = p.description || '';
@@ -295,7 +351,11 @@ function renderProducts(category = 'all') {
         `;
     }).join('');
 
-    document.querySelectorAll('.btn-add-cart').forEach(btn => {
+    attachProductEvents(grid);
+}
+
+function attachProductEvents(container) {
+    container.querySelectorAll('.btn-add-cart').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
             const product = {
@@ -308,7 +368,7 @@ function renderProducts(category = 'all') {
         });
     });
 
-    document.querySelectorAll('.btn-detail').forEach(btn => {
+    container.querySelectorAll('.btn-detail').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
             openProductDetail(this.dataset.id);
@@ -317,7 +377,7 @@ function renderProducts(category = 'all') {
 }
 
 // ============================================================
-// DÉTAILS PRODUIT - MULTI-IMAGES
+// DÉTAILS PRODUIT
 // ============================================================
 const detailOverlay = document.getElementById('productDetailOverlay');
 const detailClose = document.getElementById('productDetailClose');
@@ -346,7 +406,6 @@ function renderProductDetail(product) {
     const priceValue = parseFloat(displayPrice) || 0;
     const oldPrice = product.prixPromotion || null;
 
-    // Gestion des images
     let images = [];
     if (product.images && product.images.length > 0) {
         images = product.images;
@@ -391,13 +450,11 @@ function renderProductDetail(product) {
 
     detailContent.innerHTML = `
         <div class="product-detail-grid">
-            <div class="product-detail-image">
-                ${imagesHtml}
-            </div>
+            <div class="product-detail-image">${imagesHtml}</div>
             <div class="product-detail-info">
                 <h1>${product.name}</h1>
                 <div class="detail-category">${product.category || 'Non catégorisé'}</div>
-                <div class="detail-description">${product.description || 'Aucune description disponible'}</div>
+                <div class="detail-description">${product.description || 'Aucune description'}</div>
                 <div class="detail-price">
                     ${priceValue.toFixed(2)} MAD
                     ${oldPrice ? `<span class="old-price">${parseFloat(oldPrice).toFixed(2)} MAD</span>` : ''}
@@ -594,7 +651,7 @@ document.getElementById('checkoutBtn')?.addEventListener('click', function() {
 });
 
 // ============================================================
-// AUTH UI
+// AUTH
 // ============================================================
 export function updateUI(user) {
     const userStatus = document.getElementById('userStatus');
@@ -616,8 +673,7 @@ export function updateUI(user) {
         if (dashboardLink) {
             dashboardLink.style.display = 'none';
         }
-        // Si on est sur le dashboard et déconnecté, retourner à l'accueil
-        if (pageDashboard.style.display !== 'none') {
+        if (pageDashboard && pageDashboard.style.display !== 'none') {
             showPage('home');
         }
     }
@@ -739,34 +795,46 @@ document.getElementById('resetPasswordLink')?.addEventListener('click', function
     sendPasswordResetEmail(auth, email).then(() => showToast('📧 Email envoyé')).catch((error) => showToast('⚠️ ' + error.message, true));
 });
 
+// ============================================================
+// SURVEILLANCE AUTH & CHARGEMENT INITIAL
+// ============================================================
 onAuthStateChanged(auth, (user) => {
     updateUI(user);
-    if (user && authOverlay?.classList.contains('active')) closeAuthModal();
+    if (user && authOverlay?.classList.contains('active')) {
+        closeAuthModal();
+    }
 });
 
-// ============================================================
-// BOUTONS ACCUEIL
-// ============================================================
-document.getElementById('shopNowBtn')?.addEventListener('click', () => { showPage('shop'); loadShopProducts('all'); });
-document.getElementById('silverBtn')?.addEventListener('click', () => { showPage('shop'); loadShopProducts('all'); });
-document.getElementById('lunchBadge')?.addEventListener('click', () => { showToast('🌿 Wellness & Bien-être — MANORA'); });
+// Chargement initial
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('📄 Chargement initial...');
+    showPage('home');
+    loadHomeProducts();
+});
 
-// ============================================================
-// CATÉGORIES ACCUEIL
-// ============================================================
-document.querySelectorAll('#homeCategories .cat-item').forEach(item => {
-    item.addEventListener('click', function() {
-        const category = this.textContent.trim();
-        showPage('shop');
-        loadShopProducts('all');
-        setTimeout(() => {
-            const items = document.querySelectorAll('#shopCategoryList .category-item');
-            items.forEach(el => {
-                el.classList.toggle('active', el.textContent.trim() === category);
-            });
-            renderProducts(category);
-        }, 300);
-    });
+// Boutons
+document.getElementById('shopNowBtn')?.addEventListener('click', () => {
+    showPage('shop');
+    loadAllProducts();
+});
+
+document.getElementById('silverBtn')?.addEventListener('click', () => {
+    showPage('shop');
+    loadAllProducts();
+});
+
+document.getElementById('lunchBadge')?.addEventListener('click', () => {
+    showToast('🌿 Wellness & Bien-être — MANORA');
+});
+
+// Filtre prix
+document.getElementById('priceRange')?.addEventListener('input', function() {
+    document.getElementById('priceDisplay').textContent = this.value + ' MAD';
+});
+
+// Tri
+document.getElementById('sortSelect')?.addEventListener('change', function() {
+    renderShopProducts(document.querySelector('.category-item.active')?.dataset.category || 'all');
 });
 
 console.log('🌿 MANORA · Script principal chargé');
