@@ -1,5 +1,5 @@
 // ============================================================
-// SCRIPT.JS - Navigation, Auth, Catalogue, Panier
+// SCRIPT.JS - Navigation, Auth, Catalogue, Panier, Détails
 // ============================================================
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
@@ -147,7 +147,7 @@ navDashboard?.addEventListener('click', (e) => {
 });
 
 // ============================================================
-// BOUTIQUE - CHARGER PRODUITS DEPUIS FIRESTORE
+// BOUTIQUE - CHARGER PRODUITS
 // ============================================================
 let products = [];
 
@@ -169,6 +169,7 @@ export async function loadShopProducts(category = 'all') {
 
 function loadShopCategories() {
     const list = document.getElementById('shopCategoryList');
+    // Récupérer toutes les catégories depuis les produits
     const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
     list.innerHTML = `
         <li class="category-item active" data-category="all"><i class="fas fa-th"></i> Tous</li>
@@ -186,7 +187,7 @@ function loadShopCategories() {
 }
 
 // ============================================================
-// AFFICHAGE DES PRODUITS AVEC BOUTON "AJOUTER AU PANIER"
+// AFFICHAGE DES PRODUITS AVEC BOUTONS
 // ============================================================
 function renderProducts(category = 'all') {
     const grid = document.getElementById('productsGrid');
@@ -206,25 +207,33 @@ function renderProducts(category = 'all') {
         
         let imageHtml = p.image || '📦';
         if (p.image && p.image.startsWith('data:image')) {
-            imageHtml = `<img src="${p.image}" style="width:100%;height:100%;object-fit:cover;" />`;
+            imageHtml = `<img src="${p.image}" alt="${p.name}" />`;
         }
+
+        const desc = p.description || '';
+        const descShort = desc.length > 60 ? desc.substring(0, 60) + '...' : desc;
 
         return `
             <div class="product-card" data-id="${p.id}">
                 <div class="product-image">${imageHtml}</div>
                 <div class="product-info">
                     <h4>${p.name}</h4>
-                    <p>${p.description || ''}</p>
+                    <div class="product-desc">${descShort}</div>
                     <div class="product-price">${priceValue.toFixed(2)} MAD</div>
-                    <button class="btn-add-cart" data-id="${p.id}" data-name="${p.name}" data-price="${priceValue}" data-image="${p.image || '📦'}">
-                        <i class="fas fa-cart-plus"></i> Ajouter
-                    </button>
+                    <div class="product-actions">
+                        <button class="btn-add-cart" data-id="${p.id}" data-name="${p.name}" data-price="${priceValue}" data-image="${p.image || '📦'}">
+                            <i class="fas fa-cart-plus"></i>
+                        </button>
+                        <button class="btn-detail" data-id="${p.id}">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
     }).join('');
 
-    // Ajouter les événements "Ajouter au panier"
+    // Ajouter au panier
     document.querySelectorAll('.btn-add-cart').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -237,10 +246,134 @@ function renderProducts(category = 'all') {
             addToCart(product);
         });
     });
+
+    // Détails produit
+    document.querySelectorAll('.btn-detail').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const productId = this.dataset.id;
+            openProductDetail(productId);
+        });
+    });
 }
 
 // ============================================================
-// PANIER - GESTION COMPLÈTE
+// DÉTAILS PRODUIT - MODAL
+// ============================================================
+const detailOverlay = document.getElementById('productDetailOverlay');
+const detailClose = document.getElementById('productDetailClose');
+const detailContent = document.getElementById('productDetailContent');
+
+export async function openProductDetail(productId) {
+    try {
+        const docRef = doc(db, 'produits', productId);
+        const docSnap = await getDoc(docRef);
+        if (!docSnap.exists()) {
+            showToast('⚠️ Produit non trouvé', true);
+            return;
+        }
+        const product = { id: docSnap.id, ...docSnap.data() };
+        renderProductDetail(product);
+        detailOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    } catch (error) {
+        console.error('Erreur chargement produit:', error);
+        showToast('⚠️ Erreur chargement du produit', true);
+    }
+}
+
+function renderProductDetail(product) {
+    const displayPrice = product.prixVente || product.price || '0';
+    const priceValue = parseFloat(displayPrice) || 0;
+    const oldPrice = product.prixPromotion || null;
+    
+    let imageHtml = product.image || '📦';
+    if (product.image && product.image.startsWith('data:image')) {
+        imageHtml = `<img src="${product.image}" alt="${product.name}" />`;
+    } else if (!product.image || product.image === '📦') {
+        imageHtml = `<div class="no-image">📦</div>`;
+    }
+
+    // Vidéo YouTube si présente
+    let videoHtml = '';
+    if (product.videoUrl) {
+        const videoId = extractYouTubeId(product.videoUrl);
+        if (videoId) {
+            videoHtml = `
+                <div class="product-detail-video">
+                    <h4><i class="fab fa-youtube"></i> Vidéo du produit</h4>
+                    <iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>
+                </div>
+            `;
+        }
+    }
+
+    detailContent.innerHTML = `
+        <div class="product-detail-grid">
+            <div class="product-detail-image">
+                ${imageHtml}
+            </div>
+            <div class="product-detail-info">
+                <h1>${product.name}</h1>
+                <div class="detail-category">${product.category || 'Non catégorisé'}</div>
+                <div class="detail-description">${product.description || 'Aucune description disponible'}</div>
+                <div class="detail-price">
+                    ${priceValue.toFixed(2)} MAD
+                    ${oldPrice ? `<span class="old-price">${parseFloat(oldPrice).toFixed(2)} MAD</span>` : ''}
+                </div>
+                <div class="detail-stock ${(product.stock || 0) > 0 ? '' : 'out-of-stock'}">
+                    ${(product.stock || 0) > 0 ? `✅ En stock (${product.stock} unités)` : '❌ Rupture de stock'}
+                </div>
+                <button class="detail-add-cart" data-id="${product.id}" data-name="${product.name}" data-price="${priceValue}" data-image="${product.image || '📦'}">
+                    <i class="fas fa-cart-plus"></i> Ajouter au panier
+                </button>
+                ${videoHtml}
+            </div>
+        </div>
+    `;
+
+    // Ajouter au panier depuis le détail
+    detailContent.querySelector('.detail-add-cart')?.addEventListener('click', function() {
+        const productData = {
+            id: this.dataset.id,
+            name: this.dataset.name,
+            prixVente: this.dataset.price,
+            image: this.dataset.image
+        };
+        addToCart(productData);
+        showToast(`🛒 ${productData.name} ajouté au panier`);
+    });
+}
+
+function extractYouTubeId(url) {
+    if (!url) return null;
+    const regExp = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/;
+    const match = url.match(regExp);
+    return match ? match[1] : null;
+}
+
+// Fermeture du modal détails
+detailClose?.addEventListener('click', () => {
+    detailOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+});
+
+detailOverlay?.addEventListener('click', function(e) {
+    if (e.target === detailOverlay) {
+        detailOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && detailOverlay?.classList.contains('active')) {
+        detailOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+});
+
+// ============================================================
+// PANIER
 // ============================================================
 let cart = [];
 const cartBadge = document.getElementById('cartBadge');
@@ -251,10 +384,8 @@ const cartFooter = document.getElementById('cartFooter');
 const bagIcon = document.getElementById('bagIcon');
 const cartClose = document.getElementById('cartClose');
 
-// Ajouter au panier
 function addToCart(product) {
     const existing = cart.find(item => item.id === product.id);
-    
     if (existing) {
         existing.quantity += 1;
     } else {
@@ -266,32 +397,16 @@ function addToCart(product) {
             quantity: 1
         });
     }
-    
     updateCartUI();
     showToast(`🛒 ${product.name} ajouté au panier`);
 }
 
-// Retirer du panier
 function removeFromCart(productId) {
     cart = cart.filter(item => item.id !== productId);
     updateCartUI();
     showToast('🗑️ Produit retiré du panier');
 }
 
-// Modifier la quantité
-function updateQuantity(productId, newQuantity) {
-    const item = cart.find(i => i.id === productId);
-    if (item) {
-        if (newQuantity <= 0) {
-            removeFromCart(productId);
-            return;
-        }
-        item.quantity = newQuantity;
-        updateCartUI();
-    }
-}
-
-// Mettre à jour l'UI du panier
 function updateCartUI() {
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
     if (cartBadge) {
@@ -313,7 +428,7 @@ function updateCartUI() {
     cartItems.innerHTML = cart.map(item => {
         let imageHtml = item.image || '📦';
         if (item.image && item.image.startsWith('data:image')) {
-            imageHtml = `<img src="${item.image}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;" />`;
+            imageHtml = `<img src="${item.image}" />`;
         }
         return `
             <div class="cart-item" data-id="${item.id}">
@@ -339,71 +454,44 @@ function updateCartUI() {
     cartFooter.style.display = 'block';
 }
 
-// Exposer les fonctions au global
-window.addToCart = addToCart;
 window.removeFromCart = removeFromCart;
-window.updateQuantity = updateQuantity;
-
 window.increaseQty = function(productId) {
     const item = cart.find(i => i.id === productId);
-    if (item) {
-        item.quantity += 1;
-        updateCartUI();
-    }
+    if (item) { item.quantity += 1; updateCartUI(); }
 };
-
 window.decreaseQty = function(productId) {
     const item = cart.find(i => i.id === productId);
     if (item) {
-        if (item.quantity <= 1) {
-            removeFromCart(productId);
-        } else {
-            item.quantity -= 1;
-            updateCartUI();
-        }
+        if (item.quantity <= 1) { removeFromCart(productId); }
+        else { item.quantity -= 1; updateCartUI(); }
     }
 };
 
-// Ouvrir / Fermer le panier
-function openCart() {
-    cartOverlay.classList.add('active');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeCart() {
-    cartOverlay.classList.remove('active');
-    document.body.style.overflow = '';
-}
-
-bagIcon?.addEventListener('click', openCart);
-cartClose?.addEventListener('click', closeCart);
+bagIcon?.addEventListener('click', () => { cartOverlay.classList.add('active'); document.body.style.overflow = 'hidden'; });
+cartClose?.addEventListener('click', () => { cartOverlay.classList.remove('active'); document.body.style.overflow = ''; });
 cartOverlay?.addEventListener('click', function(e) {
-    if (e.target === cartOverlay) closeCart();
+    if (e.target === cartOverlay) { cartOverlay.classList.remove('active'); document.body.style.overflow = ''; }
 });
-
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' && cartOverlay?.classList.contains('active')) {
-        closeCart();
+        cartOverlay.classList.remove('active');
+        document.body.style.overflow = '';
     }
 });
 
-// Bouton commander
 document.getElementById('checkoutBtn')?.addEventListener('click', function() {
     const user = auth.currentUser;
     if (!user) {
-        showToast('🔐 Connectez-vous pour passer commande', true);
-        closeCart();
+        showToast('🔐 Connectez-vous pour commander', true);
+        cartOverlay.classList.remove('active');
         openAuthModal();
         return;
     }
-    
     if (cart.length === 0) {
-        showToast('⚠️ Votre panier est vide', true);
+        showToast('⚠️ Panier vide', true);
         return;
     }
-    
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    
     const orderData = {
         userId: user.uid,
         userName: user.displayName || user.email,
@@ -412,13 +500,13 @@ document.getElementById('checkoutBtn')?.addEventListener('click', function() {
         status: 'En attente',
         createdAt: serverTimestamp()
     };
-    
     addDoc(collection(db, 'commandes'), orderData)
         .then(() => {
-            showToast('✅ Commande passée avec succès !');
+            showToast('✅ Commande passée !');
             cart = [];
             updateCartUI();
-            closeCart();
+            cartOverlay.classList.remove('active');
+            document.body.style.overflow = '';
         })
         .catch((error) => {
             console.error('Erreur commande:', error);
@@ -432,7 +520,6 @@ document.getElementById('checkoutBtn')?.addEventListener('click', function() {
 export function updateUI(user) {
     const userStatus = document.getElementById('userStatus');
     const userIcon = document.getElementById('userIcon');
-
     if (user) {
         const displayName = user.displayName || user.email || 'Utilisateur';
         userStatus.textContent = '👤 ' + displayName.split('@')[0];
@@ -510,7 +597,7 @@ tabs.forEach(tab => {
 });
 
 // ============================================================
-// INSCRIPTION
+// INSCRIPTION & CONNEXION (simplifiés)
 // ============================================================
 document.getElementById('registerBtn')?.addEventListener('click', function(e) {
     e.preventDefault();
@@ -520,168 +607,57 @@ document.getElementById('registerBtn')?.addEventListener('click', function(e) {
     const password = document.getElementById('registerPassword').value;
     const confirm = document.getElementById('registerConfirm').value;
     const errorDiv = document.getElementById('registerError');
-
     errorDiv.classList.add('hidden');
 
-    if (!name || name.length < 2) {
-        errorDiv.classList.remove('hidden');
-        errorDiv.textContent = '⚠️ Nom valide requis';
-        showToast('⚠️ Nom invalide', true);
-        return;
-    }
-    if (!email || !isValidEmail(email)) {
-        errorDiv.classList.remove('hidden');
-        errorDiv.textContent = '⚠️ Email invalide';
-        showToast('⚠️ Email invalide', true);
-        return;
-    }
-    if (!password || password.length < 6) {
-        errorDiv.classList.remove('hidden');
-        errorDiv.textContent = '⚠️ Mot de passe min 6 caractères';
-        showToast('⚠️ Mot de passe trop court', true);
-        return;
-    }
-    if (password !== confirm) {
-        errorDiv.classList.remove('hidden');
-        errorDiv.textContent = '⚠️ Les mots de passe ne correspondent pas';
-        showToast('⚠️ Les mots de passe ne correspondent pas', true);
-        return;
-    }
+    if (!name || name.length < 2) { errorDiv.classList.remove('hidden'); errorDiv.textContent = '⚠️ Nom requis'; showToast('⚠️ Nom invalide', true); return; }
+    if (!email || !isValidEmail(email)) { errorDiv.classList.remove('hidden'); errorDiv.textContent = '⚠️ Email invalide'; showToast('⚠️ Email invalide', true); return; }
+    if (!password || password.length < 6) { errorDiv.classList.remove('hidden'); errorDiv.textContent = '⚠️ Mot de passe min 6 caractères'; showToast('⚠️ Mot de passe trop court', true); return; }
+    if (password !== confirm) { errorDiv.classList.remove('hidden'); errorDiv.textContent = '⚠️ Mots de passe différents'; showToast('⚠️ Mots de passe différents', true); return; }
 
-    this.disabled = true;
-    this.textContent = 'Création...';
-
+    this.disabled = true; this.textContent = 'Création...';
     createUserWithEmailAndPassword(auth, email, password)
-        .then((cred) => {
-            const user = cred.user;
-            return updateProfile(user, { displayName: name }).then(() => user);
-        })
-        .then((user) => {
-            return setDoc(doc(db, 'users', user.uid), {
-                uid: user.uid,
-                name: name,
-                email: email,
-                phone: phone || '',
-                role: 'admin',
-                createdAt: serverTimestamp(),
-                lastLogin: serverTimestamp()
-            }).then(() => user);
-        })
-        .then(() => {
-            showToast('🎉 Bienvenue ' + name + ' !');
-            closeAuthModal();
-            registerForm.reset();
-        })
-        .catch((error) => {
-            errorDiv.classList.remove('hidden');
-            let message = 'Erreur';
-            if (error.code === 'auth/email-already-in-use') message = 'Email déjà utilisé';
-            else if (error.code === 'auth/invalid-email') message = 'Email invalide';
-            else if (error.code === 'auth/weak-password') message = 'Mot de passe trop faible';
-            else message = error.message;
-            errorDiv.textContent = '⚠️ ' + message;
-            showToast('⚠️ ' + message, true);
-        })
-        .finally(() => {
-            this.disabled = false;
-            this.textContent = 'Créer mon compte';
-        });
+        .then((cred) => updateProfile(cred.user, { displayName: name }).then(() => cred.user))
+        .then((user) => setDoc(doc(db, 'users', user.uid), { uid: user.uid, name, email, phone: phone || '', role: 'admin', createdAt: serverTimestamp(), lastLogin: serverTimestamp() }))
+        .then(() => { showToast('🎉 Bienvenue ' + name + ' !'); closeAuthModal(); registerForm.reset(); })
+        .catch((error) => { errorDiv.classList.remove('hidden'); errorDiv.textContent = '⚠️ ' + (error.message || 'Erreur'); showToast('⚠️ ' + error.message, true); })
+        .finally(() => { this.disabled = false; this.textContent = 'Créer mon compte'; });
 });
 
-// ============================================================
-// CONNEXION
-// ============================================================
 document.getElementById('loginBtn')?.addEventListener('click', function(e) {
     e.preventDefault();
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
     const errorDiv = document.getElementById('loginError');
-
     errorDiv.classList.add('hidden');
 
-    if (!email || !isValidEmail(email)) {
-        errorDiv.classList.remove('hidden');
-        errorDiv.textContent = '⚠️ Email invalide';
-        showToast('⚠️ Email invalide', true);
-        return;
-    }
-    if (!password) {
-        errorDiv.classList.remove('hidden');
-        errorDiv.textContent = '⚠️ Mot de passe requis';
-        showToast('⚠️ Mot de passe requis', true);
-        return;
-    }
+    if (!email || !isValidEmail(email)) { errorDiv.classList.remove('hidden'); errorDiv.textContent = '⚠️ Email invalide'; showToast('⚠️ Email invalide', true); return; }
+    if (!password) { errorDiv.classList.remove('hidden'); errorDiv.textContent = '⚠️ Mot de passe requis'; showToast('⚠️ Mot de passe requis', true); return; }
 
-    this.disabled = true;
-    this.textContent = 'Connexion...';
-
+    this.disabled = true; this.textContent = 'Connexion...';
     signInWithEmailAndPassword(auth, email, password)
-        .then((cred) => {
-            const user = cred.user;
-            updateDoc(doc(db, 'users', user.uid), { lastLogin: serverTimestamp() }).catch(() => {});
-            showToast('✅ Bienvenue ' + (user.displayName || user.email) + ' !');
-            closeAuthModal();
-            loginForm.reset();
-        })
-        .catch((error) => {
-            errorDiv.classList.remove('hidden');
-            let message = 'Erreur';
-            if (error.code === 'auth/user-not-found') message = 'Aucun compte trouvé';
-            else if (error.code === 'auth/wrong-password') message = 'Mot de passe incorrect';
-            else if (error.code === 'auth/invalid-email') message = 'Email invalide';
-            else if (error.code === 'auth/too-many-requests') message = 'Trop de tentatives';
-            else message = error.message;
-            errorDiv.textContent = '⚠️ ' + message;
-            showToast('⚠️ ' + message, true);
-        })
-        .finally(() => {
-            this.disabled = false;
-            this.textContent = 'Se connecter';
-        });
+        .then((cred) => { updateDoc(doc(db, 'users', cred.user.uid), { lastLogin: serverTimestamp() }).catch(() => {}); showToast('✅ Bienvenue ' + (cred.user.displayName || cred.user.email) + ' !'); closeAuthModal(); loginForm.reset(); })
+        .catch((error) => { errorDiv.classList.remove('hidden'); errorDiv.textContent = '⚠️ ' + (error.message || 'Erreur'); showToast('⚠️ ' + error.message, true); })
+        .finally(() => { this.disabled = false; this.textContent = 'Se connecter'; });
 });
 
-// ============================================================
-// RESET PASSWORD
-// ============================================================
 document.getElementById('resetPasswordLink')?.addEventListener('click', function(e) {
     e.preventDefault();
     const email = document.getElementById('loginEmail').value.trim();
-    if (!email || !isValidEmail(email)) {
-        showToast('⚠️ Entrez un email valide', true);
-        document.getElementById('loginEmail').focus();
-        return;
-    }
-    sendPasswordResetEmail(auth, email)
-        .then(() => showToast('📧 Email de réinitialisation envoyé'))
-        .catch((error) => showToast('⚠️ ' + error.message, true));
+    if (!email || !isValidEmail(email)) { showToast('⚠️ Entrez un email valide', true); document.getElementById('loginEmail').focus(); return; }
+    sendPasswordResetEmail(auth, email).then(() => showToast('📧 Email envoyé')).catch((error) => showToast('⚠️ ' + error.message, true));
 });
 
-// ============================================================
-// SURVEILLANCE AUTH
-// ============================================================
 onAuthStateChanged(auth, (user) => {
     updateUI(user);
-    if (user && authOverlay?.classList.contains('active')) {
-        closeAuthModal();
-    }
+    if (user && authOverlay?.classList.contains('active')) closeAuthModal();
 });
 
 // ============================================================
 // BOUTONS ACCUEIL
 // ============================================================
-document.getElementById('shopNowBtn')?.addEventListener('click', () => {
-    showPage('shop');
-    loadShopProducts('all');
-});
-
-document.getElementById('silverBtn')?.addEventListener('click', () => {
-    showPage('shop');
-    loadShopProducts('all');
-});
-
-document.getElementById('lunchBadge')?.addEventListener('click', () => {
-    showToast('🌿 Wellness & Bien-être — MANORA');
-});
+document.getElementById('shopNowBtn')?.addEventListener('click', () => { showPage('shop'); loadShopProducts('all'); });
+document.getElementById('silverBtn')?.addEventListener('click', () => { showPage('shop'); loadShopProducts('all'); });
+document.getElementById('lunchBadge')?.addEventListener('click', () => { showToast('🌿 Wellness & Bien-être — MANORA'); });
 
 // ============================================================
 // CATÉGORIES ACCUEIL
@@ -701,24 +677,4 @@ document.querySelectorAll('#homeCategories .cat-item').forEach(item => {
     });
 });
 
-// ============================================================
-// ICÔNES HEADER
-// ============================================================
-document.querySelectorAll('.header-icons i').forEach(icon => {
-    if (icon.id === 'userIcon') return;
-    if (icon.id === 'bagIcon') return;
-    icon.addEventListener('click', function() {
-        const user = auth.currentUser;
-        if (!user && this.dataset.icon === 'bag') {
-            showToast('🛍️ Connectez-vous pour commander', true);
-            openAuthModal();
-            return;
-        }
-        const iconType = this.dataset.icon || '';
-        let label = 'Action';
-        if (iconType === 'search') label = 'Recherche';
-        showToast(`🛍️ ${label} — bientôt disponible`);
-    });
-});
-
-console.log('🌿 MANORA · Script principal chargé avec panier');
+console.log('🌿 MANORA · Script principal chargé avec détails produit');
