@@ -115,6 +115,7 @@ const pageHome = document.getElementById('pageHome');
 const pageShop = document.getElementById('pageShop');
 const pageDashboard = document.getElementById('pageDashboard');
 
+const navHome = document.getElementById('navHome');
 const navShop = document.getElementById('navShop');
 const navDashboard = document.getElementById('navDashboard');
 
@@ -124,20 +125,15 @@ export function showPage(page) {
     pageDashboard.style.display = page === 'dashboard' ? 'block' : 'none';
 
     document.querySelectorAll('.nav-links a').forEach(link => link.classList.remove('active'));
-    if (page === 'home') document.querySelector('.nav-links a[href="index.html"]')?.classList.add('active');
+    if (page === 'home') navHome?.classList.add('active');
     if (page === 'shop') navShop?.classList.add('active');
     if (page === 'dashboard') navDashboard?.classList.add('active');
-    
-    // Cacher le dashboard si l'utilisateur n'est pas connecté
-    if (page === 'dashboard') {
-        const user = auth.currentUser;
-        if (!user) {
-            showPage('home');
-            showToast('🔐 Connectez-vous pour accéder au dashboard', true);
-            openAuthModal();
-        }
-    }
 }
+
+navHome?.addEventListener('click', (e) => {
+    e.preventDefault();
+    showPage('home');
+});
 
 navShop?.addEventListener('click', (e) => {
     e.preventDefault();
@@ -177,12 +173,8 @@ export async function loadShopProducts(category = 'all') {
     }
 }
 
-// ============================================================
-// CHARGER LES CATÉGORIES DEPUIS FIRESTORE
-// ============================================================
 async function loadShopCategories() {
     const list = document.getElementById('shopCategoryList');
-    
     try {
         const snapshot = await getDocs(collection(db, 'categories'));
         const categories = [];
@@ -196,14 +188,14 @@ async function loadShopCategories() {
                 });
             }
         });
-        
+
         if (categories.length === 0) {
             const productCategories = [...new Set(products.map(p => p.category).filter(Boolean))];
             productCategories.forEach(cat => {
                 categories.push({ id: cat, name: cat, image: '🏷️' });
             });
         }
-        
+
         if (categories.length === 0) {
             list.innerHTML = `
                 <li class="category-item active" data-category="all"><i class="fas fa-th"></i> Tous</li>
@@ -211,7 +203,7 @@ async function loadShopCategories() {
             `;
             return;
         }
-        
+
         list.innerHTML = `
             <li class="category-item active" data-category="all"><i class="fas fa-th"></i> Tous</li>
             ${categories.map(cat => `
@@ -223,16 +215,15 @@ async function loadShopCategories() {
                 </li>
             `).join('')}
         `;
-        
+
         document.querySelectorAll('#shopCategoryList .category-item').forEach(item => {
             item.addEventListener('click', function() {
                 document.querySelectorAll('#shopCategoryList .category-item').forEach(c => c.classList.remove('active'));
                 this.classList.add('active');
-                const category = this.dataset.category;
-                renderProducts(category);
+                renderProducts(this.dataset.category);
             });
         });
-        
+
     } catch (error) {
         console.error('Erreur chargement catégories:', error);
         const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
@@ -253,7 +244,7 @@ async function loadShopCategories() {
 }
 
 // ============================================================
-// AFFICHAGE DES PRODUITS AVEC BOUTON "AJOUTER AU PANIER"
+// AFFICHAGE DES PRODUITS
 // ============================================================
 function renderProducts(category = 'all') {
     const grid = document.getElementById('productsGrid');
@@ -270,10 +261,15 @@ function renderProducts(category = 'all') {
     grid.innerHTML = filtered.map(p => {
         const displayPrice = p.prixVente || p.price || '0';
         const priceValue = parseFloat(displayPrice) || 0;
-        
-        let imageHtml = p.image || '📦';
-        if (p.image && p.image.startsWith('data:image')) {
+
+        // Afficher la première image ou une image par défaut
+        let imageHtml = '📦';
+        if (p.images && p.images.length > 0 && p.images[0]) {
+            imageHtml = `<img src="${p.images[0]}" alt="${p.name}" />`;
+        } else if (p.image && p.image.startsWith('data:image')) {
             imageHtml = `<img src="${p.image}" alt="${p.name}" />`;
+        } else if (p.image) {
+            imageHtml = p.image;
         }
 
         const desc = p.description || '';
@@ -287,7 +283,7 @@ function renderProducts(category = 'all') {
                     <div class="product-desc">${descShort}</div>
                     <div class="product-price">${priceValue.toFixed(2)} MAD</div>
                     <div class="product-actions">
-                        <button class="btn-add-cart" data-id="${p.id}" data-name="${p.name}" data-price="${priceValue}" data-image="${p.image || '📦'}">
+                        <button class="btn-add-cart" data-id="${p.id}" data-name="${p.name}" data-price="${priceValue}" data-image="${p.images && p.images[0] ? p.images[0] : p.image || '📦'}">
                             <i class="fas fa-cart-plus"></i> Ajouter au panier
                         </button>
                         <button class="btn-detail" data-id="${p.id}">
@@ -315,14 +311,13 @@ function renderProducts(category = 'all') {
     document.querySelectorAll('.btn-detail').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
-            const productId = this.dataset.id;
-            openProductDetail(productId);
+            openProductDetail(this.dataset.id);
         });
     });
 }
 
 // ============================================================
-// DÉTAILS PRODUIT - MODAL
+// DÉTAILS PRODUIT - MULTI-IMAGES
 // ============================================================
 const detailOverlay = document.getElementById('productDetailOverlay');
 const detailClose = document.getElementById('productDetailClose');
@@ -350,12 +345,35 @@ function renderProductDetail(product) {
     const displayPrice = product.prixVente || product.price || '0';
     const priceValue = parseFloat(displayPrice) || 0;
     const oldPrice = product.prixPromotion || null;
-    
-    let imageHtml = product.image || '📦';
-    if (product.image && product.image.startsWith('data:image')) {
-        imageHtml = `<img src="${product.image}" alt="${product.name}" />`;
-    } else if (!product.image || product.image === '📦') {
-        imageHtml = `<div class="no-image">📦</div>`;
+
+    // Gestion des images
+    let images = [];
+    if (product.images && product.images.length > 0) {
+        images = product.images;
+    } else if (product.image && product.image.startsWith('data:image')) {
+        images = [product.image];
+    }
+
+    let imagesHtml = '';
+    if (images.length > 0) {
+        imagesHtml = `
+            <div class="detail-images-container">
+                <div class="detail-main-image">
+                    <img src="${images[0]}" alt="${product.name}" id="detailMainImage" />
+                </div>
+                ${images.length > 1 ? `
+                    <div class="detail-thumbnails">
+                        ${images.map((img, index) => `
+                            <div class="detail-thumbnail ${index === 0 ? 'active' : ''}" onclick="document.getElementById('detailMainImage').src='${img}'; document.querySelectorAll('.detail-thumbnail').forEach(t => t.classList.remove('active')); this.classList.add('active');">
+                                <img src="${img}" alt="Image ${index + 1}" />
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    } else {
+        imagesHtml = `<div class="no-image">📦</div>`;
     }
 
     let videoHtml = '';
@@ -374,7 +392,7 @@ function renderProductDetail(product) {
     detailContent.innerHTML = `
         <div class="product-detail-grid">
             <div class="product-detail-image">
-                ${imageHtml}
+                ${imagesHtml}
             </div>
             <div class="product-detail-info">
                 <h1>${product.name}</h1>
@@ -387,7 +405,7 @@ function renderProductDetail(product) {
                 <div class="detail-stock ${(product.stock || 0) > 0 ? '' : 'out-of-stock'}">
                     ${(product.stock || 0) > 0 ? `✅ En stock (${product.stock} unités)` : '❌ Rupture de stock'}
                 </div>
-                <button class="detail-add-cart" data-id="${product.id}" data-name="${product.name}" data-price="${priceValue}" data-image="${product.image || '📦'}">
+                <button class="detail-add-cart" data-id="${product.id}" data-name="${product.name}" data-price="${priceValue}" data-image="${images[0] || '📦'}">
                     <i class="fas fa-cart-plus"></i> Ajouter au panier
                 </button>
                 ${videoHtml}
@@ -474,7 +492,7 @@ function updateCartUI() {
         cartBadge.textContent = totalItems;
         cartBadge.style.display = totalItems > 0 ? 'block' : 'none';
     }
-    
+
     if (cart.length === 0) {
         cartItems.innerHTML = `
             <div class="cart-empty">
@@ -485,7 +503,7 @@ function updateCartUI() {
         cartFooter.style.display = 'none';
         return;
     }
-    
+
     cartItems.innerHTML = cart.map(item => {
         let imageHtml = item.image || '📦';
         if (item.image && item.image.startsWith('data:image')) {
@@ -509,7 +527,7 @@ function updateCartUI() {
             </div>
         `;
     }).join('');
-    
+
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     cartTotalPrice.textContent = total.toFixed(2) + ' MAD';
     cartFooter.style.display = 'block';
@@ -582,7 +600,7 @@ export function updateUI(user) {
     const userStatus = document.getElementById('userStatus');
     const userIcon = document.getElementById('userIcon');
     const dashboardLink = document.getElementById('navDashboard');
-    
+
     if (user) {
         const displayName = user.displayName || user.email || 'Utilisateur';
         userStatus.textContent = '👤 ' + displayName.split('@')[0];
@@ -598,7 +616,7 @@ export function updateUI(user) {
         if (dashboardLink) {
             dashboardLink.style.display = 'none';
         }
-        // Si on est sur la page dashboard et déconnecté, revenir à l'accueil
+        // Si on est sur le dashboard et déconnecté, retourner à l'accueil
         if (pageDashboard.style.display !== 'none') {
             showPage('home');
         }
