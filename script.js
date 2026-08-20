@@ -22,6 +22,7 @@ import {
     getDocs,
     getDoc,
     updateDoc,
+    deleteDoc,
     serverTimestamp,
     query,
     orderBy,
@@ -30,7 +31,8 @@ import {
 } from "firebase/firestore";
 
 // ============================================================
-// CONFIGURATION FIREBASE// ============================================================
+// CONFIGURATION FIREBASE
+// ============================================================
 const firebaseConfig = {
     apiKey: "AIzaSyBuaSbWc0yIBvILjduH3K5NlJqpC1npX1E",
     authDomain: "manora-4281c.firebaseapp.com",
@@ -108,7 +110,7 @@ export function isValidEmail(email) {
 }
 
 // ============================================================
-// NAVIGATION
+// NAVIGATION - CORRIGÉE
 // ============================================================
 const pageHome = document.getElementById('pageHome');
 const pageShop = document.getElementById('pageShop');
@@ -129,18 +131,21 @@ export function showPage(page) {
     if (page === 'dashboard' && navDashboard) navDashboard.classList.add('active');
 }
 
+// ACCUEIL
 navHome?.addEventListener('click', (e) => {
     e.preventDefault();
     showPage('home');
     loadHomeProducts();
 });
 
+// BOUTIQUE
 navShop?.addEventListener('click', (e) => {
     e.preventDefault();
     showPage('shop');
     loadAllProducts();
 });
 
+// DASHBOARD - UNIQUEMENT ICI
 navDashboard?.addEventListener('click', (e) => {
     e.preventDefault();
     const user = auth.currentUser;
@@ -160,7 +165,7 @@ navDashboard?.addEventListener('click', (e) => {
 // ============================================================
 export async function loadHomeProducts() {
     try {
-        // Nouveautés (les 4 plus récents)
+        // Nouveautés (4 derniers)
         const newQuery = query(collection(db, 'produits'), orderBy('createdAt', 'desc'), limit(4));
         const newSnapshot = await getDocs(newQuery);
         const newProducts = [];
@@ -169,8 +174,7 @@ export async function loadHomeProducts() {
         });
         renderHomeProducts('newProductsGrid', newProducts, '✨ Nouveauté');
 
-        // Plus vendus (exemple: produits avec prix le plus élevé ou avec un champ "sold")
-        // Pour l'exemple, on prend 4 produits aléatoires ou les plus chers
+        // Plus vendus (4 plus chers)
         const featuredQuery = query(collection(db, 'produits'), orderBy('prixVente', 'desc'), limit(4));
         const featuredSnapshot = await getDocs(featuredQuery);
         const featuredProducts = [];
@@ -304,7 +308,6 @@ function renderShopProducts(category = 'all') {
 
     let filtered = category === 'all' ? allProducts : allProducts.filter(p => p.category === category);
 
-    // Trier
     const sortValue = document.getElementById('sortSelect')?.value || 'name';
     if (sortValue === 'price-asc') filtered.sort((a, b) => (parseFloat(a.prixVente) || 0) - (parseFloat(b.prixVente) || 0));
     else if (sortValue === 'price-desc') filtered.sort((a, b) => (parseFloat(b.prixVente) || 0) - (parseFloat(a.prixVente) || 0));
@@ -651,7 +654,7 @@ document.getElementById('checkoutBtn')?.addEventListener('click', function() {
 });
 
 // ============================================================
-// AUTH
+// AUTH UI
 // ============================================================
 export function updateUI(user) {
     const userStatus = document.getElementById('userStatus');
@@ -672,9 +675,6 @@ export function updateUI(user) {
         userIcon.style.color = '';
         if (dashboardLink) {
             dashboardLink.style.display = 'none';
-        }
-        if (pageDashboard && pageDashboard.style.display !== 'none') {
-            showPage('home');
         }
     }
 }
@@ -805,14 +805,14 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// Chargement initial
+// CHARGEMENT INITIAL - ACCUEIL PAR DÉFAUT
 document.addEventListener('DOMContentLoaded', () => {
     console.log('📄 Chargement initial...');
     showPage('home');
     loadHomeProducts();
 });
 
-// Boutons
+// BOUTONS
 document.getElementById('shopNowBtn')?.addEventListener('click', () => {
     showPage('shop');
     loadAllProducts();
@@ -827,12 +827,6 @@ document.getElementById('lunchBadge')?.addEventListener('click', () => {
     showToast('🌿 Wellness & Bien-être — MANORA');
 });
 
-// Filtre prix
-document.getElementById('priceRange')?.addEventListener('input', function() {
-    document.getElementById('priceDisplay').textContent = this.value + ' MAD';
-});
-
-// Tri
 document.getElementById('sortSelect')?.addEventListener('change', function() {
     renderShopProducts(document.querySelector('.category-item.active')?.dataset.category || 'all');
 });
