@@ -773,21 +773,61 @@ h1, h2, h3, p {
     margin-top: 0.5rem;
 }
 
-.product-detail-image {
+/* ===== MULTI-IMAGES DÉTAIL PRODUIT ===== */
+.detail-images-container {
     width: 100%;
-    height: 450px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.detail-main-image {
+    width: 100%;
+    height: 400px;
     background: #f0ede8;
     border-radius: 8px;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
 }
 
-.product-detail-image img {
+.detail-main-image img {
     width: 100%;
     height: 100%;
     object-fit: contain;
+}
+
+.detail-thumbnails {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.detail-thumbnail {
+    width: 70px;
+    height: 70px;
+    background: #f0ede8;
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.3s;
+}
+
+.detail-thumbnail:hover {
+    border-color: #e8a87c;
+}
+
+.detail-thumbnail.active {
+    border-color: #e8a87c;
+    box-shadow: 0 0 0 2px rgba(232, 168, 124, 0.3);
+}
+
+.detail-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .product-detail-image .no-image {
@@ -1274,7 +1314,7 @@ h1, h2, h3, p {
 
 .crud-modal {
     background: #fcfcf7;
-    max-width: 550px;
+    max-width: 600px;
     width: 90%;
     padding: 2rem;
     border-radius: 8px;
@@ -1702,8 +1742,12 @@ h1, h2, h3, p {
         grid-template-columns: 1fr;
         gap: 1.5rem;
     }
-    .product-detail-image {
+    .detail-main-image {
         height: 300px;
+    }
+    .detail-thumbnail {
+        width: 55px;
+        height: 55px;
     }
     .product-detail-modal {
         padding: 1.5rem;
@@ -1783,8 +1827,12 @@ h1, h2, h3, p {
         height: 120px;
         font-size: 2rem;
     }
-    .product-detail-image {
-        height: 220px;
+    .detail-main-image {
+        height: 200px;
+    }
+    .detail-thumbnail {
+        width: 45px;
+        height: 45px;
     }
     .product-detail-modal {
         padding: 1rem;
