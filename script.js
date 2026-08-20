@@ -127,6 +127,16 @@ export function showPage(page) {
     if (page === 'home') document.querySelector('.nav-links a[href="index.html"]')?.classList.add('active');
     if (page === 'shop') navShop?.classList.add('active');
     if (page === 'dashboard') navDashboard?.classList.add('active');
+    
+    // Cacher le dashboard si l'utilisateur n'est pas connecté
+    if (page === 'dashboard') {
+        const user = auth.currentUser;
+        if (!user) {
+            showPage('home');
+            showToast('🔐 Connectez-vous pour accéder au dashboard', true);
+            openAuthModal();
+        }
+    }
 }
 
 navShop?.addEventListener('click', (e) => {
@@ -174,7 +184,6 @@ async function loadShopCategories() {
     const list = document.getElementById('shopCategoryList');
     
     try {
-        // Récupérer toutes les catégories depuis Firestore
         const snapshot = await getDocs(collection(db, 'categories'));
         const categories = [];
         snapshot.forEach(doc => {
@@ -188,7 +197,6 @@ async function loadShopCategories() {
             }
         });
         
-        // Si aucune catégorie dans Firestore, utiliser celles des produits
         if (categories.length === 0) {
             const productCategories = [...new Set(products.map(p => p.category).filter(Boolean))];
             productCategories.forEach(cat => {
@@ -196,7 +204,6 @@ async function loadShopCategories() {
             });
         }
         
-        // Si toujours aucune catégorie, afficher un message
         if (categories.length === 0) {
             list.innerHTML = `
                 <li class="category-item active" data-category="all"><i class="fas fa-th"></i> Tous</li>
@@ -205,7 +212,6 @@ async function loadShopCategories() {
             return;
         }
         
-        // Générer la liste
         list.innerHTML = `
             <li class="category-item active" data-category="all"><i class="fas fa-th"></i> Tous</li>
             ${categories.map(cat => `
@@ -218,7 +224,6 @@ async function loadShopCategories() {
             `).join('')}
         `;
         
-        // Ré-attacher les événements
         document.querySelectorAll('#shopCategoryList .category-item').forEach(item => {
             item.addEventListener('click', function() {
                 document.querySelectorAll('#shopCategoryList .category-item').forEach(c => c.classList.remove('active'));
@@ -230,7 +235,6 @@ async function loadShopCategories() {
         
     } catch (error) {
         console.error('Erreur chargement catégories:', error);
-        // Fallback: utiliser les catégories des produits
         const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
         list.innerHTML = `
             <li class="category-item active" data-category="all"><i class="fas fa-th"></i> Tous</li>
@@ -287,7 +291,7 @@ function renderProducts(category = 'all') {
                             <i class="fas fa-cart-plus"></i> Ajouter au panier
                         </button>
                         <button class="btn-detail" data-id="${p.id}">
-                            <i class="fas fa-eye"></i>
+                            <i class="fas fa-eye"></i> Détails
                         </button>
                     </div>
                 </div>
@@ -295,7 +299,6 @@ function renderProducts(category = 'all') {
         `;
     }).join('');
 
-    // Ajouter au panier
     document.querySelectorAll('.btn-add-cart').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -309,7 +312,6 @@ function renderProducts(category = 'all') {
         });
     });
 
-    // Détails produit
     document.querySelectorAll('.btn-detail').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -356,7 +358,6 @@ function renderProductDetail(product) {
         imageHtml = `<div class="no-image">📦</div>`;
     }
 
-    // Vidéo YouTube si présente
     let videoHtml = '';
     if (product.videoUrl) {
         const videoId = extractYouTubeId(product.videoUrl);
@@ -413,7 +414,6 @@ function extractYouTubeId(url) {
     return match ? match[1] : null;
 }
 
-// Fermeture du modal détails
 detailClose?.addEventListener('click', () => {
     detailOverlay.classList.remove('active');
     document.body.style.overflow = '';
@@ -581,17 +581,27 @@ document.getElementById('checkoutBtn')?.addEventListener('click', function() {
 export function updateUI(user) {
     const userStatus = document.getElementById('userStatus');
     const userIcon = document.getElementById('userIcon');
+    const dashboardLink = document.getElementById('navDashboard');
+    
     if (user) {
         const displayName = user.displayName || user.email || 'Utilisateur';
         userStatus.textContent = '👤 ' + displayName.split('@')[0];
         userStatus.className = 'user-status logged-in';
         userIcon.style.color = '#4caf50';
-        if (navDashboard) navDashboard.style.display = 'inline';
+        if (dashboardLink) {
+            dashboardLink.style.display = 'inline';
+        }
     } else {
         userStatus.textContent = '';
         userStatus.className = 'user-status';
         userIcon.style.color = '';
-        if (navDashboard) navDashboard.style.display = 'none';
+        if (dashboardLink) {
+            dashboardLink.style.display = 'none';
+        }
+        // Si on est sur la page dashboard et déconnecté, revenir à l'accueil
+        if (pageDashboard.style.display !== 'none') {
+            showPage('home');
+        }
     }
 }
 
@@ -738,26 +748,6 @@ document.querySelectorAll('#homeCategories .cat-item').forEach(item => {
             });
             renderProducts(category);
         }, 300);
-    });
-});
-
-// ============================================================
-// ICÔNES HEADER
-// ============================================================
-document.querySelectorAll('.header-icons i').forEach(icon => {
-    if (icon.id === 'userIcon') return;
-    if (icon.id === 'bagIcon') return;
-    icon.addEventListener('click', function() {
-        const user = auth.currentUser;
-        if (!user && this.dataset.icon === 'bag') {
-            showToast('🛍️ Connectez-vous pour commander', true);
-            openAuthModal();
-            return;
-        }
-        const iconType = this.dataset.icon || '';
-        let label = 'Action';
-        if (iconType === 'search') label = 'Recherche';
-        showToast(`🛍️ ${label} — bientôt disponible`);
     });
 });
 
