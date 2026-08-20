@@ -22,7 +22,7 @@
         <header class="header">
             <a href="index.html" class="logo" id="logoLink"><i class="fas fa-leaf"></i> MANORA</a>
             <nav class="nav-links">
-                <a href="index.html" class="active" id="navHome">Accueil</a>
+                <a href="#" class="active" id="navHome">Accueil</a>
                 <a href="#" id="navShop">Boutique</a>
                 <a href="#" id="navDashboard" style="display:none;">Dashboard</a>
             </nav>
@@ -39,28 +39,61 @@
 
     </div>
 
+    <!-- ============================================================ -->
     <!-- ===== PAGE ACCUEIL ===== -->
-    <section class="hero" id="pageHome">
-        <div class="hero-overlay"></div>
-        <div class="hero-content">
-            <div class="hero-tag"><i class="fas fa-star" style="color: #f5cba7; margin-right: 0.4rem;"></i> nouvelle collection</div>
-            <h1>Beauté <span class="gold-accent">&</span> Bien-être</h1>
-            <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; justify-content: center; margin-top: 0.2rem;">
-                <span class="lunch-easter" id="lunchBadge"><i class="fas fa-spa" style="margin-right: 0.3rem;"></i> wellness</span>
-                <span style="font-size: 0.7rem; letter-spacing: 0.2em; color: #f5cba7;">✦</span>
-                <span style="font-size: 0.6rem; letter-spacing: 0.1em; color: rgba(255,255,255,0.7);">édition limitée</span>
+    <!-- ============================================================ -->
+    <div class="home-page" id="pageHome">
+        <!-- HERO SECTION -->
+        <section class="hero">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <div class="hero-tag"><i class="fas fa-star" style="color: #f5cba7; margin-right: 0.4rem;"></i> nouvelle collection</div>
+                <h1>Beauté <span class="gold-accent">&</span> Bien-être</h1>
+                <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; justify-content: center; margin-top: 0.2rem;">
+                    <span class="lunch-easter" id="lunchBadge"><i class="fas fa-spa" style="margin-right: 0.3rem;"></i> wellness</span>
+                    <span style="font-size: 0.7rem; letter-spacing: 0.2em; color: #f5cba7;">✦</span>
+                    <span style="font-size: 0.6rem; letter-spacing: 0.1em; color: rgba(255,255,255,0.7);">édition limitée</span>
+                </div>
+                <p class="hero-sub">Découvrez notre nouvelle collection</p>
+                <button class="btn-primary" id="shopNowBtn">Shop Now</button>
+                <div class="hero-note">
+                    <span><i class="fas fa-check-circle"></i> 100% naturel</span>
+                    <span><i class="fas fa-truck"></i> livraison offerte</span>
+                    <span><i class="fas fa-undo-alt"></i> 30 jours</span>
+                </div>
             </div>
-            <p class="hero-sub">Découvrez notre nouvelle collection</p>
-            <button class="btn-primary" id="shopNowBtn">Shop Now</button>
-            <div class="hero-note">
-                <span><i class="fas fa-check-circle"></i> 100% naturel</span>
-                <span><i class="fas fa-truck"></i> livraison offerte</span>
-                <span><i class="fas fa-undo-alt"></i> 30 jours</span>
-            </div>
-        </div>
-    </section>
+        </section>
 
+        <!-- NOUVEAUTÉS -->
+        <section class="section-products">
+            <div class="wrapper">
+                <div class="section-header">
+                    <h2>✨ Nouveautés</h2>
+                    <p>Les derniers produits ajoutés à notre collection</p>
+                </div>
+                <div class="products-grid" id="newProductsGrid">
+                    <div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Chargement...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PLUS VENDUS -->
+        <section class="section-products featured-section">
+            <div class="wrapper">
+                <div class="section-header">
+                    <h2>🔥 Plus vendus</h2>
+                    <p>Les produits préférés de nos clients</p>
+                </div>
+                <div class="products-grid" id="featuredProductsGrid">
+                    <div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Chargement...</div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ============================================================ -->
     <!-- ===== PAGE BOUTIQUE ===== -->
+    <!-- ============================================================ -->
     <div class="shop-page" id="pageShop" style="display: none;">
         <div class="wrapper shop-wrapper">
             <aside class="shop-sidebar">
@@ -68,33 +101,54 @@
                 <ul class="category-list" id="shopCategoryList">
                     <li class="category-item active" data-category="all"><i class="fas fa-th"></i> Tous</li>
                 </ul>
+                <div class="shop-sidebar-footer">
+                    <div class="price-filter">
+                        <h4>Prix</h4>
+                        <input type="range" min="0" max="1000" value="500" id="priceRange" />
+                        <p>Jusqu'à <span id="priceDisplay">500 MAD</span></p>
+                    </div>
+                </div>
             </aside>
             <main class="shop-content">
                 <div class="shop-header">
-                    <h2>Nos Produits</h2>
-                    <p id="productCount">0 produits</p>
+                    <div>
+                        <h2>Nos Produits</h2>
+                        <p id="productCount">0 produits</p>
+                    </div>
+                    <div class="shop-sort">
+                        <select id="sortSelect">
+                            <option value="name">Trier par nom</option>
+                            <option value="price-asc">Prix croissant</option>
+                            <option value="price-desc">Prix décroissant</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="products-grid" id="productsGrid"></div>
             </main>
         </div>
     </div>
 
+    <!-- ============================================================ -->
     <!-- ===== PAGE DASHBOARD ===== -->
+    <!-- ============================================================ -->
     <div class="dashboard-page" id="pageDashboard" style="display: none;">
         <div class="dashboard-container">
             <aside class="dashboard-sidebar">
                 <div class="dashboard-user">
                     <i class="fas fa-user-circle"></i>
-                    <span id="dashboardUserName">Utilisateur</span>
+                    <div>
+                        <span id="dashboardUserName">Utilisateur</span>
+                        <small>Administrateur</small>
+                    </div>
                 </div>
                 <nav class="dashboard-menu">
-                    <a href="#" class="dashboard-menu-item active" data-section="categories"><i class="fas fa-tags"></i> Catégories</a>
+                    <a href="#" class="dashboard-menu-item active" data-section="statistiques"><i class="fas fa-chart-pie"></i> Dashboard</a>
+                    <a href="#" class="dashboard-menu-item" data-section="categories"><i class="fas fa-tags"></i> Catégories</a>
                     <a href="#" class="dashboard-menu-item" data-section="produits"><i class="fas fa-box"></i> Produits</a>
                     <a href="#" class="dashboard-menu-item" data-section="clients"><i class="fas fa-users"></i> Clients</a>
                     <a href="#" class="dashboard-menu-item" data-section="fournisseurs"><i class="fas fa-truck"></i> Fournisseurs</a>
                     <a href="#" class="dashboard-menu-item" data-section="ventes"><i class="fas fa-chart-line"></i> Ventes</a>
                     <a href="#" class="dashboard-menu-item" data-section="credits"><i class="fas fa-credit-card"></i> Crédits</a>
-                    <a href="#" class="dashboard-menu-item" data-section="statistiques"><i class="fas fa-chart-pie"></i> Statistiques</a>
                     <a href="#" class="dashboard-menu-item" data-section="depenses"><i class="fas fa-coins"></i> Dépenses</a>
                     <a href="#" class="dashboard-menu-item" data-section="options"><i class="fas fa-cog"></i> Options</a>
                 </nav>
@@ -103,53 +157,79 @@
             <main class="dashboard-content">
                 <div class="dashboard-header">
                     <h2 id="dashboardTitle">Tableau de bord</h2>
-                    <p id="dashboardSubtitle">Gestion complète</p>
+                    <p id="dashboardSubtitle">Gestion complète de votre boutique</p>
+                </div>
+                <div class="dashboard-stats" id="dashboardStats">
+                    <div class="stat-card"><h3>0</h3><p>Produits</p></div>
+                    <div class="stat-card"><h3>0</h3><p>Clients</p></div>
+                    <div class="stat-card"><h3>0</h3><p>Commandes</p></div>
+                    <div class="stat-card"><h3>0 MAD</h3><p>CA Total</p></div>
                 </div>
                 <div class="dashboard-section-content" id="dashboardSectionContent">
                     <div class="dashboard-placeholder">
                         <i class="fas fa-chart-simple"></i>
                         <h3>Sélectionnez une section</h3>
+                        <p>Choisissez une option dans le menu de gauche</p>
                     </div>
                 </div>
             </main>
         </div>
     </div>
 
+    <!-- ============================================================ -->
     <!-- ===== FOOTER ===== -->
-    <div class="wrapper">
-        <div class="categories" id="homeCategories">
-            <span class="cat-item">Soin</span>
-            <span class="cat-item">Maquillage</span>
-            <span class="cat-item">Vitamines</span>
-            <span class="cat-item">Ensemble</span>
-            <span class="cat-item">Coquet</span>
-            <span class="cat-item">Accessoires</span>
-            <span class="cat-item">Sport</span>
-        </div>
-        <div class="silver-section">
-            <div class="silver-content">
-                <h3><i class="fas fa-heart"></i> Collection Wellness</h3>
-                <p>Soin · beauté · bien-être · vitalité</p>
-                <button class="btn-secondary" id="silverBtn">Découvrir</button>
+    <!-- ============================================================ -->
+    <footer class="footer-main">
+        <div class="wrapper">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4><i class="fas fa-leaf"></i> MANORA</h4>
+                    <p>Beauty & Wellness — Des produits naturels pour votre bien-être.</p>
+                    <div class="footer-social">
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-pinterest-p"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>Liens rapides</h4>
+                    <ul>
+                        <li><a href="#">À propos</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Livraison</a></li>
+                        <li><a href="#">Retours</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><i class="fas fa-envelope"></i> contact@manora.ma</li>
+                        <li><i class="fas fa-phone"></i> +212 5 22 12 34 56</li>
+                        <li><i class="fas fa-map-marker-alt"></i> Casablanca, Maroc</li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Newsletter</h4>
+                    <p>Recevez nos offres exclusives</p>
+                    <div class="footer-newsletter">
+                        <input type="email" placeholder="Votre email" />
+                        <button><i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>© 2026 MANORA. Tous droits réservés.</span>
+                <span>Devise: MAD</span>
             </div>
         </div>
-        <footer class="footer">
-            <div class="footer-links">
-                <a href="#">À propos</a>
-                <a href="#">FAQ</a>
-                <a href="#">Livraison</a>
-                <a href="#">Retours</a>
-            </div>
-            <div><span>© 2026 MANORA</span><span style="color:#d4cfc6;">|</span><span>Beauty & Wellness</span></div>
-            <div class="footer-social">
-                <i class="fab fa-instagram"></i>
-                <i class="fab fa-pinterest-p"></i>
-                <i class="fab fa-youtube"></i>
-            </div>
-        </footer>
-    </div>
+    </footer>
 
-    <!-- ===== MODAL AUTH ===== -->
+    <!-- ============================================================ -->
+    <!-- ===== MODALS ===== -->
+    <!-- ============================================================ -->
+
+    <!-- MODAL AUTH -->
     <div class="auth-overlay" id="authOverlay">
         <div class="auth-modal">
             <button class="auth-close" id="authClose"><i class="fas fa-times"></i></button>
@@ -203,7 +283,7 @@
         </div>
     </div>
 
-    <!-- ===== MODAL CRUD ===== -->
+    <!-- MODAL CRUD -->
     <div class="crud-overlay" id="crudOverlay">
         <div class="crud-modal">
             <button class="crud-close" id="crudClose"><i class="fas fa-times"></i></button>
@@ -215,7 +295,7 @@
         </div>
     </div>
 
-    <!-- ===== MODAL PANIER ===== -->
+    <!-- MODAL PANIER -->
     <div class="cart-overlay" id="cartOverlay">
         <div class="cart-modal">
             <button class="cart-close" id="cartClose"><i class="fas fa-times"></i></button>
@@ -236,17 +316,17 @@
         </div>
     </div>
 
-    <!-- ===== MODAL DÉTAILS PRODUIT ===== -->
+    <!-- MODAL DÉTAILS PRODUIT -->
     <div class="product-detail-overlay" id="productDetailOverlay">
         <div class="product-detail-modal">
             <button class="product-detail-close" id="productDetailClose"><i class="fas fa-times"></i></button>
-            <div class="product-detail-content" id="productDetailContent">
-                <!-- Rempli par JavaScript -->
-            </div>
+            <div class="product-detail-content" id="productDetailContent"></div>
         </div>
     </div>
 
+    <!-- ============================================================ -->
     <!-- ===== FIREBASE SDKs ===== -->
+    <!-- ============================================================ -->
     <script type="importmap">
         {
             "imports": {
