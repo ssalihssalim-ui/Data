@@ -134,18 +134,31 @@ let currentSection = 'statistiques';
 let editingId = null;
 
 // ============================================================
-// AUTH - AFFICHAGE DASHBOARD
+// AUTH - AFFICHAGE DASHBOARD (UNIQUEMENT SI PAGE DASHBOARD)
 // ============================================================
 onAuthStateChanged(auth, async (user) => {
     const userName = document.getElementById('dashboardUserName');
     const dashboardPage = document.getElementById('pageDashboard');
-    if (!user) { dashboardPage.style.display = 'none'; return; }
+    const navDashboardLink = document.getElementById('navDashboard');
+    
+    if (!user) { 
+        dashboardPage.style.display = 'none';
+        if (navDashboardLink) navDashboardLink.style.display = 'none';
+        return; 
+    }
+    
     try {
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         userName.textContent = userDoc.exists() ? userDoc.data().name || user.displayName || user.email || 'Utilisateur' : user.displayName || user.email || 'Utilisateur';
-    } catch { userName.textContent = user.displayName || user.email || 'Utilisateur'; }
-    dashboardPage.style.display = 'block';
-    loadSection('statistiques');
+    } catch { 
+        userName.textContent = user.displayName || user.email || 'Utilisateur'; 
+    }
+    
+    // Afficher le lien Dashboard dans la navbar
+    if (navDashboardLink) navDashboardLink.style.display = 'inline';
+    
+    // NE PAS afficher la page dashboard automatiquement
+    // Seul le clic sur le lien Dashboard l'affichera
 });
 
 // ============================================================
@@ -179,9 +192,7 @@ export async function loadSection(section) {
             } catch { stats[col] = 0; }
         }
 
-        // Mettre à jour les stats
         document.querySelectorAll('.stat-card h3').forEach((el, i) => {
-            const keys = ['produits', 'clients', 'ventes', ''];
             if (i === 0) el.textContent = stats.produits || 0;
             else if (i === 1) el.textContent = stats.clients || 0;
             else if (i === 2) el.textContent = stats.ventes || 0;
