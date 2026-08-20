@@ -147,7 +147,7 @@ navDashboard?.addEventListener('click', (e) => {
 });
 
 // ============================================================
-// BOUTIQUE - CHARGER PRODUITS
+// BOUTIQUE - CHARGER PRODUITS ET CATÉGORIES
 // ============================================================
 let products = [];
 
@@ -160,34 +160,96 @@ export async function loadShopProducts(category = 'all') {
             products.push({ id: doc.id, ...doc.data() });
         });
         renderProducts(category);
-        loadShopCategories();
+        await loadShopCategories();
     } catch (error) {
         console.error('Erreur chargement produits:', error);
         showToast('⚠️ Erreur chargement produits', true);
     }
 }
 
-function loadShopCategories() {
+// ============================================================
+// CHARGER LES CATÉGORIES DEPUIS FIRESTORE
+// ============================================================
+async function loadShopCategories() {
     const list = document.getElementById('shopCategoryList');
-    // Récupérer toutes les catégories depuis les produits
-    const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
-    list.innerHTML = `
-        <li class="category-item active" data-category="all"><i class="fas fa-th"></i> Tous</li>
-        ${categories.map(cat => `
-            <li class="category-item" data-category="${cat}"><i class="fas fa-tag"></i> ${cat}</li>
-        `).join('')}
-    `;
-    document.querySelectorAll('#shopCategoryList .category-item').forEach(item => {
-        item.addEventListener('click', function() {
-            document.querySelectorAll('#shopCategoryList .category-item').forEach(c => c.classList.remove('active'));
-            this.classList.add('active');
-            renderProducts(this.dataset.category);
+    
+    try {
+        // Récupérer toutes les catégories depuis Firestore
+        const snapshot = await getDocs(collection(db, 'categories'));
+        const categories = [];
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.name) {
+                categories.push({
+                    id: doc.id,
+                    name: data.name,
+                    image: data.image || '🏷️'
+                });
+            }
         });
-    });
+        
+        // Si aucune catégorie dans Firestore, utiliser celles des produits
+        if (categories.length === 0) {
+            const productCategories = [...new Set(products.map(p => p.category).filter(Boolean))];
+            productCategories.forEach(cat => {
+                categories.push({ id: cat, name: cat, image: '🏷️' });
+            });
+        }
+        
+        // Si toujours aucune catégorie, afficher un message
+        if (categories.length === 0) {
+            list.innerHTML = `
+                <li class="category-item active" data-category="all"><i class="fas fa-th"></i> Tous</li>
+                <li style="padding:0.5rem;color:#999;font-size:0.75rem;text-align:center;">Aucune catégorie</li>
+            `;
+            return;
+        }
+        
+        // Générer la liste
+        list.innerHTML = `
+            <li class="category-item active" data-category="all"><i class="fas fa-th"></i> Tous</li>
+            ${categories.map(cat => `
+                <li class="category-item" data-category="${cat.name}">
+                    ${cat.image && cat.image.startsWith('data:image') 
+                        ? `<img src="${cat.image}" style="width:20px;height:20px;object-fit:cover;border-radius:50%;margin-right:0.5rem;" />` 
+                        : `<span style="margin-right:0.5rem;">${cat.image || '🏷️'}</span>`}
+                    ${cat.name}
+                </li>
+            `).join('')}
+        `;
+        
+        // Ré-attacher les événements
+        document.querySelectorAll('#shopCategoryList .category-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('#shopCategoryList .category-item').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                const category = this.dataset.category;
+                renderProducts(category);
+            });
+        });
+        
+    } catch (error) {
+        console.error('Erreur chargement catégories:', error);
+        // Fallback: utiliser les catégories des produits
+        const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
+        list.innerHTML = `
+            <li class="category-item active" data-category="all"><i class="fas fa-th"></i> Tous</li>
+            ${categories.map(cat => `
+                <li class="category-item" data-category="${cat}"><i class="fas fa-tag"></i> ${cat}</li>
+            `).join('')}
+        `;
+        document.querySelectorAll('#shopCategoryList .category-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('#shopCategoryList .category-item').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                renderProducts(this.dataset.category);
+            });
+        });
+    }
 }
 
 // ============================================================
-// AFFICHAGE DES PRODUITS AVEC BOUTONS
+// AFFICHAGE DES PRODUITS AVEC BOUTON "AJOUTER AU PANIER"
 // ============================================================
 function renderProducts(category = 'all') {
     const grid = document.getElementById('productsGrid');
@@ -222,7 +284,7 @@ function renderProducts(category = 'all') {
                     <div class="product-price">${priceValue.toFixed(2)} MAD</div>
                     <div class="product-actions">
                         <button class="btn-add-cart" data-id="${p.id}" data-name="${p.name}" data-price="${priceValue}" data-image="${p.image || '📦'}">
-                            <i class="fas fa-cart-plus"></i>
+                            <i class="fas fa-cart-plus"></i> Ajouter au panier
                         </button>
                         <button class="btn-detail" data-id="${p.id}">
                             <i class="fas fa-eye"></i>
@@ -332,7 +394,6 @@ function renderProductDetail(product) {
         </div>
     `;
 
-    // Ajouter au panier depuis le détail
     detailContent.querySelector('.detail-add-cart')?.addEventListener('click', function() {
         const productData = {
             id: this.dataset.id,
@@ -597,7 +658,7 @@ tabs.forEach(tab => {
 });
 
 // ============================================================
-// INSCRIPTION & CONNEXION (simplifiés)
+// INSCRIPTION
 // ============================================================
 document.getElementById('registerBtn')?.addEventListener('click', function(e) {
     e.preventDefault();
@@ -623,6 +684,9 @@ document.getElementById('registerBtn')?.addEventListener('click', function(e) {
         .finally(() => { this.disabled = false; this.textContent = 'Créer mon compte'; });
 });
 
+// ============================================================
+// CONNEXION
+// ============================================================
 document.getElementById('loginBtn')?.addEventListener('click', function(e) {
     e.preventDefault();
     const email = document.getElementById('loginEmail').value.trim();
@@ -677,4 +741,24 @@ document.querySelectorAll('#homeCategories .cat-item').forEach(item => {
     });
 });
 
-console.log('🌿 MANORA · Script principal chargé avec détails produit');
+// ============================================================
+// ICÔNES HEADER
+// ============================================================
+document.querySelectorAll('.header-icons i').forEach(icon => {
+    if (icon.id === 'userIcon') return;
+    if (icon.id === 'bagIcon') return;
+    icon.addEventListener('click', function() {
+        const user = auth.currentUser;
+        if (!user && this.dataset.icon === 'bag') {
+            showToast('🛍️ Connectez-vous pour commander', true);
+            openAuthModal();
+            return;
+        }
+        const iconType = this.dataset.icon || '';
+        let label = 'Action';
+        if (iconType === 'search') label = 'Recherche';
+        showToast(`🛍️ ${label} — bientôt disponible`);
+    });
+});
+
+console.log('🌿 MANORA · Script principal chargé');
