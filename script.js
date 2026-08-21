@@ -389,6 +389,8 @@ async function loadPublicData() {
             const data = doc.data();
             const card = document.createElement('div');
             card.className = 'product-card';
+            // On ajoute un data attribute pour l'id produit
+            card.dataset.productId = doc.id;
             const promo = data.promoPrice && data.promoPrice > 0 && data.promoPrice < data.sellPrice;
             const imgSrc = data.image || 'https://via.placeholder.com/200x200?text=MANORA';
             card.innerHTML = `
@@ -397,11 +399,20 @@ async function loadPublicData() {
                     <h4>${data.name || ''}</h4>
                     <span class="product-category">${data.category || ''}</span>
                     <div class="product-price">${promo ? `<span>${data.sellPrice} MAD</span> ${data.promoPrice} MAD` : (data.sellPrice || 0) + ' MAD'}</div>
-                    <div style="font-size:0.6rem;color:#999;">Stock: ${data.stock || 0}</div>
+                    <div style="font-size:0.6rem;color:#999;">📦 Stock: ${data.stock || 0}</div>
                 </div>
             `;
             prodContainer.appendChild(card);
         });
+
+        // Ajouter un événement de clic sur chaque carte pour ouvrir la boutique
+        document.querySelectorAll('#productsContainer .product-card').forEach(card => {
+            card.style.cursor = 'pointer';
+            card.addEventListener('click', function() {
+                openStore();
+            });
+        });
+
     } catch (error) {
         console.error('Erreur chargement données publiques:', error);
     }
@@ -480,15 +491,6 @@ async function loadStoreData() {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
                     const id = this.dataset.productId;
-                    // Rechercher le produit dans les données du store (on peut le trouver via la carte parente)
-                    const card = this.closest('.product-card');
-                    // On va récupérer l'objet produit depuis les données stockées dans la carte elle-même
-                    // ou on peut le retrouver via l'id en interrogeant les données du snapshot.
-                    // Pour simplifier, on va récupérer le produit à partir du snapshot (mais on n'a plus accès directement).
-                    // On va plutôt stocker l'objet produit dans un attribut data de la carte ou du bouton.
-                    // Solution : on stocke l'objet produit dans un objet global associé à l'id.
-                    // Ou bien on utilise un Map.
-                    // Ici, on va utiliser un objet global "storeProductsMap" pour retrouver le produit par id.
                     const product = window._storeProductsMap ? window._storeProductsMap.get(id) : null;
                     if (product) addToCart(product);
                 });
