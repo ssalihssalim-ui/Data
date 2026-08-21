@@ -29,7 +29,8 @@
             <div class="header-icons">
                 <i class="fas fa-search"></i>
                 <i class="far fa-user" id="userIcon"></i>
-                <i class="fas fa-shopping-bag"></i>
+                <i class="fas fa-shopping-bag" id="cartIcon"></i>
+                <span class="cart-badge" id="cartBadge">0</span>
                 <span class="user-status" id="userStatus"></span>
             </div>
         </header>
@@ -40,7 +41,13 @@
     <div id="storePage" style="display: none;">
         <div class="store-header">
             <h2><i class="fas fa-store"></i> Notre Boutique</h2>
-            <button class="btn-close-store" id="closeStore"><i class="fas fa-times"></i></button>
+            <div class="store-header-actions">
+                <button class="btn-cart-header" id="cartHeaderBtn">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-badge-header" id="cartBadgeHeader">0</span>
+                </button>
+                <button class="btn-close-store" id="closeStore"><i class="fas fa-times"></i></button>
+            </div>
         </div>
         <div class="store-content">
             <div class="store-categories" id="storeCategories"></div>
@@ -325,6 +332,16 @@
                 <button type="submit" class="auth-submit" id="registerBtn">Créer mon compte</button>
                 <p class="auth-terms">En créant un compte, vous acceptez nos <a href="#">conditions</a></p>
             </form>
+        </div>
+    </div>
+
+    <!-- MODAL DÉTAILS PRODUIT -->
+    <div class="modal-overlay" id="productDetailsModal">
+        <div class="modal-content modal-large">
+            <button class="modal-close" id="closeProductDetails"><i class="fas fa-times"></i></button>
+            <div id="productDetailsContent">
+                <!-- Rempli dynamiquement -->
+            </div>
         </div>
     </div>
 
