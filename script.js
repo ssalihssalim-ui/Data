@@ -37,6 +37,38 @@ setPersistence(auth, browserLocalPersistence).catch(() => {});
 export { app, auth, db };
 
 // ============================================================
+// PANIER (Cart)
+// ============================================================
+let cart = [];
+let cartCount = 0;
+
+function updateCartUI() {
+    const badge = document.getElementById('cartBadge');
+    const badgeHeader = document.getElementById('cartBadgeHeader');
+    const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+    cartCount = count;
+    if (badge) {
+        badge.textContent = count;
+        badge.classList.toggle('hidden', count === 0);
+    }
+    if (badgeHeader) {
+        badgeHeader.textContent = count;
+        badgeHeader.classList.toggle('hidden', count === 0);
+    }
+}
+
+function addToCart(product) {
+    const existing = cart.find(item => item.id === product.id);
+    if (existing) {
+        existing.quantity += 1;
+    } else {
+        cart.push({ ...product, quantity: 1 });
+    }
+    updateCartUI();
+    window.showToast(`🛒 ${product.name} ajouté au panier !`);
+}
+
+// ============================================================
 // TOAST SYSTEM
 // ============================================================
 window.showToast = function(msg, isError = false) {
@@ -68,6 +100,51 @@ window.showToast = function(msg, isError = false) {
         toast.style.transform = 'translateX(-50%) translateY(20px)';
         setTimeout(() => toast.remove(), 400);
     }, 4000);
+};
+
+// ============================================================
+// PRODUCT DETAILS MODAL
+// ============================================================
+function showProductDetails(product) {
+    const modal = document.getElementById('productDetailsModal');
+    const content = document.getElementById('productDetailsContent');
+    const promo = product.promoPrice && product.promoPrice > 0 && product.promoPrice < product.sellPrice;
+    const imgSrc = product.image || 'https://via.placeholder.com/400x300?text=MANORA';
+    
+    content.innerHTML = `
+        <img src="${imgSrc}" alt="${product.name}" class="detail-image">
+        <h2 class="detail-name">${product.name || 'Sans nom'}</h2>
+        <div class="detail-category">${product.category || 'Non catégorisé'}</div>
+        <div class="detail-price">
+            ${promo ? `<span>${product.sellPrice} MAD</span> ${product.promoPrice} MAD` : (product.sellPrice || 0) + ' MAD'}
+        </div>
+        <div class="detail-row"><span class="label">Marque</span><span class="value">${product.brand || '-'}</span></div>
+        <div class="detail-row"><span class="label">Stock</span><span class="value">${product.stock || 0}</span></div>
+        <div class="detail-row"><span class="label">Fournisseur</span><span class="value">${product.supplier || '-'}</span></div>
+        <div class="detail-row"><span class="label">Prix d'achat</span><span class="value">${product.buyPrice || 0} MAD</span></div>
+        <div class="detail-row"><span class="label">Marge</span><span class="value">${((product.sellPrice || 0) - (product.buyPrice || 0)).toFixed(2)} MAD</span></div>
+        <div style="margin-top:1.2rem; display:flex; gap:0.8rem; flex-wrap:wrap;">
+            <button class="btn-primary" onclick="window.addToCartFromDetails('${product.id}')" style="flex:1; padding:0.8rem; font-size:0.8rem;">
+                <i class="fas fa-cart-plus"></i> Ajouter au panier
+            </button>
+            <button class="btn-secondary" onclick="document.getElementById('productDetailsModal').classList.remove('active')" style="flex:0; padding:0.8rem 1.5rem; font-size:0.8rem;">
+                Fermer
+            </button>
+        </div>
+    `;
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    // Stocker le produit pour l'ajout au panier depuis le modal
+    window._currentDetailProduct = product;
+}
+
+window.addToCartFromDetails = function(productId) {
+    if (window._currentDetailProduct) {
+        addToCart(window._currentDetailProduct);
+        document.getElementById('productDetailsModal').classList.remove('active');
+        document.body.style.overflow = '';
+    }
 };
 
 // ============================================================
@@ -123,6 +200,39 @@ document.getElementById('shopNowBtn').addEventListener('click', () => openStore(
 document.getElementById('closeStore').addEventListener('click', () => closeStore());
 document.getElementById('silverBtn').addEventListener('click', () => openStore());
 
+// Icône panier dans le header
+document.getElementById('cartIcon').addEventListener('click', () => {
+    if (cart.length === 0) {
+        window.showToast('🛒 Votre panier est vide');
+        return;
+    }
+    // Afficher le contenu du panier
+    let msg = '🛒 Panier :\n';
+    let total = 0;
+    cart.forEach(item => {
+        msg += `- ${item.name} x${item.quantity} = ${(item.sellPrice * item.quantity).toFixed(2)} MAD\n`;
+        total += item.sellPrice * item.quantity;
+    });
+    msg += `\nTotal: ${total.toFixed(2)} MAD`;
+    alert(msg);
+});
+
+// Bouton panier dans le store
+document.getElementById('cartHeaderBtn').addEventListener('click', () => {
+    if (cart.length === 0) {
+        window.showToast('🛒 Votre panier est vide');
+        return;
+    }
+    let msg = '🛒 Panier :\n';
+    let total = 0;
+    cart.forEach(item => {
+        msg += `- ${item.name} x${item.quantity} = ${(item.sellPrice * item.quantity).toFixed(2)} MAD\n`;
+        total += item.sellPrice * item.quantity;
+    });
+    msg += `\nTotal: ${total.toFixed(2)} MAD`;
+    alert(msg);
+});
+
 async function openStore() {
     storePage.classList.add('active');
     storePage.style.display = 'block';
@@ -159,6 +269,7 @@ async function loadStoreData() {
         } else {
             prodSnapshot.forEach(doc => {
                 const data = doc.data();
+                const product = { id: doc.id, ...data };
                 const card = document.createElement('div');
                 card.className = 'product-card';
                 card.dataset.category = data.category || '';
@@ -172,12 +283,36 @@ async function loadStoreData() {
                         <div class="product-price">${promo ? `<span>${data.sellPrice} MAD</span> ${data.promoPrice} MAD` : (data.sellPrice || 0) + ' MAD'}</div>
                         <div style="font-size:0.6rem;color:#999;">📦 Stock: ${data.stock || 0}</div>
                         ${data.brand ? `<div style="font-size:0.6rem;color:#999;">🏷️ ${data.brand}</div>` : ''}
+                        <div class="product-actions">
+                            <button class="btn-store-add" data-id="${doc.id}"><i class="fas fa-cart-plus"></i> Ajouter</button>
+                            <button class="btn-store-detail" data-id="${doc.id}"><i class="fas fa-eye"></i> Détails</button>
+                        </div>
                     </div>
                 `;
                 prodContainer.appendChild(card);
             });
+            
+            // Attacher les événements aux boutons
+            prodContainer.querySelectorAll('.btn-store-add').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const id = this.dataset.id;
+                    const product = productsData.find(p => p.id === id);
+                    if (product) addToCart(product);
+                });
+            });
+            
+            prodContainer.querySelectorAll('.btn-store-detail').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const id = this.dataset.id;
+                    const product = productsData.find(p => p.id === id);
+                    if (product) showProductDetails(product);
+                });
+            });
         }
 
+        // Filtrage par catégorie
         document.querySelectorAll('.store-category-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.querySelectorAll('.store-category-btn').forEach(b => b.classList.remove('active'));
@@ -196,6 +331,9 @@ async function loadStoreData() {
         window.showToast('⚠️ Erreur chargement du store', true);
     }
 }
+
+// Stocker les produits pour les boutons
+let productsData = [];
 
 // ============================================================
 // AUTH UI
@@ -251,6 +389,8 @@ function openAdminPanel(user) {
             module.updateDashboard();
             module.loadCategoriesTable();
             module.loadProductsTable();
+            // Stocker les produits pour la boutique
+            productsData = module.getProductsData ? module.getProductsData() : [];
         });
     }
 }
@@ -332,6 +472,18 @@ userIcon.addEventListener('click', function() {
 authClose.addEventListener('click', closeAuthModal);
 authOverlay.addEventListener('click', (e) => { if (e.target === authOverlay) closeAuthModal(); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && authOverlay.classList.contains('active')) closeAuthModal(); });
+
+// Fermeture du modal détails produit
+document.getElementById('closeProductDetails').addEventListener('click', () => {
+    document.getElementById('productDetailsModal').classList.remove('active');
+    document.body.style.overflow = '';
+});
+document.getElementById('productDetailsModal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) {
+        document.getElementById('productDetailsModal').classList.remove('active');
+        document.body.style.overflow = '';
+    }
+});
 
 // ============================================================
 // TABS AUTH
@@ -481,7 +633,7 @@ document.getElementById('lunchBadge').addEventListener('click', () => window.sho
 document.getElementById('logoLink').addEventListener('click', (e) => e.preventDefault());
 
 document.querySelectorAll('.header-icons i').forEach(icon => {
-    if (icon.id === 'userIcon') return;
+    if (icon.id === 'userIcon' || icon.id === 'cartIcon') return;
     icon.addEventListener('click', () => window.showToast('🛍️ Bientôt disponible'));
 });
 document.querySelectorAll('.footer-links a').forEach(link => {
@@ -497,11 +649,13 @@ document.querySelectorAll('.footer-social i').forEach(icon => {
 onAuthStateChanged(auth, (user) => {
     updateUI(user);
     loadPublicData();
+    updateCartUI();
 });
 
 // ============================================================
 // INIT
 // ============================================================
 loadPublicData();
+updateCartUI();
 console.log('🌿 MANORA · E-commerce Beauty & Wellness (Base64)');
 console.log('📊 Firebase Auth + Firestore actif');
