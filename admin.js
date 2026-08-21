@@ -33,7 +33,7 @@ let categoriesData = [];
 let productsData = [];
 
 // ============================================================
-// FONCTIONS UPLOAD IMAGE
+// FONCTIONS UPLOAD IMAGE (CORRIGÉES)
 // ============================================================
 async function uploadImage(file, path) {
     if (!file) return null;
@@ -43,16 +43,17 @@ async function uploadImage(file, path) {
         const fileName = `${timestamp}_${file.name}`;
         const storageRef = ref(storage, `${path}/${fileName}`);
         
+        console.log('📤 Upload en cours...', fileName);
         const snapshot = await uploadBytes(storageRef, file);
-        console.log('📤 Image uploadée:', snapshot.metadata.fullPath);
+        console.log('✅ Upload terminé:', snapshot.metadata.fullPath);
         
         const url = await getDownloadURL(storageRef);
-        console.log('🔗 URL:', url);
+        console.log('🔗 URL obtenue:', url);
         
         return url;
     } catch (error) {
         console.error('❌ Erreur upload image:', error);
-        window.showToast('⚠️ Erreur upload image: ' + error.message, true);
+        window.showToast('⚠️ Erreur upload: ' + error.message, true);
         return null;
     }
 }
@@ -62,11 +63,83 @@ async function deleteImage(url) {
     try {
         const storageRef = ref(storage, url);
         await deleteObject(storageRef);
-        console.log('🗑️ Image supprimée:', url);
+        console.log('🗑️ Image supprimée');
     } catch (error) {
-        console.warn('⚠️ Erreur suppression image:', error.message);
+        console.warn('⚠️ Erreur suppression:', error.message);
     }
 }
+
+// ============================================================
+// EXPORT / IMPORT DATA
+// ============================================================
+window.exportData = async function() {
+    try {
+        const catSnapshot = await getDocs(collection(db, 'categories'));
+        const prodSnapshot = await getDocs(collection(db, 'products'));
+        
+        const data = {
+            categories: [],
+            products: []
+        };
+        
+        catSnapshot.forEach(doc => {
+            data.categories.push({ id: doc.id, ...doc.data() });
+        });
+        
+        prodSnapshot.forEach(doc => {
+            data.products.push({ id: doc.id, ...doc.data() });
+        });
+        
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `manora_data_${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        window.showToast('✅ Données exportées avec succès !');
+    } catch (error) {
+        console.error('Erreur export:', error);
+        window.showToast('⚠️ Erreur export: ' + error.message, true);
+    }
+};
+
+window.importData = async function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        
+        let imported = 0;
+        
+        // Importer les catégories
+        for (const cat of data.categories) {
+            const { id, ...catData } = cat;
+            await setDoc(doc(db, 'categories', id || doc(collection(db, 'categories')).id), catData);
+            imported++;
+        }
+        
+        // Importer les produits
+        for (const prod of data.products) {
+            const { id, ...prodData } = prod;
+            await setDoc(doc(db, 'products', id || doc(collection(db, 'products')).id), prodData);
+            imported++;
+        }
+        
+        window.showToast(`✅ ${imported} éléments importés avec succès !`);
+        // Rafraîchir les données
+        loadCategories();
+        loadProducts();
+        loadCategoriesTable();
+        loadProductsTable();
+        updateDashboard();
+    } catch (error) {
+        console.error('Erreur import:', error);
+        window.showToast('⚠️ Erreur import: ' + error.message, true);
+    }
+};
 
 // ============================================================
 // CRUD CATÉGORIES
@@ -313,7 +386,7 @@ export async function updateDashboard() {
 }
 
 // ============================================================
-// MODALS CATÉGORIE AVEC UPLOAD
+// MODALS CATÉGORIE
 // ============================================================
 document.getElementById('btnAddCategory').addEventListener('click', () => {
     document.getElementById('categoryId').value = '';
@@ -384,12 +457,13 @@ document.getElementById('categoryForm').addEventListener('submit', async functio
         loadCategoriesTable();
         updateDashboard();
     } catch (error) {
+        console.error('Erreur sauvegarde:', error);
         window.showToast('⚠️ ' + error.message, true);
     }
 });
 
 // ============================================================
-// MODALS PRODUIT AVEC UPLOAD
+// MODALS PRODUIT
 // ============================================================
 document.getElementById('btnAddProduct').addEventListener('click', async () => {
     document.getElementById('productId').value = '';
@@ -486,8 +560,18 @@ document.getElementById('productForm').addEventListener('submit', async function
         loadProductsTable();
         updateDashboard();
     } catch (error) {
+        console.error('Erreur sauvegarde produit:', error);
         window.showToast('⚠️ ' + error.message, true);
     }
 });
+
+// ============================================================
+// IMPORT/EXPORT EVENTS
+// ============================================================
+document.getElementById('exportDataBtn').addEventListener('click', window.exportData);
+document.getElementById('importDataBtn').addEventListener('click', () => {
+    document.getElementById('importFile').click();
+});
+document.getElementById('importFile').addEventListener('change', window.importData);
 
 console.log('📊 Admin.js chargé - Gestion Catégories & Produits avec Firebase Storage');
