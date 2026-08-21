@@ -43,7 +43,7 @@ function formatPrice(price) {
 }
 
 // ============================================================
-// FONCTIONS UPLOAD IMAGE
+// FONCTIONS UPLOAD IMAGE AVEC FALLBACK URL
 // ============================================================
 async function uploadImage(file, path) {
     if (!file) return null;
@@ -62,7 +62,24 @@ async function uploadImage(file, path) {
         
         return url;
     } catch (error) {
-        console.error('❌ Erreur upload image:', error);
+        console.error('❌ Erreur upload:', error);
+        
+        // Fallback : proposer une URL externe si CORS
+        if (error.code === 'storage/unauthorized' || error.message.includes('CORS') || error.message.includes('403')) {
+            window.showToast('⚠️ Problème CORS. Utilisez une URL externe.', true);
+            
+            const url = prompt(
+                '❌ Le téléchargement direct ne fonctionne pas (CORS).\n\n' +
+                'Entrez une URL d\'image existante (ex: https://images.unsplash.com/...)\n' +
+                'ou tapez "annuler" pour ignorer.'
+            );
+            
+            if (url && url.startsWith('http')) {
+                return url;
+            }
+            return null;
+        }
+        
         window.showToast('⚠️ Erreur upload: ' + error.message, true);
         return null;
     }
@@ -145,6 +162,46 @@ window.importData = async function(event) {
     } catch (error) {
         console.error('Erreur import:', error);
         window.showToast('⚠️ Erreur import: ' + error.message, true);
+    }
+};
+
+// ============================================================
+// SUPPRIMER TOUTES LES DONNÉES
+// ============================================================
+window.deleteAllData = async function() {
+    if (!confirm('⚠️ Êtes-vous sûr de vouloir supprimer TOUTES les catégories et TOUS les produits ?')) {
+        return;
+    }
+    if (!confirm('⚠️ CONFIRMATION FINALE : Cette action est IRRÉVERSIBLE !')) {
+        return;
+    }
+    
+    try {
+        window.showToast('🗑️ Suppression en cours...', false);
+        
+        // Supprimer les produits
+        const prodSnapshot = await getDocs(collection(db, 'products'));
+        for (const docSnap of prodSnapshot.docs) {
+            await deleteDoc(doc(db, 'products', docSnap.id));
+        }
+        
+        // Supprimer les catégories
+        const catSnapshot = await getDocs(collection(db, 'categories'));
+        for (const docSnap of catSnapshot.docs) {
+            await deleteDoc(doc(db, 'categories', docSnap.id));
+        }
+        
+        window.showToast(`✅ ${prodSnapshot.size + catSnapshot.size} éléments supprimés !`);
+        
+        loadCategories();
+        loadProducts();
+        loadCategoriesTable();
+        loadProductsTable();
+        updateDashboard();
+        
+    } catch (error) {
+        console.error('Erreur suppression:', error);
+        window.showToast('⚠️ ' + error.message, true);
     }
 };
 
@@ -376,13 +433,11 @@ export async function updateDashboard() {
         
         let totalStock = 0;
         let totalCA = 0;
-        let totalProfit = 0;
         
         prodSnapshot.forEach(doc => {
             const data = doc.data();
             totalStock += data.stock || 0;
             totalCA += data.ca || 0;
-            totalProfit += data.profit || 0;
         });
         
         document.getElementById('statCategories').textContent = catSnapshot.size;
@@ -450,9 +505,6 @@ document.getElementById('categoryForm').addEventListener('submit', async functio
         description: document.getElementById('catDescription').value.trim(),
         image: imageUrl || '',
         order: parseInt(document.getElementById('catOrder').value) || 0,
-        ca: parseFloat(document.getElementById('catCA')?.value) || 0,
-        profit: parseFloat(document.getElementById('catProfit')?.value) || 0,
-        productCount: parseInt(document.getElementById('catProductCount')?.value) || 0,
         updatedAt: serverTimestamp()
     };
 
@@ -576,46 +628,6 @@ document.getElementById('productForm').addEventListener('submit', async function
         window.showToast('⚠️ ' + error.message, true);
     }
 });
-
-// ============================================================
-// SUPPRIMER TOUTES LES DONNÉES (BOUTON)
-// ============================================================
-window.deleteAllData = async function() {
-    if (!confirm('⚠️ Êtes-vous sûr de vouloir supprimer TOUTES les catégories et TOUS les produits ?')) {
-        return;
-    }
-    if (!confirm('⚠️ CONFIRMATION FINALE : Cette action est IRRÉVERSIBLE !')) {
-        return;
-    }
-    
-    try {
-        window.showToast('🗑️ Suppression en cours...', false);
-        
-        // Supprimer les produits
-        const prodSnapshot = await getDocs(collection(db, 'products'));
-        for (const docSnap of prodSnapshot.docs) {
-            await deleteDoc(doc(db, 'products', docSnap.id));
-        }
-        
-        // Supprimer les catégories
-        const catSnapshot = await getDocs(collection(db, 'categories'));
-        for (const docSnap of catSnapshot.docs) {
-            await deleteDoc(doc(db, 'categories', docSnap.id));
-        }
-        
-        window.showToast(`✅ ${prodSnapshot.size + catSnapshot.size} éléments supprimés !`);
-        
-        loadCategories();
-        loadProducts();
-        loadCategoriesTable();
-        loadProductsTable();
-        updateDashboard();
-        
-    } catch (error) {
-        console.error('Erreur suppression:', error);
-        window.showToast('⚠️ ' + error.message, true);
-    }
-};
 
 // ============================================================
 // IMPORT/EXPORT EVENTS
