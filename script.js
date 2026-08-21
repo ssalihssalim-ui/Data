@@ -99,11 +99,10 @@ window.isValidEmail = function(email) {
 };
 
 // ============================================================
-// LOAD PUBLIC DATA (Accueil)
+// LOAD PUBLIC DATA
 // ============================================================
 async function loadPublicData() {
     try {
-        // Charger catégories
         const catSnapshot = await getDocs(query(collection(db, 'categories'), orderBy('order', 'asc')));
         const catContainer = document.getElementById('categoriesContainer');
         catContainer.innerHTML = '';
@@ -119,7 +118,6 @@ async function loadPublicData() {
             catContainer.appendChild(span);
         });
 
-        // Charger produits
         const prodSnapshot = await getDocs(collection(db, 'products'));
         const prodContainer = document.getElementById('productsContainer');
         prodContainer.innerHTML = '';
@@ -150,17 +148,9 @@ async function loadPublicData() {
 // ============================================================
 const storePage = document.getElementById('storePage');
 
-document.getElementById('shopNowBtn').addEventListener('click', function() {
-    openStore();
-});
-
-document.getElementById('closeStore').addEventListener('click', function() {
-    closeStore();
-});
-
-document.getElementById('silverBtn').addEventListener('click', function() {
-    openStore();
-});
+document.getElementById('shopNowBtn').addEventListener('click', () => openStore());
+document.getElementById('closeStore').addEventListener('click', () => closeStore());
+document.getElementById('silverBtn').addEventListener('click', () => openStore());
 
 async function openStore() {
     storePage.classList.add('active');
@@ -177,7 +167,6 @@ function closeStore() {
 
 async function loadStoreData() {
     try {
-        // Charger catégories
         const catSnapshot = await getDocs(query(collection(db, 'categories'), orderBy('order', 'asc')));
         const catContainer = document.getElementById('storeCategories');
         catContainer.innerHTML = '<button class="store-category-btn active" data-category="all">📋 Tous</button>';
@@ -195,7 +184,6 @@ async function loadStoreData() {
             catContainer.appendChild(btn);
         });
 
-        // Charger produits
         const prodSnapshot = await getDocs(collection(db, 'products'));
         const prodContainer = document.getElementById('storeProducts');
         prodContainer.innerHTML = '';
@@ -205,7 +193,6 @@ async function loadStoreData() {
                 <div style="grid-column:1/-1;text-align:center;padding:3rem;color:#999;">
                     <i class="fas fa-box-open" style="font-size:3rem;display:block;margin-bottom:1rem;color:#e8a87c;"></i>
                     <p>Aucun produit disponible pour le moment.</p>
-                    <p style="font-size:0.8rem;margin-top:0.5rem;">Connectez-vous en tant qu'admin pour ajouter des produits.</p>
                 </div>
             `;
         } else {
@@ -230,30 +217,22 @@ async function loadStoreData() {
             });
         }
 
-        // Filtrage
         document.querySelectorAll('.store-category-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.querySelectorAll('.store-category-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 const cat = this.dataset.category;
                 document.querySelectorAll('#storeProducts .product-card').forEach(card => {
-                    if (cat === 'all' || card.dataset.category === cat) {
-                        card.style.display = 'block';
-                    } else {
-                        card.style.display = 'none';
-                    }
+                    card.style.display = (cat === 'all' || card.dataset.category === cat) ? 'block' : 'none';
                 });
             });
         });
-
-        console.log('✅ Store chargé avec succès !');
     } catch (error) {
-        console.error('❌ Erreur chargement store:', error);
+        console.error('Erreur chargement store:', error);
         document.getElementById('storeProducts').innerHTML = `
             <div style="grid-column:1/-1;text-align:center;padding:3rem;color:#c0392b;">
                 <i class="fas fa-exclamation-triangle" style="font-size:3rem;display:block;margin-bottom:1rem;"></i>
                 <p>Erreur lors du chargement des produits.</p>
-                <p style="font-size:0.8rem;margin-top:0.5rem;">${error.message}</p>
             </div>
         `;
         window.showToast('⚠️ Erreur chargement du store', true);
@@ -564,9 +543,7 @@ document.getElementById('logoLink').addEventListener('click', (e) => { e.prevent
 
 document.querySelectorAll('.header-icons i').forEach(icon => {
     if (icon.id === 'userIcon') return;
-    icon.addEventListener('click', function() {
-        window.showToast('🛍️ Bientôt disponible');
-    });
+    icon.addEventListener('click', () => window.showToast('🛍️ Bientôt disponible'));
 });
 
 document.querySelectorAll('.footer-links a').forEach(link => {
