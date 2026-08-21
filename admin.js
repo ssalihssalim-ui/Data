@@ -1,137 +1,63 @@
 // ============================================================
-// IMPORTS
+// ADMIN.JS - Gestion des catégories et produits
 // ============================================================
 import { 
-    collection,
-    doc,
-    setDoc,
-    getDocs,
-    updateDoc,
-    deleteDoc,
-    query,
-    orderBy,
-    serverTimestamp
+    collection, doc, setDoc, getDocs, updateDoc, deleteDoc,
+    query, orderBy, serverTimestamp
 } from "firebase/firestore";
-import { 
-    getStorage,
-    ref,
-    uploadBytesResumable,
-    getDownloadURL,
-    deleteObject
-} from "firebase/storage";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "firebase/storage";
 import { db, app } from "./script.js";
 
-// ============================================================
-// INITIALISATION STORAGE
-// ============================================================
 const storage = getStorage(app);
-
-// ============================================================
-// VARIABLES GLOBALES
-// ============================================================
 let categoriesData = [];
 let productsData = [];
-
-// ============================================================
-// CURRENCY MAD
-// ============================================================
 const CURRENCY = 'MAD';
 
-function formatPrice(price) {
-    if (price === undefined || price === null) return '0 ' + CURRENCY;
-    return Number(price).toFixed(2) + ' ' + CURRENCY;
-}
+function formatPrice(p) { return (p === undefined || p === null) ? '0 ' + CURRENCY : Number(p).toFixed(2) + ' ' + CURRENCY; }
 
 // ============================================================
-// FONCTIONS UPLOAD IMAGE
+// UPLOAD IMAGE
 // ============================================================
 async function uploadImage(file, path) {
     if (!file) return null;
-    
     return new Promise((resolve, reject) => {
         try {
-            const timestamp = Date.now();
-            const fileName = `${timestamp}_${file.name}`;
+            const fileName = Date.now() + '_' + file.name;
             const storageRef = ref(storage, `${path}/${fileName}`);
-            
-            const uploadTask = uploadBytesResumable(storageRef, file, {
-                contentType: file.type || 'image/jpeg'
-            });
-            
-            uploadTask.on('state_changed',
-                (snapshot) => {
-                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    console.log(`📤 Upload: ${progress.toFixed(0)}%`);
-                },
+            const uploadTask = uploadBytesResumable(storageRef, file, { contentType: file.type || 'image/jpeg' });
+            uploadTask.on('state_changed', null,
                 (error) => {
-                    console.error('❌ Erreur upload:', error);
+                    console.error('Upload error:', error);
                     if (error.message.includes('CORS') || error.message.includes('403')) {
-                        window.showToast('⚠️ Problème CORS. Utilisez une URL externe.', true);
-                        const url = prompt(
-                            '❌ Le téléchargement direct ne fonctionne pas.\n\n' +
-                            'Entrez une URL d\'image existante:\n' +
-                            'https://images.unsplash.com/photo-xxx\n\n' +
-                            'ou tapez "annuler" pour ignorer.'
-                        );
-                        if (url && url.startsWith('http')) {
-                            resolve(url);
-                        } else {
-                            resolve(null);
-                        }
-                    } else {
-                        reject(error);
-                    }
+                        const url = prompt('❌ Upload impossible. Entrez une URL d\'image externe:');
+                        if (url && url.startsWith('http')) resolve(url);
+                        else resolve(null);
+                    } else reject(error);
                 },
                 async () => {
-                    try {
-                        const url = await getDownloadURL(uploadTask.snapshot.ref);
-                        console.log('✅ Image uploadée:', url);
-                        resolve(url);
-                    } catch (error) {
-                        reject(error);
-                    }
+                    const url = await getDownloadURL(uploadTask.snapshot.ref);
+                    resolve(url);
                 }
             );
-        } catch (error) {
-            console.error('❌ Erreur:', error);
-            reject(error);
-        }
+        } catch (e) { reject(e); }
     });
 }
 
 async function deleteImage(url) {
-    if (!url) return;
-    try {
-        const storageRef = ref(storage, url);
-        await deleteObject(storageRef);
-        console.log('🗑️ Image supprimée');
-    } catch (error) {
-        console.warn('⚠️ Erreur suppression:', error.message);
-    }
+    if (!url || !url.includes('firebasestorage')) return;
+    try { await deleteObject(ref(storage, url)); } catch (e) {}
 }
 
 // ============================================================
-// EXPORT / IMPORT DATA
+// EXPORT / IMPORT / DELETE ALL
 // ============================================================
 window.exportData = async function() {
     try {
-        const catSnapshot = await getDocs(collection(db, 'categories'));
-        const prodSnapshot = await getDocs(collection(db, 'products'));
-        
-        const data = {
-            categories: [],
-            products: [],
-            exportedAt: new Date().toISOString()
-        };
-        
-        catSnapshot.forEach(doc => {
-            data.categories.push({ id: doc.id, ...doc.data() });
-        });
-        
-        prodSnapshot.forEach(doc => {
-            data.products.push({ id: doc.id, ...doc.data() });
-        });
-        
+        const catSnap = await getDocs(collection(db, 'categories'));
+        const prodSnap = await getDocs(collection(db, 'products'));
+        const data = { categories: [], products: [], exportedAt: new Date().toISOString() };
+        catSnap.forEach(d => data.categories.push({ id: d.id, ...d.data() }));
+        prodSnap.forEach(d => data.products.push({ id: d.id, ...d.data() }));
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -139,96 +65,58 @@ window.exportData = async function() {
         a.download = `manora_data_${new Date().toISOString().split('T')[0]}.json`;
         a.click();
         URL.revokeObjectURL(url);
-        window.showToast('✅ Données exportées avec succès !');
-    } catch (error) {
-        console.error('Erreur export:', error);
-        window.showToast('⚠️ Erreur export: ' + error.message, true);
-    }
+        window.showToast('✅ Données exportées !');
+    } catch (e) { window.showToast('⚠️ ' + e.message, true); }
 };
 
 window.importData = async function(event) {
     const file = event.target.files[0];
     if (!file) return;
-    
     try {
         const text = await file.text();
         const data = JSON.parse(text);
-        
         let imported = 0;
-        
         for (const cat of data.categories) {
             const { id, ...catData } = cat;
             await setDoc(doc(db, 'categories', id || doc(collection(db, 'categories')).id), catData);
             imported++;
         }
-        
         for (const prod of data.products) {
             const { id, ...prodData } = prod;
             await setDoc(doc(db, 'products', id || doc(collection(db, 'products')).id), prodData);
             imported++;
         }
-        
-        window.showToast(`✅ ${imported} éléments importés avec succès !`);
-        loadCategories();
-        loadProducts();
-        loadCategoriesTable();
-        loadProductsTable();
-        updateDashboard();
-    } catch (error) {
-        console.error('Erreur import:', error);
-        window.showToast('⚠️ Erreur import: ' + error.message, true);
-    }
+        window.showToast(`✅ ${imported} éléments importés !`);
+        loadCategories(); loadProducts(); loadCategoriesTable(); loadProductsTable(); updateDashboard();
+    } catch (e) { window.showToast('⚠️ ' + e.message, true); }
 };
 
-// ============================================================
-// SUPPRIMER TOUTES LES DONNÉES
-// ============================================================
 window.deleteAllData = async function() {
     if (!confirm('⚠️ Supprimer TOUTES les catégories et produits ?')) return;
     if (!confirm('⚠️ CONFIRMATION FINALE : IRRÉVERSIBLE !')) return;
-    
     try {
-        window.showToast('🗑️ Suppression en cours...', false);
-        
-        const prodSnapshot = await getDocs(collection(db, 'products'));
-        for (const docSnap of prodSnapshot.docs) {
-            await deleteDoc(doc(db, 'products', docSnap.id));
-        }
-        
-        const catSnapshot = await getDocs(collection(db, 'categories'));
-        for (const docSnap of catSnapshot.docs) {
-            await deleteDoc(doc(db, 'categories', docSnap.id));
-        }
-        
-        window.showToast(`✅ ${prodSnapshot.size + catSnapshot.size} éléments supprimés !`);
-        loadCategories();
-        loadProducts();
-        loadCategoriesTable();
-        loadProductsTable();
-        updateDashboard();
-    } catch (error) {
-        console.error('Erreur suppression:', error);
-        window.showToast('⚠️ ' + error.message, true);
-    }
+        window.showToast('🗑️ Suppression...', false);
+        const prodSnap = await getDocs(collection(db, 'products'));
+        for (const d of prodSnap.docs) await deleteDoc(doc(db, 'products', d.id));
+        const catSnap = await getDocs(collection(db, 'categories'));
+        for (const d of catSnap.docs) await deleteDoc(doc(db, 'categories', d.id));
+        window.showToast(`✅ ${prodSnap.size + catSnap.size} éléments supprimés !`);
+        loadCategories(); loadProducts(); loadCategoriesTable(); loadProductsTable(); updateDashboard();
+    } catch (e) { window.showToast('⚠️ ' + e.message, true); }
 };
 
 // ============================================================
-// CRUD CATÉGORIES
+// CATÉGORIES
 // ============================================================
 export async function loadCategories() {
     try {
         const q = query(collection(db, 'categories'), orderBy('order', 'asc'));
-        const snapshot = await getDocs(q);
+        const snap = await getDocs(q);
         categoriesData = [];
-        snapshot.forEach(doc => {
-            categoriesData.push({ id: doc.id, ...doc.data() });
-        });
+        snap.forEach(d => categoriesData.push({ id: d.id, ...d.data() }));
         renderCategories();
-    } catch (error) {
-        console.error('Erreur chargement catégories:', error);
-    }
+    } catch (e) { console.error(e); }
 }
-
 function renderCategories() {
     const container = document.getElementById('categoriesContainer');
     if (!container) return;
@@ -237,11 +125,7 @@ function renderCategories() {
         const span = document.createElement('span');
         span.className = 'cat-item';
         span.dataset.category = cat.id;
-        if (cat.image) {
-            span.innerHTML = `<img src="${cat.image}" alt="${cat.name}">${cat.name}`;
-        } else {
-            span.innerHTML = cat.name;
-        }
+        span.innerHTML = cat.image ? `<img src="${cat.image}" alt="${cat.name}">${cat.name}` : cat.name;
         container.appendChild(span);
     });
 }
@@ -249,11 +133,11 @@ function renderCategories() {
 export async function loadCategoriesTable() {
     try {
         const q = query(collection(db, 'categories'), orderBy('order', 'asc'));
-        const snapshot = await getDocs(q);
+        const snap = await getDocs(q);
         const tbody = document.getElementById('categoriesTableBody');
         tbody.innerHTML = '';
-        snapshot.forEach(doc => {
-            const data = doc.data();
+        snap.forEach(d => {
+            const data = d.data();
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${data.image ? `<img src="${data.image}" class="table-img">` : '-'}</td>
@@ -263,18 +147,14 @@ export async function loadCategoriesTable() {
                 <td>${formatPrice(data.ca || 0)}</td>
                 <td>${formatPrice(data.profit || 0)}</td>
                 <td>${data.productCount || 0}</td>
-                <td>
-                    <div class="action-btns">
-                        <button class="btn-edit-small" onclick="window.editCategory('${doc.id}')"><i class="fas fa-edit"></i></button>
-                        <button class="btn-danger-small" onclick="window.deleteCategory('${doc.id}')"><i class="fas fa-trash"></i></button>
-                    </div>
-                </td>
+                <td><div class="action-btns">
+                    <button class="btn-edit-small" onclick="window.editCategory('${d.id}')"><i class="fas fa-edit"></i></button>
+                    <button class="btn-danger-small" onclick="window.deleteCategory('${d.id}')"><i class="fas fa-trash"></i></button>
+                </div></td>
             `;
             tbody.appendChild(tr);
         });
-    } catch (error) {
-        console.error('Erreur chargement table catégories:', error);
-    }
+    } catch (e) { console.error(e); }
 }
 
 window.editCategory = function(id) {
@@ -286,49 +166,33 @@ window.editCategory = function(id) {
     document.getElementById('catImage').value = data.image || '';
     document.getElementById('catOrder').value = data.order || 0;
     document.getElementById('categoryModalTitle').textContent = 'Modifier la catégorie';
-    document.getElementById('categoryModal').classList.add('active');
-    
     const preview = document.getElementById('catImagePreview');
-    if (data.image) {
-        preview.innerHTML = `<img src="${data.image}" style="max-width:150px;max-height:150px;border-radius:4px;">`;
-    } else {
-        preview.innerHTML = '';
-    }
+    preview.innerHTML = data.image ? `<img src="${data.image}">` : '';
+    document.getElementById('categoryModal').classList.add('active');
 };
 
 window.deleteCategory = async function(id) {
     if (!confirm('Supprimer cette catégorie ?')) return;
     try {
         const data = categoriesData.find(c => c.id === id);
-        if (data?.image) {
-            await deleteImage(data.image);
-        }
+        if (data?.image) await deleteImage(data.image);
         await deleteDoc(doc(db, 'categories', id));
         window.showToast('✅ Catégorie supprimée');
-        loadCategories();
-        loadCategoriesTable();
-        updateDashboard();
-    } catch (error) {
-        window.showToast('⚠️ ' + error.message, true);
-    }
+        loadCategories(); loadCategoriesTable(); updateDashboard();
+    } catch (e) { window.showToast('⚠️ ' + e.message, true); }
 };
 
 // ============================================================
-// CRUD PRODUITS
+// PRODUITS
 // ============================================================
 export async function loadProducts() {
     try {
-        const snapshot = await getDocs(collection(db, 'products'));
+        const snap = await getDocs(collection(db, 'products'));
         productsData = [];
-        snapshot.forEach(doc => {
-            productsData.push({ id: doc.id, ...doc.data() });
-        });
+        snap.forEach(d => productsData.push({ id: d.id, ...d.data() }));
         renderProducts();
-    } catch (error) {
-        console.error('Erreur chargement produits:', error);
-    }
+    } catch (e) { console.error(e); }
 }
-
 function renderProducts() {
     const container = document.getElementById('productsContainer');
     if (!container) return;
@@ -343,7 +207,7 @@ function renderProducts() {
             <div class="product-info">
                 <h4>${prod.name || ''}</h4>
                 <span class="product-category">${prod.category || ''}</span>
-                <div class="product-price">${promo ? `<span>${formatPrice(prod.sellPrice)}</span> ${formatPrice(prod.promoPrice)}` : formatPrice(prod.sellPrice || 0)}</div>
+                <div class="product-price">${promo ? `<span>${prod.sellPrice} MAD</span> ${prod.promoPrice} MAD` : (prod.sellPrice || 0) + ' MAD'}</div>
                 <div style="font-size:0.6rem;color:#999;">Stock: ${prod.stock || 0}</div>
             </div>
         `;
@@ -353,11 +217,11 @@ function renderProducts() {
 
 export async function loadProductsTable() {
     try {
-        const snapshot = await getDocs(collection(db, 'products'));
+        const snap = await getDocs(collection(db, 'products'));
         const tbody = document.getElementById('productsTableBody');
         tbody.innerHTML = '';
-        snapshot.forEach(doc => {
-            const data = doc.data();
+        snap.forEach(d => {
+            const data = d.data();
             const profit = (data.sellPrice || 0) - (data.buyPrice || 0);
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -373,18 +237,14 @@ export async function loadProductsTable() {
                 <td>${data.supplier || '-'}</td>
                 <td>${formatPrice(data.ca || 0)}</td>
                 <td>${formatPrice(data.profit || 0)}</td>
-                <td>
-                    <div class="action-btns">
-                        <button class="btn-edit-small" onclick="window.editProduct('${doc.id}')"><i class="fas fa-edit"></i></button>
-                        <button class="btn-danger-small" onclick="window.deleteProduct('${doc.id}')"><i class="fas fa-trash"></i></button>
-                    </div>
-                </td>
+                <td><div class="action-btns">
+                    <button class="btn-edit-small" onclick="window.editProduct('${d.id}')"><i class="fas fa-edit"></i></button>
+                    <button class="btn-danger-small" onclick="window.deleteProduct('${d.id}')"><i class="fas fa-trash"></i></button>
+                </div></td>
             `;
             tbody.appendChild(tr);
         });
-    } catch (error) {
-        console.error('Erreur chargement table produits:', error);
-    }
+    } catch (e) { console.error(e); }
 }
 
 window.editProduct = function(id) {
@@ -403,31 +263,22 @@ window.editProduct = function(id) {
     document.getElementById('prodCA').value = data.ca || 0;
     document.getElementById('prodProfit').value = data.profit || 0;
     document.getElementById('productModalTitle').textContent = 'Modifier le produit';
-    document.getElementById('productModal').classList.add('active');
-    
     const preview = document.getElementById('prodImagePreview');
-    if (data.image) {
-        preview.innerHTML = `<img src="${data.image}" style="max-width:150px;max-height:150px;border-radius:4px;">`;
-    } else {
-        preview.innerHTML = '';
-    }
+    preview.innerHTML = data.image ? `<img src="${data.image}">` : '';
+    // Charger les catégories dans le select
+    loadCategoriesForSelect(data.category);
+    document.getElementById('productModal').classList.add('active');
 };
 
 window.deleteProduct = async function(id) {
     if (!confirm('Supprimer ce produit ?')) return;
     try {
         const data = productsData.find(p => p.id === id);
-        if (data?.image) {
-            await deleteImage(data.image);
-        }
+        if (data?.image) await deleteImage(data.image);
         await deleteDoc(doc(db, 'products', id));
         window.showToast('✅ Produit supprimé');
-        loadProducts();
-        loadProductsTable();
-        updateDashboard();
-    } catch (error) {
-        window.showToast('⚠️ ' + error.message, true);
-    }
+        loadProducts(); loadProductsTable(); updateDashboard();
+    } catch (e) { window.showToast('⚠️ ' + e.message, true); }
 };
 
 // ============================================================
@@ -435,30 +286,38 @@ window.deleteProduct = async function(id) {
 // ============================================================
 export async function updateDashboard() {
     try {
-        const catSnapshot = await getDocs(collection(db, 'categories'));
-        const prodSnapshot = await getDocs(collection(db, 'products'));
-        
-        let totalStock = 0;
-        let totalCA = 0;
-        
-        prodSnapshot.forEach(doc => {
-            const data = doc.data();
-            totalStock += data.stock || 0;
-            totalCA += data.ca || 0;
-        });
-        
-        document.getElementById('statCategories').textContent = catSnapshot.size;
-        document.getElementById('statProducts').textContent = prodSnapshot.size;
+        const catSnap = await getDocs(collection(db, 'categories'));
+        const prodSnap = await getDocs(collection(db, 'products'));
+        let totalStock = 0, totalCA = 0;
+        prodSnap.forEach(d => { const data = d.data(); totalStock += data.stock || 0; totalCA += data.ca || 0; });
+        document.getElementById('statCategories').textContent = catSnap.size;
+        document.getElementById('statProducts').textContent = prodSnap.size;
         document.getElementById('statStock').textContent = totalStock;
         document.getElementById('statCA').textContent = formatPrice(totalCA);
-    } catch (error) {
-        console.error('Erreur dashboard:', error);
-    }
+    } catch (e) { console.error(e); }
 }
 
 // ============================================================
-// MODALS CATÉGORIE
+// LOAD CATEGORIES FOR SELECT
 // ============================================================
+async function loadCategoriesForSelect(selectedId) {
+    const select = document.getElementById('prodCategory');
+    select.innerHTML = '<option value="">Sélectionner</option>';
+    const snap = await getDocs(collection(db, 'categories'));
+    snap.forEach(d => {
+        const data = d.data();
+        const opt = document.createElement('option');
+        opt.value = d.id;
+        opt.textContent = data.name;
+        if (d.id === selectedId) opt.selected = true;
+        select.appendChild(opt);
+    });
+}
+
+// ============================================================
+// MODALS EVENTS
+// ============================================================
+// Category Modal
 document.getElementById('btnAddCategory').addEventListener('click', () => {
     document.getElementById('categoryId').value = '';
     document.getElementById('catName').value = '';
@@ -470,43 +329,31 @@ document.getElementById('btnAddCategory').addEventListener('click', () => {
     document.getElementById('categoryModalTitle').textContent = 'Ajouter une catégorie';
     document.getElementById('categoryModal').classList.add('active');
 });
-
 document.getElementById('closeCategoryModal').addEventListener('click', () => {
     document.getElementById('categoryModal').classList.remove('active');
 });
-
 document.getElementById('categoryModal').addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) {
-        document.getElementById('categoryModal').classList.remove('active');
-    }
+    if (e.target === e.currentTarget) document.getElementById('categoryModal').classList.remove('active');
 });
-
 document.getElementById('catImageInput').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (file) {
         const reader = new FileReader();
-        reader.onload = function(event) {
-            document.getElementById('catImagePreview').innerHTML = 
-                `<img src="${event.target.result}" style="max-width:150px;max-height:150px;border-radius:4px;border:2px solid #e8a87c;">`;
+        reader.onload = (ev) => {
+            document.getElementById('catImagePreview').innerHTML = `<img src="${ev.target.result}">`;
         };
         reader.readAsDataURL(file);
     }
 });
-
 document.getElementById('categoryForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const id = document.getElementById('categoryId').value;
-    const fileInput = document.getElementById('catImageInput');
-    const file = fileInput.files[0];
-    
+    const file = document.getElementById('catImageInput').files[0];
     let imageUrl = document.getElementById('catImage').value;
     if (file) {
-        const uploadedUrl = await uploadImage(file, 'categories');
-        if (uploadedUrl) {
-            imageUrl = uploadedUrl;
-        }
+        const uploaded = await uploadImage(file, 'categories');
+        if (uploaded) imageUrl = uploaded;
     }
-    
     const data = {
         name: document.getElementById('catName').value.trim(),
         description: document.getElementById('catDescription').value.trim(),
@@ -514,32 +361,19 @@ document.getElementById('categoryForm').addEventListener('submit', async functio
         order: parseInt(document.getElementById('catOrder').value) || 0,
         updatedAt: serverTimestamp()
     };
-
     try {
-        if (id) {
-            await updateDoc(doc(db, 'categories', id), data);
-            window.showToast('✅ Catégorie mise à jour');
-        } else {
-            await setDoc(doc(collection(db, 'categories')), data);
-            window.showToast('✅ Catégorie créée');
-        }
+        if (id) await updateDoc(doc(db, 'categories', id), data);
+        else await setDoc(doc(collection(db, 'categories')), data);
+        window.showToast(id ? '✅ Catégorie mise à jour' : '✅ Catégorie créée');
         document.getElementById('categoryModal').classList.remove('active');
-        loadCategories();
-        loadCategoriesTable();
-        updateDashboard();
-    } catch (error) {
-        console.error('Erreur sauvegarde:', error);
-        window.showToast('⚠️ ' + error.message, true);
-    }
+        loadCategories(); loadCategoriesTable(); updateDashboard();
+    } catch (e) { window.showToast('⚠️ ' + e.message, true); }
 });
 
-// ============================================================
-// MODALS PRODUIT
-// ============================================================
+// Product Modal
 document.getElementById('btnAddProduct').addEventListener('click', async () => {
     document.getElementById('productId').value = '';
     document.getElementById('prodName').value = '';
-    document.getElementById('prodCategory').value = '';
     document.getElementById('prodBrand').value = '';
     document.getElementById('prodSupplier').value = '';
     document.getElementById('prodBuyPrice').value = '';
@@ -552,64 +386,41 @@ document.getElementById('btnAddProduct').addEventListener('click', async () => {
     document.getElementById('prodCA').value = '0';
     document.getElementById('prodProfit').value = '0';
     document.getElementById('productModalTitle').textContent = 'Ajouter un produit';
-    
-    const select = document.getElementById('prodCategory');
-    select.innerHTML = '<option value="">Sélectionner</option>';
-    const snapshot = await getDocs(collection(db, 'categories'));
-    snapshot.forEach(doc => {
-        const data = doc.data();
-        select.innerHTML += `<option value="${doc.id}">${data.name}</option>`;
-    });
-    
+    await loadCategoriesForSelect('');
     document.getElementById('productModal').classList.add('active');
 });
-
 document.getElementById('closeProductModal').addEventListener('click', () => {
     document.getElementById('productModal').classList.remove('active');
 });
-
 document.getElementById('productModal').addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) {
-        document.getElementById('productModal').classList.remove('active');
-    }
+    if (e.target === e.currentTarget) document.getElementById('productModal').classList.remove('active');
 });
-
 document.getElementById('prodImageInput').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (file) {
         const reader = new FileReader();
-        reader.onload = function(event) {
-            document.getElementById('prodImagePreview').innerHTML = 
-                `<img src="${event.target.result}" style="max-width:150px;max-height:150px;border-radius:4px;border:2px solid #e8a87c;">`;
+        reader.onload = (ev) => {
+            document.getElementById('prodImagePreview').innerHTML = `<img src="${ev.target.result}">`;
         };
         reader.readAsDataURL(file);
     }
 });
-
 document.getElementById('productForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const id = document.getElementById('productId').value;
-    const fileInput = document.getElementById('prodImageInput');
-    const file = fileInput.files[0];
-    
+    const file = document.getElementById('prodImageInput').files[0];
     let imageUrl = document.getElementById('prodImage').value;
     if (file) {
-        const uploadedUrl = await uploadImage(file, 'products');
-        if (uploadedUrl) {
-            imageUrl = uploadedUrl;
-        }
+        const uploaded = await uploadImage(file, 'products');
+        if (uploaded) imageUrl = uploaded;
     }
-    
-    const buyPrice = parseFloat(document.getElementById('prodBuyPrice').value) || 0;
-    const sellPrice = parseFloat(document.getElementById('prodSellPrice').value) || 0;
-    
     const data = {
         name: document.getElementById('prodName').value.trim(),
         category: document.getElementById('prodCategory').value,
         brand: document.getElementById('prodBrand').value.trim(),
         supplier: document.getElementById('prodSupplier').value.trim(),
-        buyPrice: buyPrice,
-        sellPrice: sellPrice,
+        buyPrice: parseFloat(document.getElementById('prodBuyPrice').value) || 0,
+        sellPrice: parseFloat(document.getElementById('prodSellPrice').value) || 0,
         stock: parseInt(document.getElementById('prodStock').value) || 0,
         promoPrice: parseFloat(document.getElementById('prodPromoPrice').value) || 0,
         image: imageUrl || '',
@@ -617,23 +428,13 @@ document.getElementById('productForm').addEventListener('submit', async function
         profit: parseFloat(document.getElementById('prodProfit').value) || 0,
         updatedAt: serverTimestamp()
     };
-
     try {
-        if (id) {
-            await updateDoc(doc(db, 'products', id), data);
-            window.showToast('✅ Produit mis à jour');
-        } else {
-            await setDoc(doc(collection(db, 'products')), data);
-            window.showToast('✅ Produit créé');
-        }
+        if (id) await updateDoc(doc(db, 'products', id), data);
+        else await setDoc(doc(collection(db, 'products')), data);
+        window.showToast(id ? '✅ Produit mis à jour' : '✅ Produit créé');
         document.getElementById('productModal').classList.remove('active');
-        loadProducts();
-        loadProductsTable();
-        updateDashboard();
-    } catch (error) {
-        console.error('Erreur sauvegarde produit:', error);
-        window.showToast('⚠️ ' + error.message, true);
-    }
+        loadProducts(); loadProductsTable(); updateDashboard();
+    } catch (e) { window.showToast('⚠️ ' + e.message, true); }
 });
 
 // ============================================================
@@ -644,6 +445,7 @@ document.getElementById('importDataBtn').addEventListener('click', () => {
     document.getElementById('importFile').click();
 });
 document.getElementById('importFile').addEventListener('change', window.importData);
+document.getElementById('deleteAllBtn').addEventListener('click', window.deleteAllData);
 
 console.log('📊 Admin.js chargé - Gestion Catégories & Produits');
 console.log('💱 Devise: ' + CURRENCY);
