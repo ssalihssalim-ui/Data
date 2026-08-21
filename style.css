@@ -18,7 +18,6 @@ body {
     padding: 0 2rem;
 }
 
-/* ===== TYPOGRAPHIE ===== */
 h1, h2, h3, p {
     font-weight: 300;
     letter-spacing: 0.04em;
@@ -78,28 +77,6 @@ h1, h2, h3, p {
     color: #e8a87c;
 }
 
-.nav-links {
-    display: flex;
-    gap: 2.5rem;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-weight: 400;
-    flex: 1;
-    justify-content: center;
-}
-
-.nav-links a {
-    text-decoration: none;
-    color: #1a1a1a;
-    transition: color 0.2s;
-    cursor: pointer;
-}
-
-.nav-links a:hover {
-    color: #e8a87c;
-}
-
 .header-icons {
     display: flex;
     align-items: center;
@@ -130,7 +107,7 @@ h1, h2, h3, p {
     color: #4caf50;
 }
 
-/* ===== HERO SECTION AVEC IMAGE ===== */
+/* ===== HERO ===== */
 .hero {
     position: relative;
     display: flex;
@@ -311,7 +288,7 @@ h1, h2, h3, p {
     border-color: #e8a87c;
 }
 
-/* ===== CATÉGORIES (Public) ===== */
+/* ===== CATÉGORIES ===== */
 .categories {
     display: flex;
     flex-wrap: wrap;
@@ -356,7 +333,7 @@ h1, h2, h3, p {
     color: #e8a87c;
 }
 
-/* ===== PRODUITS (Public) ===== */
+/* ===== PRODUITS ===== */
 .products-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -452,9 +429,7 @@ h1, h2, h3, p {
     margin-bottom: 1.2rem;
 }
 
-/* ============================================================ */
 /* ===== STORE PAGE ===== */
-/* ============================================================ */
 #storePage {
     position: fixed;
     top: 0;
@@ -559,9 +534,7 @@ h1, h2, h3, p {
     gap: 1.5rem;
 }
 
-/* ============================================================ */
 /* ===== ADMIN SIDEBAR ===== */
-/* ============================================================ */
 #adminPanel {
     display: none;
     position: fixed;
@@ -655,7 +628,6 @@ h1, h2, h3, p {
     background: rgba(231, 76, 60, 0.1);
 }
 
-/* Admin Content */
 .admin-content {
     flex: 1;
     padding: 2rem;
@@ -685,9 +657,7 @@ h1, h2, h3, p {
     font-size: 1rem;
 }
 
-/* ============================================================ */
 /* ===== ADMIN PANELS ===== */
-/* ============================================================ */
 .admin-panel-header {
     display: flex;
     justify-content: space-between;
@@ -756,9 +726,7 @@ h1, h2, h3, p {
     background: #34495e;
 }
 
-/* ============================================================ */
 /* ===== TABLE ADMIN ===== */
-/* ============================================================ */
 .table-container {
     overflow-x: auto;
     margin-bottom: 2rem;
@@ -810,9 +778,7 @@ h1, h2, h3, p {
     flex-wrap: wrap;
 }
 
-/* ============================================================ */
-/* ===== DASHBOARD STATS ===== */
-/* ============================================================ */
+/* ===== DASHBOARD ===== */
 .dashboard-header {
     margin: 0 0 1.5rem 0;
 }
@@ -862,9 +828,7 @@ h1, h2, h3, p {
     display: block;
 }
 
-/* ============================================================ */
 /* ===== MODALS ===== */
-/* ============================================================ */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -935,9 +899,7 @@ h1, h2, h3, p {
     color: #1a1a1a;
 }
 
-/* ============================================================ */
 /* ===== FORMULAIRES ===== */
-/* ============================================================ */
 .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -988,9 +950,7 @@ h1, h2, h3, p {
     min-height: 60px;
 }
 
-/* ============================================================ */
 /* ===== MODAL AUTH ===== */
-/* ============================================================ */
 .auth-overlay {
     position: fixed;
     top: 0;
@@ -1179,9 +1139,7 @@ h1, h2, h3, p {
     text-decoration: none;
 }
 
-/* ============================================================ */
 /* ===== FOOTER ===== */
-/* ============================================================ */
 .footer {
     display: flex;
     flex-wrap: wrap;
@@ -1223,354 +1181,83 @@ h1, h2, h3, p {
     color: #e8a87c;
 }
 
-/* ============================================================ */
-/* ===== RESPONSIVE (< 700px) ===== */
-/* ============================================================ */
+/* ===== RESPONSIVE ===== */
 @media (max-width: 700px) {
-    /* ===== AUGMENTATION TAILLE POLICE ===== */
-    body {
-        font-size: 16px;
-    }
-    
-    .wrapper {
-        padding: 0 1rem;
-    }
-    
-    /* Header */
-    .logo {
-        font-size: 1.6rem;
-    }
-    
-    .header-icons {
-        gap: 1.2rem;
-        font-size: 1.1rem;
-    }
-    
-    .user-status {
-        font-size: 0.7rem;
-    }
-    
-    /* Promo bar */
-    .promo-bar {
-        font-size: 0.65rem;
-        padding: 0.7rem 0.5rem;
-        letter-spacing: 0.1em;
-    }
-    
-    /* Hero */
-    .hero {
-        height: 350px;
-    }
-    
-    .hero h1 {
-        font-size: 2.5rem;
-    }
-    
-    .hero .hero-sub {
-        font-size: 1rem;
-        margin: 0.8rem 0 1.5rem 0;
-    }
-    
-    .hero .hero-tag {
-        font-size: 0.65rem;
-        padding: 0.4rem 1.2rem;
-    }
-    
-    .hero .hero-note span {
-        font-size: 0.65rem;
-        padding: 0.3rem 1rem;
-    }
-    
-    /* Boutons */
-    .btn-primary {
-        padding: 1rem 2.5rem;
-        font-size: 0.85rem;
-    }
-    
-    .btn-secondary {
-        padding: 0.8rem 2rem;
-        font-size: 0.75rem;
-    }
-    
-    .btn-primary-small {
-        padding: 0.8rem 1.5rem;
-        font-size: 0.75rem;
-    }
-    
-    /* Catégories */
-    .cat-item {
-        font-size: 0.85rem;
-    }
-    
-    /* Produits */
-    .product-card .product-info h4 {
-        font-size: 0.9rem;
-    }
-    
-    .product-card .product-info .product-price {
-        font-size: 1rem;
-    }
-    
-    /* Admin table */
-    .admin-table {
-        font-size: 0.7rem;
-    }
-    
-    .admin-table th,
-    .admin-table td {
-        padding: 0.6rem 0.4rem;
-    }
-    
-    .admin-panel-header h2 {
-        font-size: 1.3rem;
-    }
-    
-    /* Dashboard */
-    .dashboard-header h2 {
-        font-size: 1.5rem;
-    }
-    
-    .stat-card .stat-number {
-        font-size: 1.8rem;
-    }
-    
-    .stat-card .stat-label {
-        font-size: 0.7rem;
-    }
-    
-    /* Formulaires */
-    .form-group label {
-        font-size: 0.75rem;
-    }
-    
-    .form-group input,
-    .form-group textarea,
-    .form-group select {
-        font-size: 0.9rem;
-        padding: 0.8rem 1rem;
-    }
-    
-    .modal-content h3 {
-        font-size: 1.2rem;
-    }
-    
-    /* Auth modal */
-    .auth-header h2 {
-        font-size: 1.3rem;
-    }
-    
-    .auth-tab {
-        font-size: 0.8rem;
-        padding: 0.8rem 0.5rem;
-    }
-    
-    .auth-submit {
-        font-size: 0.8rem;
-        padding: 1rem;
-    }
-    
-    .auth-error {
-        font-size: 0.75rem;
-    }
-    
-    /* Footer */
-    .footer {
-        font-size: 0.7rem;
-    }
-    
-    /* Sidebar */
-    .sidebar-link {
-        font-size: 0.85rem;
-        padding: 0.8rem 1.2rem;
-    }
-    
-    .sidebar-header h3 {
-        font-size: 1.2rem;
-    }
-    
-    .sidebar-user {
-        font-size: 0.75rem;
-    }
-    
-    /* Store */
-    .store-header h2 {
-        font-size: 1.4rem;
-    }
-    
-    .store-category-btn {
-        font-size: 0.75rem;
-        padding: 0.5rem 1rem;
-    }
-    
-    /* ===== 2 COLONNES SUR LA BOUTIQUE ===== */
-    .store-products {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
-    }
-    
-    .store-products .product-card img {
-        height: 150px;
-    }
-    
-    .store-products .product-card .product-info h4 {
-        font-size: 0.8rem;
-    }
-    
-    .store-products .product-card .product-info .product-price {
-        font-size: 0.9rem;
-    }
-    
-    /* Produits page d'accueil - 2 colonnes */
-    .products-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.8rem;
-    }
-    
-    .products-grid .product-card img {
-        height: 140px;
-    }
+    body { font-size: 16px; }
+    .wrapper { padding: 0 1rem; }
+    .logo { font-size: 1.6rem; }
+    .header-icons { gap: 1.2rem; font-size: 1.1rem; }
+    .user-status { font-size: 0.7rem; }
+    .promo-bar { font-size: 0.65rem; padding: 0.7rem 0.5rem; }
+    .hero { height: 350px; }
+    .hero h1 { font-size: 2.5rem; }
+    .hero .hero-sub { font-size: 1rem; margin: 0.8rem 0 1.5rem 0; }
+    .hero .hero-tag { font-size: 0.65rem; padding: 0.4rem 1.2rem; }
+    .hero .hero-note span { font-size: 0.65rem; padding: 0.3rem 1rem; }
+    .btn-primary { padding: 1rem 2.5rem; font-size: 0.85rem; }
+    .btn-secondary { padding: 0.8rem 2rem; font-size: 0.75rem; }
+    .btn-primary-small { padding: 0.8rem 1.5rem; font-size: 0.75rem; }
+    .cat-item { font-size: 0.85rem; }
+    .product-card .product-info h4 { font-size: 0.9rem; }
+    .product-card .product-info .product-price { font-size: 1rem; }
+    .admin-table { font-size: 0.7rem; }
+    .admin-table th, .admin-table td { padding: 0.6rem 0.4rem; }
+    .admin-panel-header h2 { font-size: 1.3rem; }
+    .dashboard-header h2 { font-size: 1.5rem; }
+    .stat-card .stat-number { font-size: 1.8rem; }
+    .stat-card .stat-label { font-size: 0.7rem; }
+    .form-group label { font-size: 0.75rem; }
+    .form-group input, .form-group textarea, .form-group select { font-size: 0.9rem; padding: 0.8rem 1rem; }
+    .modal-content h3 { font-size: 1.2rem; }
+    .auth-header h2 { font-size: 1.3rem; }
+    .auth-tab { font-size: 0.8rem; padding: 0.8rem 0.5rem; }
+    .auth-submit { font-size: 0.8rem; padding: 1rem; }
+    .auth-error { font-size: 0.75rem; }
+    .footer { font-size: 0.7rem; }
+    .sidebar-link { font-size: 0.85rem; padding: 0.8rem 1.2rem; }
+    .sidebar-header h3 { font-size: 1.2rem; }
+    .sidebar-user { font-size: 0.75rem; }
+    .store-header h2 { font-size: 1.4rem; }
+    .store-category-btn { font-size: 0.75rem; padding: 0.5rem 1rem; }
+    .store-products { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    .store-products .product-card img { height: 150px; }
+    .store-products .product-card .product-info h4 { font-size: 0.8rem; }
+    .store-products .product-card .product-info .product-price { font-size: 0.9rem; }
+    .products-grid { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
+    .products-grid .product-card img { height: 140px; }
 }
 
-/* ============================================================ */
-/* ===== PETITS ECRANS (< 480px) ===== */
-/* ============================================================ */
 @media (max-width: 480px) {
-    .hero {
-        height: 280px;
-    }
-    
-    .hero h1 {
-        font-size: 2rem;
-    }
-    
-    .hero .hero-sub {
-        font-size: 0.85rem;
-    }
-    
-    .hero .hero-note {
-        display: none;
-    }
-    
-    .store-products {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.8rem;
-    }
-    
-    .store-products .product-card img {
-        height: 120px;
-    }
-    
-    .products-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.6rem;
-    }
-    
-    .products-grid .product-card img {
-        height: 110px;
-    }
-    
-    .product-card .product-info {
-        padding: 0.6rem;
-    }
-    
-    .product-card .product-info h4 {
-        font-size: 0.7rem;
-    }
-    
-    .product-card .product-info .product-price {
-        font-size: 0.8rem;
-    }
-    
-    .categories {
-        gap: 0.6rem 1rem;
-    }
-    
-    .cat-item {
-        font-size: 0.7rem;
-    }
-    
-    .admin-sidebar {
-        width: 160px;
-    }
-    
-    .sidebar-link {
-        font-size: 0.7rem;
-        padding: 0.6rem 0.8rem;
-    }
-    
-    .sidebar-link i {
-        width: 16px;
-        font-size: 0.8rem;
-    }
-    
-    .admin-content {
-        padding: 0.8rem;
-    }
-    
-    .admin-table {
-        font-size: 0.5rem;
-    }
-    
-    .admin-table th,
-    .admin-table td {
-        padding: 0.2rem 0.15rem;
-    }
-    
-    .admin-table .table-img {
-        width: 28px;
-        height: 28px;
-    }
-    
-    .btn-edit-small,
-    .btn-danger-small {
-        font-size: 0.5rem;
-        padding: 0.15rem 0.4rem;
-    }
-    
-    .btn-primary-small {
-        font-size: 0.6rem;
-        padding: 0.5rem 1rem;
-    }
-    
-    .modal-content {
-        padding: 1.2rem 0.8rem 1.2rem;
-    }
-    
-    .form-row {
-        grid-template-columns: 1fr;
-        gap: 0.5rem;
-    }
-    
-    .form-group input,
-    .form-group textarea,
-    .form-group select {
-        font-size: 0.85rem;
-        padding: 0.6rem 0.8rem;
-    }
+    .hero { height: 280px; }
+    .hero h1 { font-size: 2rem; }
+    .hero .hero-sub { font-size: 0.85rem; }
+    .hero .hero-note { display: none; }
+    .store-products { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
+    .store-products .product-card img { height: 120px; }
+    .products-grid { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
+    .products-grid .product-card img { height: 110px; }
+    .product-card .product-info { padding: 0.6rem; }
+    .product-card .product-info h4 { font-size: 0.7rem; }
+    .product-card .product-info .product-price { font-size: 0.8rem; }
+    .categories { gap: 0.6rem 1rem; }
+    .cat-item { font-size: 0.7rem; }
+    .admin-sidebar { width: 160px; }
+    .sidebar-link { font-size: 0.7rem; padding: 0.6rem 0.8rem; }
+    .sidebar-link i { width: 16px; font-size: 0.8rem; }
+    .admin-content { padding: 0.8rem; }
+    .admin-table { font-size: 0.5rem; }
+    .admin-table th, .admin-table td { padding: 0.2rem 0.15rem; }
+    .admin-table .table-img { width: 28px; height: 28px; }
+    .btn-edit-small, .btn-danger-small { font-size: 0.5rem; padding: 0.15rem 0.4rem; }
+    .btn-primary-small { font-size: 0.6rem; padding: 0.5rem 1rem; }
+    .modal-content { padding: 1.2rem 0.8rem 1.2rem; }
+    .form-row { grid-template-columns: 1fr; gap: 0.5rem; }
+    .form-group input, .form-group textarea, .form-group select { font-size: 0.85rem; padding: 0.6rem 0.8rem; }
 }
 
-/* ============================================================ */
 /* ===== SCROLLBAR ===== */
-/* ============================================================ */
-::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-}
-
-::-webkit-scrollbar-track {
-    background: #f0ede8;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #e8a87c;
-    border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #d4956e;
-}
-
-::selection {
-    background: #e8a87c;
-    color: #fff;
-}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f0ede8; }
+::-webkit-scrollbar-thumb { background: #e8a87c; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #d4956e; }
+::selection { background: #e8a87c; color: #fff; }
