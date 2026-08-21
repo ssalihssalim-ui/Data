@@ -127,14 +127,17 @@
                                 <span class="stat-label">Stock total</span>
                             </div>
                             <div class="stat-card">
-                                <span class="stat-number" id="statCA">0 €</span>
+                                <span class="stat-number" id="statCA">0 MAD</span>
                                 <span class="stat-label">Chiffre d'affaires</span>
                             </div>
                         </div>
                     </div>
                     <div style="display:flex; gap:1rem; margin-top:1rem; flex-wrap:wrap;">
-                        <button class="btn-primary-small" id="exportDataBtn"><i class="fas fa-file-export"></i> Exporter les données</button>
-                        <button class="btn-primary-small" id="importDataBtn"><i class="fas fa-file-import"></i> Importer les données</button>
+                        <button class="btn-primary-small" id="exportDataBtn"><i class="fas fa-file-export"></i> Exporter</button>
+                        <button class="btn-primary-small" id="importDataBtn"><i class="fas fa-file-import"></i> Importer</button>
+                        <button class="btn-danger-small" onclick="window.deleteAllData()" style="padding:0.6rem 1.5rem;font-size:0.7rem;">
+                            <i class="fas fa-trash-alt"></i> Tout supprimer
+                        </button>
                         <input type="file" id="importFile" accept=".json" style="display:none;" />
                     </div>
                 </div>
@@ -307,11 +310,11 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Prix d'achat (€)</label>
+                        <label>Prix d'achat (MAD)</label>
                         <input type="number" id="prodBuyPrice" placeholder="0.00" step="0.01" />
                     </div>
                     <div class="form-group">
-                        <label>Prix de vente (€)</label>
+                        <label>Prix de vente (MAD)</label>
                         <input type="number" id="prodSellPrice" placeholder="0.00" step="0.01" required />
                     </div>
                 </div>
@@ -321,7 +324,7 @@
                         <input type="number" id="prodStock" placeholder="0" />
                     </div>
                     <div class="form-group">
-                        <label>Prix promo (€)</label>
+                        <label>Prix promo (MAD)</label>
                         <input type="number" id="prodPromoPrice" placeholder="0.00" step="0.01" />
                     </div>
                 </div>
@@ -334,11 +337,11 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Chiffre d'affaires (€)</label>
+                        <label>Chiffre d'affaires (MAD)</label>
                         <input type="number" id="prodCA" placeholder="0.00" step="0.01" value="0" />
                     </div>
                     <div class="form-group">
-                        <label>Profit total (€)</label>
+                        <label>Profit total (MAD)</label>
                         <input type="number" id="prodProfit" placeholder="0.00" step="0.01" value="0" />
                     </div>
                 </div>
