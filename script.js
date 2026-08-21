@@ -327,7 +327,8 @@ document.querySelectorAll('.sidebar-link').forEach(link => {
             'dashboard': 'dashboardPanel',
             'categories': 'categoriesPanel',
             'products': 'productsPanel',
-            'orders': 'ordersPanel',
+            'ventes': 'ventesPanel',
+            'credits': 'creditsPanel',
             'clients': 'clientsPanel'
         };
         const target = document.getElementById(targetMap[page]);
@@ -339,6 +340,18 @@ document.querySelectorAll('.sidebar-link').forEach(link => {
             import('./admin.js').then(module => module.loadProductsTable());
         } else if (page === 'dashboard') {
             import('./admin.js').then(module => module.updateDashboard());
+        } else if (page === 'ventes') {
+            import('./admin-ventes.js').then(module => {
+                if (typeof module.loadVentesPage === 'function') {
+                    module.loadVentesPage(document.getElementById('ventesPanel'));
+                }
+            });
+        } else if (page === 'credits') {
+            import('./admin-credits.js').then(module => {
+                if (typeof module.loadCreditsPage === 'function') {
+                    module.loadCreditsPage(document.getElementById('creditsContainer'));
+                }
+            });
         }
     });
 });
