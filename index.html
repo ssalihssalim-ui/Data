@@ -21,9 +21,7 @@
         <!-- HEADER -->
         <header class="header">
             <a href="#" class="logo" id="logoLink"><i class="fas fa-leaf"></i> MANORA</a>
-            <nav class="nav-links">
-                <!-- Liens admin cachés par défaut -->
-            </nav>
+            <nav class="nav-links"></nav>
             <div class="header-icons">
                 <i class="fas fa-search" data-icon="search" id="searchIcon"></i>
                 <i class="far fa-user" data-icon="user" id="userIcon"></i>
@@ -34,29 +32,19 @@
 
     </div>
 
-    <!-- ============================================================ -->
-    <!-- STORE PUBLIC - S'ouvre quand on clique sur Shop Now -->
-    <!-- ============================================================ -->
+    <!-- STORE PAGE -->
     <div id="storePage" style="display: none;">
         <div class="store-header">
             <h2><i class="fas fa-store"></i> Notre Boutique</h2>
             <button class="btn-close-store" id="closeStore"><i class="fas fa-times"></i></button>
         </div>
         <div class="store-content">
-            <!-- Catégories du store -->
-            <div class="store-categories" id="storeCategories">
-                <!-- Chargées dynamiquement -->
-            </div>
-            <!-- Produits du store -->
-            <div class="store-products" id="storeProducts">
-                <!-- Chargées dynamiquement -->
-            </div>
+            <div class="store-categories" id="storeCategories"></div>
+            <div class="store-products" id="storeProducts"></div>
         </div>
     </div>
 
-    <!-- ============================================================ -->
     <!-- HERO SECTION -->
-    <!-- ============================================================ -->
     <section class="hero" id="heroSection">
         <div class="hero-overlay"></div>
         <div class="hero-content">
@@ -81,27 +69,18 @@
 
     <div class="wrapper">
 
-        <!-- ============================================================ -->
-        <!-- SECTION CATÉGORIES (Affichage public sur la page d'accueil) -->
-        <!-- ============================================================ -->
+        <!-- PUBLIC CATEGORIES -->
         <div id="publicCategories">
-            <div class="categories" id="categoriesContainer">
-                <!-- Les catégories seront chargées dynamiquement -->
-            </div>
+            <div class="categories" id="categoriesContainer"></div>
         </div>
 
-        <!-- SECTION PRODUITS (Affichage public sur la page d'accueil) -->
+        <!-- PUBLIC PRODUCTS -->
         <div id="publicProducts">
-            <div class="products-grid" id="productsContainer">
-                <!-- Les produits seront chargés dynamiquement -->
-            </div>
+            <div class="products-grid" id="productsContainer"></div>
         </div>
 
-        <!-- ============================================================ -->
-        <!-- ADMIN PANEL - Menu latéral gauche -->
-        <!-- ============================================================ -->
+        <!-- ADMIN PANEL -->
         <div id="adminPanel" style="display: none;">
-            <!-- Sidebar gauche -->
             <div class="admin-sidebar">
                 <div class="sidebar-header">
                     <h3><i class="fas fa-leaf"></i> MANORA</h3>
@@ -129,7 +108,6 @@
                 </nav>
             </div>
 
-            <!-- Contenu admin -->
             <div class="admin-content">
                 <!-- Dashboard -->
                 <div id="dashboardPanel" class="admin-page active">
@@ -153,6 +131,11 @@
                                 <span class="stat-label">Chiffre d'affaires</span>
                             </div>
                         </div>
+                    </div>
+                    <div style="display:flex; gap:1rem; margin-top:1rem; flex-wrap:wrap;">
+                        <button class="btn-primary-small" id="exportDataBtn"><i class="fas fa-file-export"></i> Exporter les données</button>
+                        <button class="btn-primary-small" id="importDataBtn"><i class="fas fa-file-import"></i> Importer les données</button>
+                        <input type="file" id="importFile" accept=".json" style="display:none;" />
                     </div>
                 </div>
 
@@ -211,7 +194,6 @@
                     </div>
                 </div>
 
-                <!-- Commandes (placeholder) -->
                 <div id="ordersPanel" class="admin-page">
                     <div class="admin-panel-header">
                         <h2><i class="fas fa-shopping-cart"></i> Commandes</h2>
@@ -222,7 +204,6 @@
                     </div>
                 </div>
 
-                <!-- Clients (placeholder) -->
                 <div id="clientsPanel" class="admin-page">
                     <div class="admin-panel-header">
                         <h2><i class="fas fa-users"></i> Clients</h2>
@@ -235,9 +216,7 @@
             </div>
         </div>
 
-        <!-- ============================================================ -->
         <!-- COLLECTION SECTION -->
-        <!-- ============================================================ -->
         <div class="silver-section" id="collectionSection">
             <div class="silver-content">
                 <h3><i class="fas fa-heart"></i> Collection Wellness</h3>
@@ -267,10 +246,6 @@
         </footer>
 
     </div>
-
-    <!-- ============================================================ -->
-    <!-- MODALS -->
-    <!-- ============================================================ -->
 
     <!-- MODAL CATÉGORIE -->
     <div class="modal-overlay" id="categoryModal">
@@ -372,22 +347,18 @@
         </div>
     </div>
 
-    <!-- MODAL AUTHENTIFICATION -->
+    <!-- MODAL AUTH -->
     <div class="auth-overlay" id="authOverlay">
         <div class="auth-modal">
             <button class="auth-close" id="authClose"><i class="fas fa-times"></i></button>
-
             <div class="auth-header">
                 <h2><i class="fas fa-leaf" style="color: #e8a87c;"></i> Bienvenue chez MANORA</h2>
                 <p>Connectez-vous ou créez un compte</p>
             </div>
-
             <div class="auth-tabs">
                 <button class="auth-tab active" data-tab="login">Connexion</button>
                 <button class="auth-tab" data-tab="register">Inscription</button>
             </div>
-
-            <!-- Connexion -->
             <form class="auth-form" id="loginForm">
                 <div class="form-group">
                     <label for="loginEmail"><i class="fas fa-envelope"></i> Email</label>
@@ -401,8 +372,6 @@
                 <button type="submit" class="auth-submit" id="loginBtn">Se connecter</button>
                 <p class="auth-forgot"><a href="#" id="resetPasswordLink">Mot de passe oublié ?</a></p>
             </form>
-
-            <!-- Inscription -->
             <form class="auth-form hidden" id="registerForm">
                 <div class="form-group">
                     <label for="registerName"><i class="fas fa-user"></i> Nom complet</label>
@@ -432,9 +401,7 @@
         </div>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- ===== FIREBASE SDKs ===== -->
-    <!-- ============================================================ -->
+    <!-- FIREBASE SDKs -->
     <script type="importmap">
         {
             "imports": {
