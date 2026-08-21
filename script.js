@@ -1,5 +1,5 @@
 // ============================================================
-// IMPORTS FIREBASE
+// MANORA - script.js (Auth + Store + UI)
 // ============================================================
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
@@ -10,7 +10,6 @@ import {
     browserLocalPersistence, updateProfile
 } from "firebase/auth";
 import { getFirestore, collection, getDocs, query, orderBy } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
 
 // ============================================================
 // CONFIGURATION FIREBASE
@@ -32,11 +31,10 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const storage = getStorage(app);
 
 setPersistence(auth, browserLocalPersistence).catch(() => {});
 
-export { app, auth, db, storage };
+export { app, auth, db };
 
 // ============================================================
 // TOAST SYSTEM
@@ -56,7 +54,7 @@ window.showToast = function(msg, isError = false) {
         fontSize: '0.7rem', textTransform: 'uppercase',
         boxShadow: '0 12px 30px rgba(0,0,0,0.25)',
         zIndex: '99999', borderLeft: isError ? '4px solid #e74c3c' : '4px solid #e8a87c',
-        opacity: '0', transition: 'opacity 0.4s ease, transform 0.3s ease',
+        opacity: '0', transition: 'opacity 0.4s, transform 0.3s',
         fontFamily: "'Montserrat', sans-serif", pointerEvents: 'none',
         maxWidth: '90%', wordBreak: 'break-word',
     });
@@ -84,8 +82,11 @@ async function loadPublicData() {
             const data = doc.data();
             const span = document.createElement('span');
             span.className = 'cat-item';
-            if (data.image) span.innerHTML = `<img src="${data.image}" alt="${data.name}">${data.name}`;
-            else span.textContent = data.name;
+            if (data.image) {
+                span.innerHTML = `<img src="${data.image}" alt="${data.name}">${data.name}`;
+            } else {
+                span.textContent = data.name;
+            }
             catContainer.appendChild(span);
         });
 
@@ -502,5 +503,5 @@ onAuthStateChanged(auth, (user) => {
 // INIT
 // ============================================================
 loadPublicData();
-console.log('🌿 MANORA · E-commerce Beauty & Wellness');
-console.log('📊 Firebase Auth + Firestore + Storage actif');
+console.log('🌿 MANORA · E-commerce Beauty & Wellness (Base64)');
+console.log('📊 Firebase Auth + Firestore actif');
