@@ -15,7 +15,7 @@ import {
 import { 
     getStorage,
     ref,
-    uploadBytes,
+    uploadBytesResumable,
     getDownloadURL,
     deleteObject
 } from "firebase/storage";
@@ -43,46 +43,60 @@ function formatPrice(price) {
 }
 
 // ============================================================
-// FONCTIONS UPLOAD IMAGE AVEC FALLBACK URL
+// FONCTIONS UPLOAD IMAGE
 // ============================================================
 async function uploadImage(file, path) {
     if (!file) return null;
     
-    try {
-        const timestamp = Date.now();
-        const fileName = `${timestamp}_${file.name}`;
-        const storageRef = ref(storage, `${path}/${fileName}`);
-        
-        console.log('📤 Upload en cours...', fileName);
-        const snapshot = await uploadBytes(storageRef, file);
-        console.log('✅ Upload terminé:', snapshot.metadata.fullPath);
-        
-        const url = await getDownloadURL(storageRef);
-        console.log('🔗 URL obtenue:', url);
-        
-        return url;
-    } catch (error) {
-        console.error('❌ Erreur upload:', error);
-        
-        // Fallback : proposer une URL externe si CORS
-        if (error.code === 'storage/unauthorized' || error.message.includes('CORS') || error.message.includes('403')) {
-            window.showToast('⚠️ Problème CORS. Utilisez une URL externe.', true);
+    return new Promise((resolve, reject) => {
+        try {
+            const timestamp = Date.now();
+            const fileName = `${timestamp}_${file.name}`;
+            const storageRef = ref(storage, `${path}/${fileName}`);
             
-            const url = prompt(
-                '❌ Le téléchargement direct ne fonctionne pas (CORS).\n\n' +
-                'Entrez une URL d\'image existante (ex: https://images.unsplash.com/...)\n' +
-                'ou tapez "annuler" pour ignorer.'
+            const uploadTask = uploadBytesResumable(storageRef, file, {
+                contentType: file.type || 'image/jpeg'
+            });
+            
+            uploadTask.on('state_changed',
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    console.log(`📤 Upload: ${progress.toFixed(0)}%`);
+                },
+                (error) => {
+                    console.error('❌ Erreur upload:', error);
+                    if (error.message.includes('CORS') || error.message.includes('403')) {
+                        window.showToast('⚠️ Problème CORS. Utilisez une URL externe.', true);
+                        const url = prompt(
+                            '❌ Le téléchargement direct ne fonctionne pas.\n\n' +
+                            'Entrez une URL d\'image existante:\n' +
+                            'https://images.unsplash.com/photo-xxx\n\n' +
+                            'ou tapez "annuler" pour ignorer.'
+                        );
+                        if (url && url.startsWith('http')) {
+                            resolve(url);
+                        } else {
+                            resolve(null);
+                        }
+                    } else {
+                        reject(error);
+                    }
+                },
+                async () => {
+                    try {
+                        const url = await getDownloadURL(uploadTask.snapshot.ref);
+                        console.log('✅ Image uploadée:', url);
+                        resolve(url);
+                    } catch (error) {
+                        reject(error);
+                    }
+                }
             );
-            
-            if (url && url.startsWith('http')) {
-                return url;
-            }
-            return null;
+        } catch (error) {
+            console.error('❌ Erreur:', error);
+            reject(error);
         }
-        
-        window.showToast('⚠️ Erreur upload: ' + error.message, true);
-        return null;
-    }
+    });
 }
 
 async function deleteImage(url) {
@@ -106,7 +120,8 @@ window.exportData = async function() {
         
         const data = {
             categories: [],
-            products: []
+            products: [],
+            exportedAt: new Date().toISOString()
         };
         
         catSnapshot.forEach(doc => {
@@ -169,36 +184,28 @@ window.importData = async function(event) {
 // SUPPRIMER TOUTES LES DONNÉES
 // ============================================================
 window.deleteAllData = async function() {
-    if (!confirm('⚠️ Êtes-vous sûr de vouloir supprimer TOUTES les catégories et TOUS les produits ?')) {
-        return;
-    }
-    if (!confirm('⚠️ CONFIRMATION FINALE : Cette action est IRRÉVERSIBLE !')) {
-        return;
-    }
+    if (!confirm('⚠️ Supprimer TOUTES les catégories et produits ?')) return;
+    if (!confirm('⚠️ CONFIRMATION FINALE : IRRÉVERSIBLE !')) return;
     
     try {
         window.showToast('🗑️ Suppression en cours...', false);
         
-        // Supprimer les produits
         const prodSnapshot = await getDocs(collection(db, 'products'));
         for (const docSnap of prodSnapshot.docs) {
             await deleteDoc(doc(db, 'products', docSnap.id));
         }
         
-        // Supprimer les catégories
         const catSnapshot = await getDocs(collection(db, 'categories'));
         for (const docSnap of catSnapshot.docs) {
             await deleteDoc(doc(db, 'categories', docSnap.id));
         }
         
         window.showToast(`✅ ${prodSnapshot.size + catSnapshot.size} éléments supprimés !`);
-        
         loadCategories();
         loadProducts();
         loadCategoriesTable();
         loadProductsTable();
         updateDashboard();
-        
     } catch (error) {
         console.error('Erreur suppression:', error);
         window.showToast('⚠️ ' + error.message, true);
@@ -638,5 +645,5 @@ document.getElementById('importDataBtn').addEventListener('click', () => {
 });
 document.getElementById('importFile').addEventListener('change', window.importData);
 
-console.log('📊 Admin.js chargé - Gestion Catégories & Produits avec Firebase Storage');
+console.log('📊 Admin.js chargé - Gestion Catégories & Produits');
 console.log('💱 Devise: ' + CURRENCY);
