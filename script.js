@@ -184,12 +184,12 @@ window.applyPromo = function() {
     const code = input.value.trim().toUpperCase();
     if (code === 'BIENVENUE10') {
         promoApplied = true;
-        promoDiscount = 0.10; // 10%
+        promoDiscount = 0.10;
         msg.textContent = '✅ Code promo appliqué : 10% de réduction !';
         msg.style.color = '#27ae60';
         msg.style.display = 'block';
         window.showToast('🎉 Code promo appliqué !');
-        renderCart(); // rafraîchir pour afficher la réduction
+        renderCart();
     } else if (code === 'MANORA20') {
         promoApplied = true;
         promoDiscount = 0.20;
@@ -242,7 +242,6 @@ Merci pour votre commande ! 🌿
 
     alert(message);
 
-    // Vider le panier après validation
     cart = [];
     saveCart(cart);
     updateCartUI();
@@ -364,7 +363,7 @@ document.getElementById('productDetailsModal').addEventListener('click', (e) => 
 });
 
 // ============================================================
-// LOAD PUBLIC DATA
+// LOAD PUBLIC DATA (page d'accueil)
 // ============================================================
 async function loadPublicData() {
     try {
@@ -409,7 +408,7 @@ async function loadPublicData() {
 }
 
 // ============================================================
-// STORE PAGE
+// STORE PAGE (boutique modale)
 // ============================================================
 const storePage = document.getElementById('storePage');
 document.getElementById('shopNowBtn').addEventListener('click', () => openStore());
@@ -430,6 +429,7 @@ function closeStore() {
 
 async function loadStoreData() {
     try {
+        // Charger catégories
         const catSnapshot = await getDocs(query(collection(db, 'categories'), orderBy('order', 'asc')));
         const catContainer = document.getElementById('storeCategories');
         catContainer.innerHTML = '<button class="store-category-btn active" data-category="all">📋 Tous</button>';
@@ -442,6 +442,7 @@ async function loadStoreData() {
             catContainer.appendChild(btn);
         });
 
+        // Charger produits
         const prodSnapshot = await getDocs(collection(db, 'products'));
         const prodContainer = document.getElementById('storeProducts');
         prodContainer.innerHTML = '';
@@ -451,49 +452,66 @@ async function loadStoreData() {
                 <p>Aucun produit disponible pour le moment.</p></div>`;
         } else {
             prodSnapshot.forEach(doc => {
-                const data = doc.data();
-                const product = { id: doc.id, ...data };
+                const product = { id: doc.id, ...doc.data() };
                 const card = document.createElement('div');
                 card.className = 'product-card';
-                card.dataset.category = data.category || '';
-                const promo = data.promoPrice && data.promoPrice > 0 && data.promoPrice < data.sellPrice;
-                const imgSrc = data.image || 'https://via.placeholder.com/200x200?text=MANORA';
+                card.dataset.category = product.category || '';
+                const promo = product.promoPrice && product.promoPrice > 0 && product.promoPrice < product.sellPrice;
+                const imgSrc = product.image || 'https://via.placeholder.com/200x200?text=MANORA';
                 card.innerHTML = `
-                    <img src="${imgSrc}" alt="${data.name}">
+                    <img src="${imgSrc}" alt="${product.name}">
                     <div class="product-info">
-                        <h4>${data.name || 'Sans nom'}</h4>
-                        <span class="product-category">${data.category || 'Non catégorisé'}</span>
-                        <div class="product-price">${promo ? `<span>${data.sellPrice} MAD</span> ${data.promoPrice} MAD` : (data.sellPrice || 0) + ' MAD'}</div>
-                        <div style="font-size:0.6rem;color:#999;">📦 Stock: ${data.stock || 0}</div>
-                        ${data.brand ? `<div style="font-size:0.6rem;color:#999;">🏷️ ${data.brand}</div>` : ''}
+                        <h4>${product.name || 'Sans nom'}</h4>
+                        <span class="product-category">${product.category || 'Non catégorisé'}</span>
+                        <div class="product-price">${promo ? `<span>${product.sellPrice} MAD</span> ${product.promoPrice} MAD` : (product.sellPrice || 0) + ' MAD'}</div>
+                        <div style="font-size:0.6rem;color:#999;">📦 Stock: ${product.stock || 0}</div>
+                        ${product.brand ? `<div style="font-size:0.6rem;color:#999;">🏷️ ${product.brand}</div>` : ''}
                         <div class="product-actions">
-                            <button class="btn-store-add" data-id="${doc.id}"><i class="fas fa-cart-plus"></i> Ajouter</button>
-                            <button class="btn-store-detail" data-id="${doc.id}"><i class="fas fa-eye"></i> Détails</button>
+                            <button class="btn-store-add" data-product-id="${product.id}"><i class="fas fa-cart-plus"></i> Ajouter</button>
+                            <button class="btn-store-detail" data-product-id="${product.id}"><i class="fas fa-eye"></i> Détails</button>
                         </div>
                     </div>
                 `;
                 prodContainer.appendChild(card);
             });
-            
+
+            // Attacher les événements sur les boutons de chaque carte
             prodContainer.querySelectorAll('.btn-store-add').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    const id = this.dataset.id;
-                    const product = productsData.find(p => p.id === id);
+                    const id = this.dataset.productId;
+                    // Rechercher le produit dans les données du store (on peut le trouver via la carte parente)
+                    const card = this.closest('.product-card');
+                    // On va récupérer l'objet produit depuis les données stockées dans la carte elle-même
+                    // ou on peut le retrouver via l'id en interrogeant les données du snapshot.
+                    // Pour simplifier, on va récupérer le produit à partir du snapshot (mais on n'a plus accès directement).
+                    // On va plutôt stocker l'objet produit dans un attribut data de la carte ou du bouton.
+                    // Solution : on stocke l'objet produit dans un objet global associé à l'id.
+                    // Ou bien on utilise un Map.
+                    // Ici, on va utiliser un objet global "storeProductsMap" pour retrouver le produit par id.
+                    const product = window._storeProductsMap ? window._storeProductsMap.get(id) : null;
                     if (product) addToCart(product);
                 });
             });
-            
+
             prodContainer.querySelectorAll('.btn-store-detail').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    const id = this.dataset.id;
-                    const product = productsData.find(p => p.id === id);
+                    const id = this.dataset.productId;
+                    const product = window._storeProductsMap ? window._storeProductsMap.get(id) : null;
                     if (product) showProductDetails(product);
                 });
             });
+
+            // Stocker les produits dans une Map pour accès facile
+            window._storeProductsMap = new Map();
+            prodSnapshot.forEach(doc => {
+                const product = { id: doc.id, ...doc.data() };
+                window._storeProductsMap.set(doc.id, product);
+            });
         }
 
+        // Filtrage par catégorie
         document.querySelectorAll('.store-category-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.querySelectorAll('.store-category-btn').forEach(b => b.classList.remove('active'));
@@ -512,8 +530,6 @@ async function loadStoreData() {
         window.showToast('⚠️ Erreur chargement du store', true);
     }
 }
-
-let productsData = [];
 
 // ============================================================
 // AUTH UI
@@ -569,7 +585,6 @@ function openAdminPanel(user) {
             module.updateDashboard();
             module.loadCategoriesTable();
             module.loadProductsTable();
-            productsData = module.getProductsData ? module.getProductsData() : [];
         });
     }
 }
@@ -825,6 +840,6 @@ onAuthStateChanged(auth, (user) => {
 loadPublicData();
 updateCartUI();
 
-console.log('🌿 MANORA · E-commerce Beauty & Wellness (Base64)');
+console.log('🌿 MANORA · E-commerce Beauty & Wellness');
 console.log('📊 Firebase Auth + Firestore actif');
 console.log('🛒 Panier persistant dans localStorage');
