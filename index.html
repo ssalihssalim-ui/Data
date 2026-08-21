@@ -12,8 +12,8 @@
     <!-- PROMO BAR -->
     <div class="promo-bar">
         <span><i class="fas fa-sparkles"></i> Nouvelle collection beauté & bien-être</span>
-        <i class="fas fa-circle" style="font-size: 0.2rem; vertical-align: middle;"></i>
-        <span>Shop Now <i class="fas fa-arrow-right" style="font-size: 0.5rem;"></i></span>
+        <i class="fas fa-circle"></i>
+        <span>Shop Now <i class="fas fa-arrow-right"></i></span>
     </div>
 
     <div class="wrapper">
@@ -21,11 +21,15 @@
         <!-- HEADER -->
         <header class="header">
             <a href="#" class="logo" id="logoLink"><i class="fas fa-leaf"></i> MANORA</a>
-            <nav class="nav-links"></nav>
+            <nav class="nav-links">
+                <a href="#" data-page="dashboard" id="navDashboard">Dashboard</a>
+                <a href="#" data-page="categories" id="navCategories">Catégories</a>
+                <a href="#" data-page="products" id="navProducts">Produits</a>
+            </nav>
             <div class="header-icons">
-                <i class="fas fa-search" data-icon="search" id="searchIcon"></i>
-                <i class="far fa-user" data-icon="user" id="userIcon"></i>
-                <i class="fas fa-shopping-bag" data-icon="bag" id="bagIcon"></i>
+                <i class="fas fa-search"></i>
+                <i class="far fa-user" id="userIcon"></i>
+                <i class="fas fa-shopping-bag"></i>
                 <span class="user-status" id="userStatus"></span>
             </div>
         </header>
@@ -48,14 +52,12 @@
     <section class="hero" id="heroSection">
         <div class="hero-overlay"></div>
         <div class="hero-content">
-            <div class="hero-tag"><i class="fas fa-star" style="color: #f5cba7; margin-right: 0.4rem;"></i> nouvelle collection</div>
-            <h1>
-                Beauté <span class="gold-accent">&</span> Bien-être
-            </h1>
-            <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; justify-content: center; margin-top: 0.2rem;">
-                <span class="lunch-easter" id="lunchBadge"><i class="fas fa-spa" style="margin-right: 0.3rem;"></i> wellness</span>
-                <span style="font-size: 0.7rem; letter-spacing: 0.2em; color: #f5cba7;">✦</span>
-                <span style="font-size: 0.6rem; letter-spacing: 0.1em; color: rgba(255,255,255,0.7);">édition limitée</span>
+            <div class="hero-tag"><i class="fas fa-star"></i> nouvelle collection</div>
+            <h1>Beauté <span class="gold-accent">&</span> Bien-être</h1>
+            <div class="hero-badges">
+                <span class="lunch-easter" id="lunchBadge"><i class="fas fa-spa"></i> wellness</span>
+                <span class="hero-sep">✦</span>
+                <span class="hero-limited">édition limitée</span>
             </div>
             <p class="hero-sub">Découvrez notre nouvelle collection</p>
             <button class="btn-primary" id="shopNowBtn">🛍️ Shop Now</button>
@@ -79,193 +81,6 @@
             <div class="products-grid" id="productsContainer"></div>
         </div>
 
-        <!-- ADMIN PANEL -->
-        <div id="adminPanel" style="display: none;">
-            <div class="admin-sidebar">
-                <div class="sidebar-header">
-                    <h3><i class="fas fa-leaf"></i> MANORA</h3>
-                    <span class="sidebar-user" id="sidebarUser">Admin</span>
-                </div>
-                <nav class="sidebar-nav">
-                    <a href="#" data-page="dashboard" class="sidebar-link active" id="sideDashboard">
-                        <i class="fas fa-chart-pie"></i> Dashboard
-                    </a>
-                    <a href="#" data-page="categories" class="sidebar-link" id="sideCategories">
-                        <i class="fas fa-tags"></i> Catégories
-                    </a>
-                    <a href="#" data-page="products" class="sidebar-link" id="sideProducts">
-                        <i class="fas fa-box"></i> Produits
-                    </a>
-                    <a href="#" data-page="ventes" class="sidebar-link" id="sideVentes">
-                        <i class="fas fa-cash-register"></i> Ventes
-                    </a>
-                    <a href="#" data-page="credits" class="sidebar-link" id="sideCredits">
-                        <i class="fas fa-credit-card"></i> Crédits
-                    </a>
-                    <a href="#" data-page="clients" class="sidebar-link" id="sideClients">
-                        <i class="fas fa-users"></i> Clients
-                    </a>
-                    <a href="#" class="sidebar-link logout" id="sideLogout">
-                        <i class="fas fa-sign-out-alt"></i> Déconnexion
-                    </a>
-                </nav>
-            </div>
-
-            <div class="admin-content">
-                <!-- Dashboard -->
-                <div id="dashboardPanel" class="admin-page active">
-                    <div class="page-header">
-                        <div class="header-title">
-                            <i class="fas fa-chart-pie"></i>
-                            <h2>Tableau de bord</h2>
-                        </div>
-                    </div>
-                    <div class="dashboard-stats" id="dashboardStats">
-                        <div class="stat-card">
-                            <span class="stat-number" id="statCategories">0</span>
-                            <span class="stat-label">Catégories</span>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-number" id="statProducts">0</span>
-                            <span class="stat-label">Produits</span>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-number" id="statStock">0</span>
-                            <span class="stat-label">Stock total</span>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-number" id="statCA">0 MAD</span>
-                            <span class="stat-label">Chiffre d'affaires</span>
-                        </div>
-                    </div>
-                    <div style="display:flex; gap:1rem; margin-top:1rem; flex-wrap:wrap;">
-                        <button class="btn-primary-small" id="exportDataBtn"><i class="fas fa-file-export"></i> Exporter</button>
-                        <button class="btn-primary-small" id="importDataBtn"><i class="fas fa-file-import"></i> Importer</button>
-                        <button class="btn-danger-small" onclick="window.deleteAllData()" style="padding:0.6rem 1.5rem;font-size:0.7rem;">
-                            <i class="fas fa-trash-alt"></i> Tout supprimer
-                        </button>
-                        <input type="file" id="importFile" accept=".json" style="display:none;" />
-                    </div>
-                </div>
-
-                <!-- Gestion Catégories -->
-                <div id="categoriesPanel" class="admin-page">
-                    <div class="page-header">
-                        <div class="header-title">
-                            <i class="fas fa-tags"></i>
-                            <h2>Gestion des Catégories</h2>
-                        </div>
-                    </div>
-                    <div class="admin-panel-header">
-                        <button class="btn-primary-small" id="btnAddCategory"><i class="fas fa-plus"></i> Ajouter</button>
-                    </div>
-                    <div class="table-container">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Image</th>
-                                    <th>Nom</th>
-                                    <th>Description</th>
-                                    <th>Ordre</th>
-                                    <th>CA</th>
-                                    <th>Profit</th>
-                                    <th>Nb Produits</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="categoriesTableBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Gestion Produits -->
-                <div id="productsPanel" class="admin-page">
-                    <div class="page-header">
-                        <div class="header-title">
-                            <i class="fas fa-box"></i>
-                            <h2>Gestion des Produits</h2>
-                        </div>
-                    </div>
-                    <div class="admin-panel-header">
-                        <button class="btn-primary-small" id="btnAddProduct"><i class="fas fa-plus"></i> Ajouter</button>
-                    </div>
-                    <div class="table-container">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Image</th>
-                                    <th>Nom</th>
-                                    <th>Catégorie</th>
-                                    <th>Marque</th>
-                                    <th>Prix Achat</th>
-                                    <th>Prix Vente</th>
-                                    <th>Profit</th>
-                                    <th>Stock</th>
-                                    <th>Prix Promo</th>
-                                    <th>Fournisseur</th>
-                                    <th>CA</th>
-                                    <th>Profit Total</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="productsTableBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Ventes -->
-                <div id="ventesPanel" class="admin-page">
-                    <div class="page-header">
-                        <div class="header-title">
-                            <i class="fas fa-cash-register"></i>
-                            <h2>Ventes</h2>
-                        </div>
-                    </div>
-                    <div class="content-card">
-                        <div class="card-header">
-                            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                                <input type="text" id="ventesSearchInput" placeholder="🔍 Rechercher..." style="padding:14px 18px; border:2px solid #e2e8f0; border-radius:8px; width:280px; font-size:24px !important; height:56px;">
-                                <select id="ventesPeriodSelect" style="padding:14px 18px; border:2px solid #e2e8f0; border-radius:8px; font-size:24px !important; height:56px;">
-                                    <option value="all">Toutes</option>
-                                    <option value="today">Aujourd'hui</option>
-                                    <option value="week">Cette semaine</option>
-                                    <option value="month">Ce mois</option>
-                                </select>
-                                <button class="btn-add" onclick="loadVentes()" style="font-size:24px !important; padding:14px 20px; height:56px;"><i class="fas fa-sync"></i> Actualiser</button>
-                            </div>
-                        </div>
-                        <div id="ventesTableContainer"></div>
-                        <div id="ventesPagination" style="margin-top:10px;"></div>
-                    </div>
-                </div>
-
-                <!-- Crédits -->
-                <div id="creditsPanel" class="admin-page">
-                    <div class="page-header">
-                        <div class="header-title">
-                            <i class="fas fa-credit-card"></i>
-                            <h2>Crédits</h2>
-                        </div>
-                    </div>
-                    <div id="creditsContainer"></div>
-                </div>
-
-                <!-- Clients -->
-                <div id="clientsPanel" class="admin-page">
-                    <div class="page-header">
-                        <div class="header-title">
-                            <i class="fas fa-users"></i>
-                            <h2>Clients</h2>
-                        </div>
-                    </div>
-                    <div class="placeholder-content">
-                        <i class="fas fa-users" style="font-size: 3rem; color: #e8a87c;"></i>
-                        <p>Gestion des clients à venir</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- COLLECTION SECTION -->
         <div class="silver-section" id="collectionSection">
             <div class="silver-content">
@@ -275,23 +90,85 @@
             </div>
         </div>
 
+        <!-- ADMIN PANEL -->
+        <div id="adminPanel" style="display: none;">
+            <div class="admin-sidebar">
+                <div class="sidebar-header">
+                    <h3><i class="fas fa-leaf"></i> MANORA</h3>
+                    <span class="sidebar-user" id="sidebarUser">Admin</span>
+                </div>
+                <nav class="sidebar-nav">
+                    <a href="#" data-page="dashboard" class="sidebar-link active" id="sideDashboard"><i class="fas fa-chart-pie"></i> Dashboard</a>
+                    <a href="#" data-page="categories" class="sidebar-link" id="sideCategories"><i class="fas fa-tags"></i> Catégories</a>
+                    <a href="#" data-page="products" class="sidebar-link" id="sideProducts"><i class="fas fa-box"></i> Produits</a>
+                    <a href="#" class="sidebar-link logout" id="sideLogout"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+                </nav>
+            </div>
+
+            <div class="admin-content">
+                <!-- Dashboard -->
+                <div id="dashboardPanel" class="admin-page active">
+                    <div class="page-header">
+                        <h2><i class="fas fa-chart-pie"></i> Tableau de bord</h2>
+                    </div>
+                    <div class="dashboard-stats">
+                        <div class="stat-card"><span class="stat-number" id="statCategories">0</span><span class="stat-label">Catégories</span></div>
+                        <div class="stat-card"><span class="stat-number" id="statProducts">0</span><span class="stat-label">Produits</span></div>
+                        <div class="stat-card"><span class="stat-number" id="statStock">0</span><span class="stat-label">Stock total</span></div>
+                        <div class="stat-card"><span class="stat-number" id="statCA">0 MAD</span><span class="stat-label">Chiffre d'affaires</span></div>
+                    </div>
+                    <div class="admin-actions">
+                        <button class="btn-primary-small" id="exportDataBtn"><i class="fas fa-file-export"></i> Exporter</button>
+                        <button class="btn-primary-small" id="importDataBtn"><i class="fas fa-file-import"></i> Importer</button>
+                        <button class="btn-danger-small" id="deleteAllBtn"><i class="fas fa-trash-alt"></i> Tout supprimer</button>
+                        <input type="file" id="importFile" accept=".json" style="display:none;" />
+                    </div>
+                </div>
+
+                <!-- Catégories -->
+                <div id="categoriesPanel" class="admin-page">
+                    <div class="admin-panel-header">
+                        <h2><i class="fas fa-tags"></i> Gestion des Catégories</h2>
+                        <button class="btn-primary-small" id="btnAddCategory"><i class="fas fa-plus"></i> Ajouter</button>
+                    </div>
+                    <div class="table-container">
+                        <table class="admin-table">
+                            <thead><tr>
+                                <th>Image</th><th>Nom</th><th>Description</th><th>Ordre</th><th>CA</th><th>Profit</th><th>Nb Produits</th><th>Actions</th>
+                            </tr></thead>
+                            <tbody id="categoriesTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Produits -->
+                <div id="productsPanel" class="admin-page">
+                    <div class="admin-panel-header">
+                        <h2><i class="fas fa-box"></i> Gestion des Produits</h2>
+                        <button class="btn-primary-small" id="btnAddProduct"><i class="fas fa-plus"></i> Ajouter</button>
+                    </div>
+                    <div class="table-container">
+                        <table class="admin-table">
+                            <thead><tr>
+                                <th>Image</th><th>Nom</th><th>Catégorie</th><th>Marque</th>
+                                <th>Prix Achat</th><th>Prix Vente</th><th>Profit</th><th>Stock</th>
+                                <th>Prix Promo</th><th>Fournisseur</th><th>CA</th><th>Profit Total</th><th>Actions</th>
+                            </tr></thead>
+                            <tbody id="productsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- FOOTER -->
         <footer class="footer">
             <div class="footer-links">
-                <a href="#" data-footer="about">À propos</a>
-                <a href="#" data-footer="faq">FAQ</a>
-                <a href="#" data-footer="shipping">Livraison</a>
-                <a href="#" data-footer="returns">Retours</a>
+                <a href="#">À propos</a><a href="#">FAQ</a><a href="#">Livraison</a><a href="#">Retours</a>
             </div>
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <span style="font-size: 0.6rem;">© 2026 MANORA</span>
-                <span style="color: #d4cfc6;">|</span>
-                <span style="font-size: 0.6rem; letter-spacing: 0.1em;">Beauty & Wellness</span>
-            </div>
+            <div>© 2026 MANORA | Beauty & Wellness</div>
             <div class="footer-social">
-                <i class="fab fa-instagram" data-social="instagram"></i>
-                <i class="fab fa-pinterest-p" data-social="pinterest"></i>
-                <i class="fab fa-youtube" data-social="youtube"></i>
+                <i class="fab fa-instagram"></i><i class="fab fa-pinterest-p"></i><i class="fab fa-youtube"></i>
             </div>
         </footer>
 
@@ -310,20 +187,20 @@
                 </div>
                 <div class="form-group">
                     <label>Description</label>
-                    <textarea id="catDescription" placeholder="Description de la catégorie" rows="3"></textarea>
+                    <textarea id="catDescription" placeholder="Description" rows="3"></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Image de la catégorie</label>
+                    <label>Image</label>
                     <input type="file" id="catImageInput" accept="image/*" />
-                    <div id="catImagePreview" style="margin-top:10px;"></div>
+                    <div id="catImagePreview"></div>
                     <input type="hidden" id="catImage" />
-                    <small style="font-size:0.6rem;color:#999;">Téléchargez une image (JPG, PNG, WEBP)</small>
+                    <small>Téléchargez une image (JPG, PNG, WEBP)</small>
                 </div>
                 <div class="form-group">
                     <label>Ordre d'affichage</label>
-                    <input type="number" id="catOrder" placeholder="1" value="0" />
+                    <input type="number" id="catOrder" value="0" />
                 </div>
-                <button type="submit" class="btn-primary" id="saveCategoryBtn">Enregistrer</button>
+                <button type="submit" class="btn-primary">Enregistrer</button>
             </form>
         </div>
     </div>
@@ -338,7 +215,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Nom du produit</label>
-                        <input type="text" id="prodName" placeholder="Nom du produit" required />
+                        <input type="text" id="prodName" placeholder="Nom" required />
                     </div>
                     <div class="form-group">
                         <label>Catégorie</label>
@@ -358,41 +235,41 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Prix d'achat (MAD)</label>
-                        <input type="number" id="prodBuyPrice" placeholder="0.00" step="0.01" />
+                        <input type="number" id="prodBuyPrice" step="0.01" />
                     </div>
                     <div class="form-group">
                         <label>Prix de vente (MAD)</label>
-                        <input type="number" id="prodSellPrice" placeholder="0.00" step="0.01" required />
+                        <input type="number" id="prodSellPrice" step="0.01" required />
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Stock</label>
-                        <input type="number" id="prodStock" placeholder="0" />
+                        <input type="number" id="prodStock" />
                     </div>
                     <div class="form-group">
                         <label>Prix promo (MAD)</label>
-                        <input type="number" id="prodPromoPrice" placeholder="0.00" step="0.01" />
+                        <input type="number" id="prodPromoPrice" step="0.01" />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Image du produit</label>
+                    <label>Image</label>
                     <input type="file" id="prodImageInput" accept="image/*" />
-                    <div id="prodImagePreview" style="margin-top:10px;"></div>
+                    <div id="prodImagePreview"></div>
                     <input type="hidden" id="prodImage" />
-                    <small style="font-size:0.6rem;color:#999;">Téléchargez une image (JPG, PNG, WEBP)</small>
+                    <small>Téléchargez une image (JPG, PNG, WEBP)</small>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Chiffre d'affaires (MAD)</label>
-                        <input type="number" id="prodCA" placeholder="0.00" step="0.01" value="0" />
+                        <input type="number" id="prodCA" step="0.01" value="0" />
                     </div>
                     <div class="form-group">
                         <label>Profit total (MAD)</label>
-                        <input type="number" id="prodProfit" placeholder="0.00" step="0.01" value="0" />
+                        <input type="number" id="prodProfit" step="0.01" value="0" />
                     </div>
                 </div>
-                <button type="submit" class="btn-primary" id="saveProductBtn">Enregistrer</button>
+                <button type="submit" class="btn-primary">Enregistrer</button>
             </form>
         </div>
     </div>
@@ -402,7 +279,7 @@
         <div class="auth-modal">
             <button class="auth-close" id="authClose"><i class="fas fa-times"></i></button>
             <div class="auth-header">
-                <h2><i class="fas fa-leaf" style="color: #e8a87c;"></i> Bienvenue chez MANORA</h2>
+                <h2><i class="fas fa-leaf"></i> Bienvenue chez MANORA</h2>
                 <p>Connectez-vous ou créez un compte</p>
             </div>
             <div class="auth-tabs">
@@ -411,11 +288,11 @@
             </div>
             <form class="auth-form" id="loginForm">
                 <div class="form-group">
-                    <label for="loginEmail"><i class="fas fa-envelope"></i> Email</label>
+                    <label>Email</label>
                     <input type="email" id="loginEmail" placeholder="votre@email.com" required />
                 </div>
                 <div class="form-group">
-                    <label for="loginPassword"><i class="fas fa-lock"></i> Mot de passe</label>
+                    <label>Mot de passe</label>
                     <input type="password" id="loginPassword" placeholder="••••••••" required />
                 </div>
                 <div id="loginError" class="auth-error hidden"></div>
@@ -424,34 +301,34 @@
             </form>
             <form class="auth-form hidden" id="registerForm">
                 <div class="form-group">
-                    <label for="registerName"><i class="fas fa-user"></i> Nom complet</label>
+                    <label>Nom complet</label>
                     <input type="text" id="registerName" placeholder="Jean Dupont" required />
                 </div>
                 <div class="form-group">
-                    <label for="registerEmail"><i class="fas fa-envelope"></i> Email</label>
+                    <label>Email</label>
                     <input type="email" id="registerEmail" placeholder="votre@email.com" required />
                 </div>
                 <div class="form-group">
-                    <label for="registerPhone"><i class="fas fa-phone"></i> Téléphone</label>
+                    <label>Téléphone</label>
                     <input type="tel" id="registerPhone" placeholder="06 12 34 56 78" />
                 </div>
                 <div class="form-group">
-                    <label for="registerPassword"><i class="fas fa-lock"></i> Mot de passe</label>
+                    <label>Mot de passe</label>
                     <input type="password" id="registerPassword" placeholder="••••••••" required />
-                    <small style="font-size: 0.6rem; color: #999;">Minimum 6 caractères</small>
+                    <small>Minimum 6 caractères</small>
                 </div>
                 <div class="form-group">
-                    <label for="registerConfirm"><i class="fas fa-check-circle"></i> Confirmer</label>
+                    <label>Confirmer</label>
                     <input type="password" id="registerConfirm" placeholder="••••••••" required />
                 </div>
                 <div id="registerError" class="auth-error hidden"></div>
                 <button type="submit" class="auth-submit" id="registerBtn">Créer mon compte</button>
-                <p class="auth-terms">En créant un compte, vous acceptez nos <a href="#">conditions d'utilisation</a></p>
+                <p class="auth-terms">En créant un compte, vous acceptez nos <a href="#">conditions</a></p>
             </form>
         </div>
     </div>
 
-    <!-- FIREBASE SDKs -->
+    <!-- FIREBASE -->
     <script type="importmap">
         {
             "imports": {
