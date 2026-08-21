@@ -14,6 +14,7 @@ let categoriesData = [];
 let productsData = [];
 const CURRENCY = 'MAD';
 const MAX_IMAGE_SIZE = 800 * 1024; // 800 KB
+let categoriesMap = {};
 
 function formatPrice(p) {
     if (p === undefined || p === null) return '0 ' + CURRENCY;
@@ -22,6 +23,21 @@ function formatPrice(p) {
 
 export function getProductsData() {
     return productsData;
+}
+
+// ============================================================
+// CHARGER LES CATÉGORIES DANS LA MAP (pour affichage des noms)
+// ============================================================
+async function loadCategoriesMap() {
+    try {
+        const snap = await getDocs(collection(db, 'categories'));
+        categoriesMap = {};
+        snap.forEach(doc => {
+            categoriesMap[doc.id] = doc.data().name || doc.id;
+        });
+    } catch (e) {
+        console.error('Erreur chargement catégories map:', e);
+    }
 }
 
 // ============================================================
@@ -117,6 +133,8 @@ export async function loadCategories() {
         categoriesData = [];
         snap.forEach(d => categoriesData.push({ id: d.id, ...d.data() }));
         renderCategories();
+        // Mettre à jour la map des catégories pour l'utiliser dans les produits
+        await loadCategoriesMap();
     } catch (e) { console.error(e); }
 }
 
@@ -218,6 +236,10 @@ function renderProducts() {
 }
 
 export async function loadProductsTable() {
+    // S'assurer que la map des catégories est chargée
+    if (Object.keys(categoriesMap).length === 0) {
+        await loadCategoriesMap();
+    }
     try {
         const snap = await getDocs(collection(db, 'products'));
         const tbody = document.getElementById('productsTableBody');
@@ -225,11 +247,12 @@ export async function loadProductsTable() {
         snap.forEach(d => {
             const data = d.data();
             const profit = (data.sellPrice || 0) - (data.buyPrice || 0);
+            const categoryName = categoriesMap[data.category] || data.category || '-';
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${data.image ? `<img src="${data.image}" class="table-img">` : '-'}</td>
                 <td><strong>${data.name || ''}</strong></td>
-                <td>${data.category || '-'}</td>
+                <td>${categoryName}</td>
                 <td>${data.brand || '-'}</td>
                 <td>${formatPrice(data.buyPrice || 0)}</td>
                 <td>${formatPrice(data.sellPrice || 0)}</td>
