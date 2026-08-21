@@ -20,6 +20,11 @@ function formatPrice(p) {
     return Number(p).toFixed(2) + ' ' + CURRENCY;
 }
 
+// Exporter pour que script.js puisse récupérer les produits
+export function getProductsData() {
+    return productsData;
+}
+
 // ============================================================
 // UPLOAD IMAGE EN BASE64 (SANS API EXTERNE)
 // ============================================================
@@ -30,8 +35,7 @@ async function uploadImage(file) {
         const reader = new FileReader();
         reader.onload = function(e) {
             const base64 = e.target.result;
-            // Vérifier la taille
-            const sizeInBytes = base64.length * 0.75; // approximation
+            const sizeInBytes = base64.length * 0.75;
             if (sizeInBytes > MAX_IMAGE_SIZE) {
                 window.showToast('⚠️ Image trop grande (max 800 KB)', true);
                 resolve(null);
