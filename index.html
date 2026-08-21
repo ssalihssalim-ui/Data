@@ -190,11 +190,11 @@
                     <textarea id="catDescription" placeholder="Description" rows="3"></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Image</label>
+                    <label>Image (Base64)</label>
                     <input type="file" id="catImageInput" accept="image/*" />
                     <div id="catImagePreview"></div>
                     <input type="hidden" id="catImage" />
-                    <small>Téléchargez une image (JPG, PNG, WEBP)</small>
+                    <small>Choisissez une image (max 800KB). Elle sera stockée en Base64 dans Firestore.</small>
                 </div>
                 <div class="form-group">
                     <label>Ordre d'affichage</label>
@@ -253,11 +253,11 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Image</label>
+                    <label>Image (Base64)</label>
                     <input type="file" id="prodImageInput" accept="image/*" />
                     <div id="prodImagePreview"></div>
                     <input type="hidden" id="prodImage" />
-                    <small>Téléchargez une image (JPG, PNG, WEBP)</small>
+                    <small>Choisissez une image (max 800KB). Elle sera stockée en Base64 dans Firestore.</small>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -335,7 +335,6 @@
                 "firebase/app": "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js",
                 "firebase/auth": "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js",
                 "firebase/firestore": "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js",
-                "firebase/storage": "https://www.gstatic.com/firebasejs/12.17.1/firebase-storage.js",
                 "firebase/analytics": "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js"
             }
         }
