@@ -1,10 +1,10 @@
 // ============================================================
-// SCRIPT.JS - Navigation, Auth, Catalogue, Panier
+// IMPORTS FIREBASE
 // ============================================================
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import {
-    getAuth,
+import { 
+    getAuth, 
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     sendPasswordResetEmail,
@@ -14,21 +14,8 @@ import {
     browserLocalPersistence,
     updateProfile
 } from "firebase/auth";
-import {
-    getFirestore,
-    collection,
-    doc,
-    setDoc,
-    getDocs,
-    getDoc,
-    updateDoc,
-    deleteDoc,
-    serverTimestamp,
-    query,
-    orderBy,
-    addDoc,
-    limit
-} from "firebase/firestore";
+import { getFirestore, collection, getDocs, query, orderBy } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 // ============================================================
 // CONFIGURATION FIREBASE
@@ -48,18 +35,20 @@ const firebaseConfig = {
 // ============================================================
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
 
-setPersistence(auth, browserLocalPersistence)
-    .catch((error) => console.warn('Erreur persistance:', error));
+setPersistence(auth, browserLocalPersistence).catch(() => {});
 
 console.log('🔥 Firebase initialisé !');
+
+export { app, auth, db, storage };
 
 // ============================================================
 // TOAST SYSTEM
 // ============================================================
-export function showToast(msg, isError = false) {
+window.showToast = function(msg, isError = false) {
     const existing = document.querySelector('.toast-luna');
     if (existing) existing.remove();
 
@@ -100,584 +89,280 @@ export function showToast(msg, isError = false) {
         toast.style.transform = 'translateX(-50%) translateY(20px)';
         setTimeout(() => toast.remove(), 400);
     }, 4000);
-}
+};
 
 // ============================================================
 // VALIDATION EMAIL
 // ============================================================
-export function isValidEmail(email) {
+window.isValidEmail = function(email) {
     return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
-}
+};
 
 // ============================================================
-// NAVIGATION - CORRIGÉE
+// LOAD PUBLIC DATA (Accueil)
 // ============================================================
-const pageHome = document.getElementById('pageHome');
-const pageShop = document.getElementById('pageShop');
-const pageDashboard = document.getElementById('pageDashboard');
-
-const navHome = document.getElementById('navHome');
-const navShop = document.getElementById('navShop');
-const navDashboard = document.getElementById('navDashboard');
-
-export function showPage(page) {
-    pageHome.style.display = page === 'home' ? 'block' : 'none';
-    pageShop.style.display = page === 'shop' ? 'block' : 'none';
-    pageDashboard.style.display = page === 'dashboard' ? 'block' : 'none';
-
-    document.querySelectorAll('.nav-links a').forEach(link => link.classList.remove('active'));
-    if (page === 'home' && navHome) navHome.classList.add('active');
-    if (page === 'shop' && navShop) navShop.classList.add('active');
-    if (page === 'dashboard' && navDashboard) navDashboard.classList.add('active');
-}
-
-// ACCUEIL
-navHome?.addEventListener('click', (e) => {
-    e.preventDefault();
-    showPage('home');
-    loadHomeProducts();
-});
-
-// BOUTIQUE
-navShop?.addEventListener('click', (e) => {
-    e.preventDefault();
-    showPage('shop');
-    loadAllProducts();
-});
-
-// DASHBOARD - UNIQUEMENT ICI
-navDashboard?.addEventListener('click', (e) => {
-    e.preventDefault();
-    const user = auth.currentUser;
-    if (!user) {
-        showToast('🔐 Connectez-vous pour accéder au dashboard', true);
-        openAuthModal();
-        return;
-    }
-    showPage('dashboard');
-    if (typeof loadSection === 'function') {
-        loadSection('statistiques');
-    }
-});
-
-// ============================================================
-// PAGE ACCUEIL - NOUVEAUTÉS & PLUS VENDUS
-// ============================================================
-export async function loadHomeProducts() {
+async function loadPublicData() {
     try {
-        // Nouveautés (4 derniers)
-        const newQuery = query(collection(db, 'produits'), orderBy('createdAt', 'desc'), limit(4));
-        const newSnapshot = await getDocs(newQuery);
-        const newProducts = [];
-        newSnapshot.forEach(doc => {
-            newProducts.push({ id: doc.id, ...doc.data() });
-        });
-        renderHomeProducts('newProductsGrid', newProducts, '✨ Nouveauté');
-
-        // Plus vendus (4 plus chers)
-        const featuredQuery = query(collection(db, 'produits'), orderBy('prixVente', 'desc'), limit(4));
-        const featuredSnapshot = await getDocs(featuredQuery);
-        const featuredProducts = [];
-        featuredSnapshot.forEach(doc => {
-            featuredProducts.push({ id: doc.id, ...doc.data() });
-        });
-        renderHomeProducts('featuredProductsGrid', featuredProducts, '🔥 Best-seller');
-
-    } catch (error) {
-        console.error('Erreur chargement home:', error);
-    }
-}
-
-function renderHomeProducts(containerId, products, badge) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-
-    if (products.length === 0) {
-        container.innerHTML = `<div class="empty-state"><i class="fas fa-box-open"></i><p>Aucun produit</p></div>`;
-        return;
-    }
-
-    container.innerHTML = products.map(p => {
-        const displayPrice = p.prixVente || p.price || '0';
-        const priceValue = parseFloat(displayPrice) || 0;
-
-        let imageHtml = '📦';
-        if (p.images && p.images.length > 0 && p.images[0]) {
-            imageHtml = `<img src="${p.images[0]}" alt="${p.name}" />`;
-        } else if (p.image && p.image.startsWith('data:image')) {
-            imageHtml = `<img src="${p.image}" alt="${p.name}" />`;
-        }
-
-        const desc = p.description || '';
-        const descShort = desc.length > 50 ? desc.substring(0, 50) + '...' : desc;
-
-        return `
-            <div class="product-card" data-id="${p.id}">
-                <div class="product-image">
-                    ${imageHtml}
-                    <span class="product-badge">${badge}</span>
-                </div>
-                <div class="product-info">
-                    <h4>${p.name}</h4>
-                    <div class="product-desc">${descShort}</div>
-                    <div class="product-price">${priceValue.toFixed(2)} MAD</div>
-                    <div class="product-actions">
-                        <button class="btn-add-cart" data-id="${p.id}" data-name="${p.name}" data-price="${priceValue}" data-image="${p.images && p.images[0] ? p.images[0] : p.image || '📦'}">
-                            <i class="fas fa-cart-plus"></i> Ajouter
-                        </button>
-                        <button class="btn-detail" data-id="${p.id}">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join('');
-
-    attachProductEvents(container);
-}
-
-// ============================================================
-// BOUTIQUE - TOUS LES PRODUITS
-// ============================================================
-let allProducts = [];
-
-export async function loadAllProducts(category = 'all') {
-    try {
-        const q = query(collection(db, 'produits'), orderBy('name'));
-        const snapshot = await getDocs(q);
-        allProducts = [];
-        snapshot.forEach(doc => {
-            allProducts.push({ id: doc.id, ...doc.data() });
-        });
-        renderShopProducts(category);
-        loadShopCategories();
-    } catch (error) {
-        console.error('Erreur chargement produits:', error);
-        showToast('⚠️ Erreur chargement produits', true);
-    }
-}
-
-async function loadShopCategories() {
-    const list = document.getElementById('shopCategoryList');
-    try {
-        const snapshot = await getDocs(collection(db, 'categories'));
-        const categories = [];
-        snapshot.forEach(doc => {
+        // Charger catégories
+        const catSnapshot = await getDocs(query(collection(db, 'categories'), orderBy('order', 'asc')));
+        const catContainer = document.getElementById('categoriesContainer');
+        catContainer.innerHTML = '';
+        catSnapshot.forEach(doc => {
             const data = doc.data();
-            if (data.name) {
-                categories.push({ id: doc.id, name: data.name, image: data.image || '🏷️' });
+            const span = document.createElement('span');
+            span.className = 'cat-item';
+            if (data.image) {
+                span.innerHTML = `<img src="${data.image}" alt="${data.name}">${data.name}`;
+            } else {
+                span.innerHTML = data.name;
             }
+            catContainer.appendChild(span);
         });
 
-        if (categories.length === 0) {
-            const productCategories = [...new Set(allProducts.map(p => p.category).filter(Boolean))];
-            productCategories.forEach(cat => {
-                categories.push({ id: cat, name: cat, image: '🏷️' });
-            });
-        }
-
-        list.innerHTML = `
-            <li class="category-item active" data-category="all"><i class="fas fa-th"></i> Tous</li>
-            ${categories.map(cat => `
-                <li class="category-item" data-category="${cat.name}">
-                    ${cat.image && cat.image.startsWith('data:image') 
-                        ? `<img src="${cat.image}" />` 
-                        : `<span>${cat.image || '🏷️'}</span>`}
-                    ${cat.name}
-                </li>
-            `).join('')}
-        `;
-
-        document.querySelectorAll('#shopCategoryList .category-item').forEach(item => {
-            item.addEventListener('click', function() {
-                document.querySelectorAll('#shopCategoryList .category-item').forEach(c => c.classList.remove('active'));
-                this.classList.add('active');
-                renderShopProducts(this.dataset.category);
-            });
-        });
-
-    } catch (error) {
-        console.error('Erreur catégories:', error);
-    }
-}
-
-function renderShopProducts(category = 'all') {
-    const grid = document.getElementById('productsGrid');
-    const count = document.getElementById('productCount');
-
-    let filtered = category === 'all' ? allProducts : allProducts.filter(p => p.category === category);
-
-    const sortValue = document.getElementById('sortSelect')?.value || 'name';
-    if (sortValue === 'price-asc') filtered.sort((a, b) => (parseFloat(a.prixVente) || 0) - (parseFloat(b.prixVente) || 0));
-    else if (sortValue === 'price-desc') filtered.sort((a, b) => (parseFloat(b.prixVente) || 0) - (parseFloat(a.prixVente) || 0));
-    else filtered.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-
-    count.textContent = `${filtered.length} produits`;
-
-    if (filtered.length === 0) {
-        grid.innerHTML = `<div class="empty-state"><i class="fas fa-box-open"></i><p>Aucun produit</p></div>`;
-        return;
-    }
-
-    grid.innerHTML = filtered.map(p => {
-        const displayPrice = p.prixVente || p.price || '0';
-        const priceValue = parseFloat(displayPrice) || 0;
-
-        let imageHtml = '📦';
-        if (p.images && p.images.length > 0 && p.images[0]) {
-            imageHtml = `<img src="${p.images[0]}" alt="${p.name}" />`;
-        } else if (p.image && p.image.startsWith('data:image')) {
-            imageHtml = `<img src="${p.image}" alt="${p.name}" />`;
-        }
-
-        const desc = p.description || '';
-        const descShort = desc.length > 60 ? desc.substring(0, 60) + '...' : desc;
-
-        return `
-            <div class="product-card" data-id="${p.id}">
-                <div class="product-image">${imageHtml}</div>
+        // Charger produits
+        const prodSnapshot = await getDocs(collection(db, 'products'));
+        const prodContainer = document.getElementById('productsContainer');
+        prodContainer.innerHTML = '';
+        prodSnapshot.forEach(doc => {
+            const data = doc.data();
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            const promo = data.promoPrice && data.promoPrice > 0 && data.promoPrice < data.sellPrice;
+            const imgSrc = data.image || 'https://via.placeholder.com/200x200?text=MANORA';
+            card.innerHTML = `
+                <img src="${imgSrc}" alt="${data.name}">
                 <div class="product-info">
-                    <h4>${p.name}</h4>
-                    <div class="product-desc">${descShort}</div>
-                    <div class="product-price">${priceValue.toFixed(2)} MAD</div>
-                    <div class="product-actions">
-                        <button class="btn-add-cart" data-id="${p.id}" data-name="${p.name}" data-price="${priceValue}" data-image="${p.images && p.images[0] ? p.images[0] : p.image || '📦'}">
-                            <i class="fas fa-cart-plus"></i> Ajouter au panier
-                        </button>
-                        <button class="btn-detail" data-id="${p.id}">
-                            <i class="fas fa-eye"></i> Détails
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join('');
-
-    attachProductEvents(grid);
-}
-
-function attachProductEvents(container) {
-    container.querySelectorAll('.btn-add-cart').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const product = {
-                id: this.dataset.id,
-                name: this.dataset.name,
-                prixVente: this.dataset.price,
-                image: this.dataset.image
-            };
-            addToCart(product);
-        });
-    });
-
-    container.querySelectorAll('.btn-detail').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            openProductDetail(this.dataset.id);
-        });
-    });
-}
-
-// ============================================================
-// DÉTAILS PRODUIT
-// ============================================================
-const detailOverlay = document.getElementById('productDetailOverlay');
-const detailClose = document.getElementById('productDetailClose');
-const detailContent = document.getElementById('productDetailContent');
-
-export async function openProductDetail(productId) {
-    try {
-        const docRef = doc(db, 'produits', productId);
-        const docSnap = await getDoc(docRef);
-        if (!docSnap.exists()) {
-            showToast('⚠️ Produit non trouvé', true);
-            return;
-        }
-        const product = { id: docSnap.id, ...docSnap.data() };
-        renderProductDetail(product);
-        detailOverlay.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    } catch (error) {
-        console.error('Erreur chargement produit:', error);
-        showToast('⚠️ Erreur chargement du produit', true);
-    }
-}
-
-function renderProductDetail(product) {
-    const displayPrice = product.prixVente || product.price || '0';
-    const priceValue = parseFloat(displayPrice) || 0;
-    const oldPrice = product.prixPromotion || null;
-
-    let images = [];
-    if (product.images && product.images.length > 0) {
-        images = product.images;
-    } else if (product.image && product.image.startsWith('data:image')) {
-        images = [product.image];
-    }
-
-    let imagesHtml = '';
-    if (images.length > 0) {
-        imagesHtml = `
-            <div class="detail-images-container">
-                <div class="detail-main-image">
-                    <img src="${images[0]}" alt="${product.name}" id="detailMainImage" />
-                </div>
-                ${images.length > 1 ? `
-                    <div class="detail-thumbnails">
-                        ${images.map((img, index) => `
-                            <div class="detail-thumbnail ${index === 0 ? 'active' : ''}" onclick="document.getElementById('detailMainImage').src='${img}'; document.querySelectorAll('.detail-thumbnail').forEach(t => t.classList.remove('active')); this.classList.add('active');">
-                                <img src="${img}" alt="Image ${index + 1}" />
-                            </div>
-                        `).join('')}
-                    </div>
-                ` : ''}
-            </div>
-        `;
-    } else {
-        imagesHtml = `<div class="no-image">📦</div>`;
-    }
-
-    let videoHtml = '';
-    if (product.videoUrl) {
-        const videoId = extractYouTubeId(product.videoUrl);
-        if (videoId) {
-            videoHtml = `
-                <div class="product-detail-video">
-                    <h4><i class="fab fa-youtube"></i> Vidéo du produit</h4>
-                    <iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>
+                    <h4>${data.name || ''}</h4>
+                    <span class="product-category">${data.category || ''}</span>
+                    <div class="product-price">${promo ? `<span>${data.sellPrice}€</span> ${data.promoPrice}€` : (data.sellPrice || 0) + '€'}</div>
+                    <div style="font-size:0.6rem;color:#999;">Stock: ${data.stock || 0}</div>
                 </div>
             `;
-        }
+            prodContainer.appendChild(card);
+        });
+    } catch (error) {
+        console.error('Erreur chargement données publiques:', error);
     }
-
-    detailContent.innerHTML = `
-        <div class="product-detail-grid">
-            <div class="product-detail-image">${imagesHtml}</div>
-            <div class="product-detail-info">
-                <h1>${product.name}</h1>
-                <div class="detail-category">${product.category || 'Non catégorisé'}</div>
-                <div class="detail-description">${product.description || 'Aucune description'}</div>
-                <div class="detail-price">
-                    ${priceValue.toFixed(2)} MAD
-                    ${oldPrice ? `<span class="old-price">${parseFloat(oldPrice).toFixed(2)} MAD</span>` : ''}
-                </div>
-                <div class="detail-stock ${(product.stock || 0) > 0 ? '' : 'out-of-stock'}">
-                    ${(product.stock || 0) > 0 ? `✅ En stock (${product.stock} unités)` : '❌ Rupture de stock'}
-                </div>
-                <button class="detail-add-cart" data-id="${product.id}" data-name="${product.name}" data-price="${priceValue}" data-image="${images[0] || '📦'}">
-                    <i class="fas fa-cart-plus"></i> Ajouter au panier
-                </button>
-                ${videoHtml}
-            </div>
-        </div>
-    `;
-
-    detailContent.querySelector('.detail-add-cart')?.addEventListener('click', function() {
-        const productData = {
-            id: this.dataset.id,
-            name: this.dataset.name,
-            prixVente: this.dataset.price,
-            image: this.dataset.image
-        };
-        addToCart(productData);
-        showToast(`🛒 ${productData.name} ajouté au panier`);
-    });
 }
 
-function extractYouTubeId(url) {
-    if (!url) return null;
-    const regExp = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/;
-    const match = url.match(regExp);
-    return match ? match[1] : null;
+// ============================================================
+// STORE PAGE
+// ============================================================
+const storePage = document.getElementById('storePage');
+
+document.getElementById('shopNowBtn').addEventListener('click', function() {
+    openStore();
+});
+
+document.getElementById('closeStore').addEventListener('click', function() {
+    closeStore();
+});
+
+document.getElementById('silverBtn').addEventListener('click', function() {
+    openStore();
+});
+
+async function openStore() {
+    storePage.classList.add('active');
+    storePage.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    await loadStoreData();
 }
 
-detailClose?.addEventListener('click', () => {
-    detailOverlay.classList.remove('active');
+function closeStore() {
+    storePage.classList.remove('active');
+    storePage.style.display = 'none';
     document.body.style.overflow = '';
-});
+}
 
-detailOverlay?.addEventListener('click', function(e) {
-    if (e.target === detailOverlay) {
-        detailOverlay.classList.remove('active');
-        document.body.style.overflow = '';
-    }
-});
-
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && detailOverlay?.classList.contains('active')) {
-        detailOverlay.classList.remove('active');
-        document.body.style.overflow = '';
-    }
-});
-
-// ============================================================
-// PANIER
-// ============================================================
-let cart = [];
-const cartBadge = document.getElementById('cartBadge');
-const cartOverlay = document.getElementById('cartOverlay');
-const cartItems = document.getElementById('cartItems');
-const cartTotalPrice = document.getElementById('cartTotalPrice');
-const cartFooter = document.getElementById('cartFooter');
-const bagIcon = document.getElementById('bagIcon');
-const cartClose = document.getElementById('cartClose');
-
-function addToCart(product) {
-    const existing = cart.find(item => item.id === product.id);
-    if (existing) {
-        existing.quantity += 1;
-    } else {
-        cart.push({
-            id: product.id,
-            name: product.name,
-            price: parseFloat(product.prixVente) || 0,
-            image: product.image || '📦',
-            quantity: 1
+async function loadStoreData() {
+    try {
+        // Charger catégories
+        const catSnapshot = await getDocs(query(collection(db, 'categories'), orderBy('order', 'asc')));
+        const catContainer = document.getElementById('storeCategories');
+        catContainer.innerHTML = '<button class="store-category-btn active" data-category="all">📋 Tous</button>';
+        
+        catSnapshot.forEach(doc => {
+            const data = doc.data();
+            const btn = document.createElement('button');
+            btn.className = 'store-category-btn';
+            btn.dataset.category = doc.id;
+            if (data.image) {
+                btn.innerHTML = `<img src="${data.image}"> ${data.name}`;
+            } else {
+                btn.textContent = data.name;
+            }
+            catContainer.appendChild(btn);
         });
-    }
-    updateCartUI();
-    showToast(`🛒 ${product.name} ajouté au panier`);
-}
 
-function removeFromCart(productId) {
-    cart = cart.filter(item => item.id !== productId);
-    updateCartUI();
-    showToast('🗑️ Produit retiré du panier');
-}
-
-function updateCartUI() {
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    if (cartBadge) {
-        cartBadge.textContent = totalItems;
-        cartBadge.style.display = totalItems > 0 ? 'block' : 'none';
-    }
-
-    if (cart.length === 0) {
-        cartItems.innerHTML = `
-            <div class="cart-empty">
-                <i class="fas fa-shopping-bag"></i>
-                <p>Votre panier est vide</p>
-            </div>
-        `;
-        cartFooter.style.display = 'none';
-        return;
-    }
-
-    cartItems.innerHTML = cart.map(item => {
-        let imageHtml = item.image || '📦';
-        if (item.image && item.image.startsWith('data:image')) {
-            imageHtml = `<img src="${item.image}" />`;
-        }
-        return `
-            <div class="cart-item" data-id="${item.id}">
-                <div class="cart-item-image">${imageHtml}</div>
-                <div class="cart-item-info">
-                    <h4>${item.name}</h4>
-                    <div class="cart-item-qty">
-                        <button onclick="window.decreaseQty('${item.id}')">-</button>
-                        <span>${item.quantity}</span>
-                        <button onclick="window.increaseQty('${item.id}')">+</button>
-                    </div>
+        // Charger produits
+        const prodSnapshot = await getDocs(collection(db, 'products'));
+        const prodContainer = document.getElementById('storeProducts');
+        prodContainer.innerHTML = '';
+        
+        if (prodSnapshot.empty) {
+            prodContainer.innerHTML = `
+                <div style="grid-column:1/-1;text-align:center;padding:3rem;color:#999;">
+                    <i class="fas fa-box-open" style="font-size:3rem;display:block;margin-bottom:1rem;color:#e8a87c;"></i>
+                    <p>Aucun produit disponible pour le moment.</p>
+                    <p style="font-size:0.8rem;margin-top:0.5rem;">Connectez-vous en tant qu'admin pour ajouter des produits.</p>
                 </div>
-                <div class="cart-item-price">${(item.price * item.quantity).toFixed(2)} MAD</div>
-                <button class="cart-item-remove" onclick="window.removeFromCart('${item.id}')">
-                    <i class="fas fa-trash"></i>
-                </button>
+            `;
+        } else {
+            prodSnapshot.forEach(doc => {
+                const data = doc.data();
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.dataset.category = data.category || '';
+                const promo = data.promoPrice && data.promoPrice > 0 && data.promoPrice < data.sellPrice;
+                const imgSrc = data.image || 'https://via.placeholder.com/200x200?text=MANORA';
+                card.innerHTML = `
+                    <img src="${imgSrc}" alt="${data.name}">
+                    <div class="product-info">
+                        <h4>${data.name || 'Sans nom'}</h4>
+                        <span class="product-category">${data.category || 'Non catégorisé'}</span>
+                        <div class="product-price">${promo ? `<span>${data.sellPrice}€</span> ${data.promoPrice}€` : (data.sellPrice || 0) + '€'}</div>
+                        <div style="font-size:0.6rem;color:#999;">📦 Stock: ${data.stock || 0}</div>
+                        ${data.brand ? `<div style="font-size:0.6rem;color:#999;">🏷️ ${data.brand}</div>` : ''}
+                    </div>
+                `;
+                prodContainer.appendChild(card);
+            });
+        }
+
+        // Filtrage
+        document.querySelectorAll('.store-category-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.store-category-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const cat = this.dataset.category;
+                document.querySelectorAll('#storeProducts .product-card').forEach(card => {
+                    if (cat === 'all' || card.dataset.category === cat) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        console.log('✅ Store chargé avec succès !');
+    } catch (error) {
+        console.error('❌ Erreur chargement store:', error);
+        document.getElementById('storeProducts').innerHTML = `
+            <div style="grid-column:1/-1;text-align:center;padding:3rem;color:#c0392b;">
+                <i class="fas fa-exclamation-triangle" style="font-size:3rem;display:block;margin-bottom:1rem;"></i>
+                <p>Erreur lors du chargement des produits.</p>
+                <p style="font-size:0.8rem;margin-top:0.5rem;">${error.message}</p>
             </div>
         `;
-    }).join('');
-
-    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    cartTotalPrice.textContent = total.toFixed(2) + ' MAD';
-    cartFooter.style.display = 'block';
+        window.showToast('⚠️ Erreur chargement du store', true);
+    }
 }
 
-window.removeFromCart = removeFromCart;
-window.increaseQty = function(productId) {
-    const item = cart.find(i => i.id === productId);
-    if (item) { item.quantity += 1; updateCartUI(); }
-};
-window.decreaseQty = function(productId) {
-    const item = cart.find(i => i.id === productId);
-    if (item) {
-        if (item.quantity <= 1) { removeFromCart(productId); }
-        else { item.quantity -= 1; updateCartUI(); }
-    }
-};
-
-bagIcon?.addEventListener('click', () => { cartOverlay.classList.add('active'); document.body.style.overflow = 'hidden'; });
-cartClose?.addEventListener('click', () => { cartOverlay.classList.remove('active'); document.body.style.overflow = ''; });
-cartOverlay?.addEventListener('click', function(e) {
-    if (e.target === cartOverlay) { cartOverlay.classList.remove('active'); document.body.style.overflow = ''; }
-});
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && cartOverlay?.classList.contains('active')) {
-        cartOverlay.classList.remove('active');
-        document.body.style.overflow = '';
-    }
-});
-
-document.getElementById('checkoutBtn')?.addEventListener('click', function() {
-    const user = auth.currentUser;
-    if (!user) {
-        showToast('🔐 Connectez-vous pour commander', true);
-        cartOverlay.classList.remove('active');
-        openAuthModal();
-        return;
-    }
-    if (cart.length === 0) {
-        showToast('⚠️ Panier vide', true);
-        return;
-    }
-    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const orderData = {
-        userId: user.uid,
-        userName: user.displayName || user.email,
-        items: cart,
-        total: total,
-        status: 'En attente',
-        createdAt: serverTimestamp()
-    };
-    addDoc(collection(db, 'commandes'), orderData)
-        .then(() => {
-            showToast('✅ Commande passée !');
-            cart = [];
-            updateCartUI();
-            cartOverlay.classList.remove('active');
-            document.body.style.overflow = '';
-        })
-        .catch((error) => {
-            console.error('Erreur commande:', error);
-            showToast('⚠️ Erreur lors de la commande', true);
-        });
-});
-
 // ============================================================
-// AUTH UI
+// AUTH STATE
 // ============================================================
-export function updateUI(user) {
+function updateUI(user) {
     const userStatus = document.getElementById('userStatus');
     const userIcon = document.getElementById('userIcon');
-    const dashboardLink = document.getElementById('navDashboard');
 
     if (user) {
         const displayName = user.displayName || user.email || 'Utilisateur';
         userStatus.textContent = '👤 ' + displayName.split('@')[0];
         userStatus.className = 'user-status logged-in';
         userIcon.style.color = '#4caf50';
-        if (dashboardLink) {
-            dashboardLink.style.display = 'inline';
-        }
+        openAdminPanel(user);
     } else {
         userStatus.textContent = '';
         userStatus.className = 'user-status';
         userIcon.style.color = '';
-        if (dashboardLink) {
-            dashboardLink.style.display = 'none';
-        }
+        closeAdminPanel();
     }
 }
+
+// ============================================================
+// ADMIN PANEL
+// ============================================================
+function openAdminPanel(user) {
+    const adminPanel = document.getElementById('adminPanel');
+    const sidebarUser = document.getElementById('sidebarUser');
+    const hero = document.getElementById('heroSection');
+    const publicCat = document.getElementById('publicCategories');
+    const publicProd = document.getElementById('publicProducts');
+    const collection = document.getElementById('collectionSection');
+    
+    if (user) {
+        adminPanel.classList.add('active');
+        adminPanel.style.display = 'flex';
+        sidebarUser.textContent = user.displayName || user.email || 'Admin';
+        hero.style.display = 'none';
+        publicCat.style.display = 'none';
+        publicProd.style.display = 'none';
+        collection.style.display = 'none';
+        
+        import('./admin.js').then(module => {
+            module.loadCategories();
+            module.loadProducts();
+            module.updateDashboard();
+            module.loadCategoriesTable();
+            module.loadProductsTable();
+        });
+    }
+}
+
+function closeAdminPanel() {
+    const adminPanel = document.getElementById('adminPanel');
+    const hero = document.getElementById('heroSection');
+    const publicCat = document.getElementById('publicCategories');
+    const publicProd = document.getElementById('publicProducts');
+    const collection = document.getElementById('collectionSection');
+    
+    adminPanel.classList.remove('active');
+    adminPanel.style.display = 'none';
+    hero.style.display = 'flex';
+    publicCat.style.display = 'block';
+    publicProd.style.display = 'block';
+    collection.style.display = 'block';
+}
+
+// ============================================================
+// SIDEBAR NAVIGATION
+// ============================================================
+document.querySelectorAll('.sidebar-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const page = this.dataset.page;
+        
+        if (this.id === 'sideLogout') {
+            signOut(auth);
+            window.showToast('👋 Déconnecté');
+            return;
+        }
+        
+        document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
+        
+        document.querySelectorAll('.admin-page').forEach(p => p.classList.remove('active'));
+        const targetMap = {
+            'dashboard': 'dashboardPanel',
+            'categories': 'categoriesPanel',
+            'products': 'productsPanel',
+            'orders': 'ordersPanel',
+            'clients': 'clientsPanel'
+        };
+        const target = document.getElementById(targetMap[page]);
+        if (target) target.classList.add('active');
+        
+        if (page === 'categories') {
+            import('./admin.js').then(module => module.loadCategoriesTable());
+        } else if (page === 'products') {
+            import('./admin.js').then(module => module.loadProductsTable());
+        } else if (page === 'dashboard') {
+            import('./admin.js').then(module => module.updateDashboard());
+        }
+    });
+});
 
 // ============================================================
 // MODAL AUTH
@@ -686,40 +371,37 @@ const authOverlay = document.getElementById('authOverlay');
 const userIcon = document.getElementById('userIcon');
 const authClose = document.getElementById('authClose');
 
-export function openAuthModal() {
+function openAuthModal() {
     authOverlay.classList.add('active');
     document.body.style.overflow = 'hidden';
 }
 
-export function closeAuthModal() {
+function closeAuthModal() {
     authOverlay.classList.remove('active');
     document.body.style.overflow = '';
     document.getElementById('loginError').classList.add('hidden');
     document.getElementById('registerError').classList.add('hidden');
 }
 
-userIcon?.addEventListener('click', function() {
+userIcon.addEventListener('click', function() {
     const user = auth.currentUser;
     if (user) {
         if (confirm('Se déconnecter ?')) {
             signOut(auth);
-            showToast('👋 Déconnexion réussie');
+            window.showToast('👋 Déconnecté');
         }
     } else {
         openAuthModal();
     }
 });
 
-authClose?.addEventListener('click', closeAuthModal);
-authOverlay?.addEventListener('click', function(e) {
-    if (e.target === authOverlay) closeAuthModal();
-});
+authClose.addEventListener('click', closeAuthModal);
+authOverlay.addEventListener('click', (e) => { if (e.target === authOverlay) closeAuthModal(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && authOverlay.classList.contains('active')) closeAuthModal(); });
 
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && authOverlay?.classList.contains('active')) closeAuthModal();
-});
-
-// Tabs
+// ============================================================
+// TABS AUTH
+// ============================================================
 const tabs = document.querySelectorAll('.auth-tab');
 const loginForm = document.getElementById('loginForm');
 const registerForm = document.getElementById('registerForm');
@@ -728,8 +410,7 @@ tabs.forEach(tab => {
     tab.addEventListener('click', function() {
         tabs.forEach(t => t.classList.remove('active'));
         this.classList.add('active');
-        const tabName = this.dataset.tab;
-        if (tabName === 'login') {
+        if (this.dataset.tab === 'login') {
             loginForm.classList.remove('hidden');
             registerForm.classList.add('hidden');
         } else {
@@ -742,9 +423,60 @@ tabs.forEach(tab => {
 });
 
 // ============================================================
-// INSCRIPTION
+// LOGIN
 // ============================================================
-document.getElementById('registerBtn')?.addEventListener('click', function(e) {
+loginForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const errorDiv = document.getElementById('loginError');
+
+    errorDiv.classList.add('hidden');
+    if (!email || !window.isValidEmail(email)) {
+        errorDiv.classList.remove('hidden');
+        errorDiv.textContent = '⚠️ Email invalide';
+        return;
+    }
+    if (!password) {
+        errorDiv.classList.remove('hidden');
+        errorDiv.textContent = '⚠️ Mot de passe requis';
+        return;
+    }
+
+    const loginBtn = document.getElementById('loginBtn');
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'Connexion...';
+
+    signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            const user = userCredential.user;
+            window.showToast('✅ Bienvenue ' + (user.displayName || user.email) + ' !');
+            closeAuthModal();
+            loginForm.reset();
+        })
+        .catch((error) => {
+            errorDiv.classList.remove('hidden');
+            let message = 'Erreur de connexion';
+            switch (error.code) {
+                case 'auth/user-not-found': message = 'Aucun compte trouvé'; break;
+                case 'auth/wrong-password': message = 'Mot de passe incorrect'; break;
+                case 'auth/invalid-email': message = 'Email invalide'; break;
+                case 'auth/too-many-requests': message = 'Trop de tentatives'; break;
+                default: message = error.message;
+            }
+            errorDiv.textContent = '⚠️ ' + message;
+            window.showToast('⚠️ ' + message, true);
+        })
+        .finally(() => {
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'Se connecter';
+        });
+});
+
+// ============================================================
+// REGISTER
+// ============================================================
+registerForm.addEventListener('submit', function(e) {
     e.preventDefault();
     const name = document.getElementById('registerName').value.trim();
     const email = document.getElementById('registerEmail').value.trim();
@@ -752,83 +484,115 @@ document.getElementById('registerBtn')?.addEventListener('click', function(e) {
     const password = document.getElementById('registerPassword').value;
     const confirm = document.getElementById('registerConfirm').value;
     const errorDiv = document.getElementById('registerError');
+
     errorDiv.classList.add('hidden');
 
-    if (!name || name.length < 2) { errorDiv.classList.remove('hidden'); errorDiv.textContent = '⚠️ Nom requis'; showToast('⚠️ Nom invalide', true); return; }
-    if (!email || !isValidEmail(email)) { errorDiv.classList.remove('hidden'); errorDiv.textContent = '⚠️ Email invalide'; showToast('⚠️ Email invalide', true); return; }
-    if (!password || password.length < 6) { errorDiv.classList.remove('hidden'); errorDiv.textContent = '⚠️ Mot de passe min 6 caractères'; showToast('⚠️ Mot de passe trop court', true); return; }
-    if (password !== confirm) { errorDiv.classList.remove('hidden'); errorDiv.textContent = '⚠️ Mots de passe différents'; showToast('⚠️ Mots de passe différents', true); return; }
+    if (!name || name.length < 2) {
+        errorDiv.classList.remove('hidden');
+        errorDiv.textContent = '⚠️ Nom invalide';
+        return;
+    }
+    if (!email || !window.isValidEmail(email)) {
+        errorDiv.classList.remove('hidden');
+        errorDiv.textContent = '⚠️ Email invalide';
+        return;
+    }
+    if (!password || password.length < 6) {
+        errorDiv.classList.remove('hidden');
+        errorDiv.textContent = '⚠️ Mot de passe minimum 6 caractères';
+        return;
+    }
+    if (password !== confirm) {
+        errorDiv.classList.remove('hidden');
+        errorDiv.textContent = '⚠️ Les mots de passe ne correspondent pas';
+        return;
+    }
 
-    this.disabled = true; this.textContent = 'Création...';
+    const registerBtn = document.getElementById('registerBtn');
+    registerBtn.disabled = true;
+    registerBtn.textContent = 'Création...';
+
     createUserWithEmailAndPassword(auth, email, password)
-        .then((cred) => updateProfile(cred.user, { displayName: name }).then(() => cred.user))
-        .then((user) => setDoc(doc(db, 'users', user.uid), { uid: user.uid, name, email, phone: phone || '', role: 'admin', createdAt: serverTimestamp(), lastLogin: serverTimestamp() }))
-        .then(() => { showToast('🎉 Bienvenue ' + name + ' !'); closeAuthModal(); registerForm.reset(); })
-        .catch((error) => { errorDiv.classList.remove('hidden'); errorDiv.textContent = '⚠️ ' + (error.message || 'Erreur'); showToast('⚠️ ' + error.message, true); })
-        .finally(() => { this.disabled = false; this.textContent = 'Créer mon compte'; });
+        .then((userCredential) => {
+            const user = userCredential.user;
+            return updateProfile(user, { displayName: name }).then(() => user);
+        })
+        .then(() => {
+            window.showToast('🎉 Bienvenue ' + name + ' !');
+            closeAuthModal();
+            registerForm.reset();
+        })
+        .catch((error) => {
+            errorDiv.classList.remove('hidden');
+            let message = 'Erreur';
+            switch (error.code) {
+                case 'auth/email-already-in-use': message = 'Email déjà utilisé'; break;
+                case 'auth/invalid-email': message = 'Email invalide'; break;
+                case 'auth/weak-password': message = 'Mot de passe trop faible'; break;
+                default: message = error.message;
+            }
+            errorDiv.textContent = '⚠️ ' + message;
+            window.showToast('⚠️ ' + message, true);
+        })
+        .finally(() => {
+            registerBtn.disabled = false;
+            registerBtn.textContent = 'Créer mon compte';
+        });
 });
 
 // ============================================================
-// CONNEXION
+// RESET PASSWORD
 // ============================================================
-document.getElementById('loginBtn')?.addEventListener('click', function(e) {
+document.getElementById('resetPasswordLink').addEventListener('click', function(e) {
     e.preventDefault();
     const email = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value;
-    const errorDiv = document.getElementById('loginError');
-    errorDiv.classList.add('hidden');
-
-    if (!email || !isValidEmail(email)) { errorDiv.classList.remove('hidden'); errorDiv.textContent = '⚠️ Email invalide'; showToast('⚠️ Email invalide', true); return; }
-    if (!password) { errorDiv.classList.remove('hidden'); errorDiv.textContent = '⚠️ Mot de passe requis'; showToast('⚠️ Mot de passe requis', true); return; }
-
-    this.disabled = true; this.textContent = 'Connexion...';
-    signInWithEmailAndPassword(auth, email, password)
-        .then((cred) => { updateDoc(doc(db, 'users', cred.user.uid), { lastLogin: serverTimestamp() }).catch(() => {}); showToast('✅ Bienvenue ' + (cred.user.displayName || cred.user.email) + ' !'); closeAuthModal(); loginForm.reset(); })
-        .catch((error) => { errorDiv.classList.remove('hidden'); errorDiv.textContent = '⚠️ ' + (error.message || 'Erreur'); showToast('⚠️ ' + error.message, true); })
-        .finally(() => { this.disabled = false; this.textContent = 'Se connecter'; });
-});
-
-document.getElementById('resetPasswordLink')?.addEventListener('click', function(e) {
-    e.preventDefault();
-    const email = document.getElementById('loginEmail').value.trim();
-    if (!email || !isValidEmail(email)) { showToast('⚠️ Entrez un email valide', true); document.getElementById('loginEmail').focus(); return; }
-    sendPasswordResetEmail(auth, email).then(() => showToast('📧 Email envoyé')).catch((error) => showToast('⚠️ ' + error.message, true));
+    if (!email || !window.isValidEmail(email)) {
+        window.showToast('⚠️ Email valide requis', true);
+        document.getElementById('loginEmail').focus();
+        return;
+    }
+    sendPasswordResetEmail(auth, email)
+        .then(() => window.showToast('📧 Email envoyé à ' + email))
+        .catch((error) => window.showToast('⚠️ ' + error.message, true));
 });
 
 // ============================================================
-// SURVEILLANCE AUTH & CHARGEMENT INITIAL
+// AUTRES ÉVÉNEMENTS
+// ============================================================
+document.getElementById('lunchBadge').addEventListener('click', () => window.showToast('🌿 Wellness & Bien-être'));
+document.getElementById('logoLink').addEventListener('click', (e) => { e.preventDefault(); });
+
+document.querySelectorAll('.header-icons i').forEach(icon => {
+    if (icon.id === 'userIcon') return;
+    icon.addEventListener('click', function() {
+        window.showToast('🛍️ Bientôt disponible');
+    });
+});
+
+document.querySelectorAll('.footer-links a').forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.showToast('📄 Page en construction');
+    });
+});
+
+document.querySelectorAll('.footer-social i').forEach(icon => {
+    icon.addEventListener('click', () => window.showToast('📱 Bientôt disponible'));
+});
+
+// ============================================================
+// AUTH STATE LISTENER
 // ============================================================
 onAuthStateChanged(auth, (user) => {
     updateUI(user);
-    if (user && authOverlay?.classList.contains('active')) {
-        closeAuthModal();
-    }
+    loadPublicData();
 });
 
-// CHARGEMENT INITIAL - ACCUEIL PAR DÉFAUT
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('📄 Chargement initial...');
-    showPage('home');
-    loadHomeProducts();
-});
+// ============================================================
+// INITIALISATION
+// ============================================================
+loadPublicData();
 
-// BOUTONS
-document.getElementById('shopNowBtn')?.addEventListener('click', () => {
-    showPage('shop');
-    loadAllProducts();
-});
-
-document.getElementById('silverBtn')?.addEventListener('click', () => {
-    showPage('shop');
-    loadAllProducts();
-});
-
-document.getElementById('lunchBadge')?.addEventListener('click', () => {
-    showToast('🌿 Wellness & Bien-être — MANORA');
-});
-
-document.getElementById('sortSelect')?.addEventListener('change', function() {
-    renderShopProducts(document.querySelector('.category-item.active')?.dataset.category || 'all');
-});
-
-console.log('🌿 MANORA · Script principal chargé');
+console.log('🌿 MANORA · Store + Admin');
+console.log('📊 Firebase Auth + Firestore + Storage actif');
+console.log('🛍️ Store disponible avec les données Firebase');
