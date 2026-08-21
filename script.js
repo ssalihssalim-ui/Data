@@ -132,7 +132,7 @@ async function loadPublicData() {
                 <div class="product-info">
                     <h4>${data.name || ''}</h4>
                     <span class="product-category">${data.category || ''}</span>
-                    <div class="product-price">${promo ? `<span>${data.sellPrice}€</span> ${data.promoPrice}€` : (data.sellPrice || 0) + '€'}</div>
+                    <div class="product-price">${promo ? `<span>${data.sellPrice} MAD</span> ${data.promoPrice} MAD` : (data.sellPrice || 0) + ' MAD'}</div>
                     <div style="font-size:0.6rem;color:#999;">Stock: ${data.stock || 0}</div>
                 </div>
             `;
@@ -208,7 +208,7 @@ async function loadStoreData() {
                     <div class="product-info">
                         <h4>${data.name || 'Sans nom'}</h4>
                         <span class="product-category">${data.category || 'Non catégorisé'}</span>
-                        <div class="product-price">${promo ? `<span>${data.sellPrice}€</span> ${data.promoPrice}€` : (data.sellPrice || 0) + '€'}</div>
+                        <div class="product-price">${promo ? `<span>${data.sellPrice} MAD</span> ${data.promoPrice} MAD` : (data.sellPrice || 0) + ' MAD'}</div>
                         <div style="font-size:0.6rem;color:#999;">📦 Stock: ${data.stock || 0}</div>
                         ${data.brand ? `<div style="font-size:0.6rem;color:#999;">🏷️ ${data.brand}</div>` : ''}
                     </div>
