@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>MANORA · Beauty & Wellness</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <link rel="stylesheet" href="style.css" />
@@ -96,8 +96,11 @@
                     <a href="#" data-page="products" class="sidebar-link" id="sideProducts">
                         <i class="fas fa-box"></i> Produits
                     </a>
-                    <a href="#" data-page="orders" class="sidebar-link" id="sideOrders">
-                        <i class="fas fa-shopping-cart"></i> Commandes
+                    <a href="#" data-page="ventes" class="sidebar-link" id="sideVentes">
+                        <i class="fas fa-cash-register"></i> Ventes
+                    </a>
+                    <a href="#" data-page="credits" class="sidebar-link" id="sideCredits">
+                        <i class="fas fa-credit-card"></i> Crédits
                     </a>
                     <a href="#" data-page="clients" class="sidebar-link" id="sideClients">
                         <i class="fas fa-users"></i> Clients
@@ -111,25 +114,28 @@
             <div class="admin-content">
                 <!-- Dashboard -->
                 <div id="dashboardPanel" class="admin-page active">
-                    <div class="dashboard-header">
-                        <h2><i class="fas fa-chart-pie"></i> Tableau de bord</h2>
-                        <div class="dashboard-stats" id="dashboardStats">
-                            <div class="stat-card">
-                                <span class="stat-number" id="statCategories">0</span>
-                                <span class="stat-label">Catégories</span>
-                            </div>
-                            <div class="stat-card">
-                                <span class="stat-number" id="statProducts">0</span>
-                                <span class="stat-label">Produits</span>
-                            </div>
-                            <div class="stat-card">
-                                <span class="stat-number" id="statStock">0</span>
-                                <span class="stat-label">Stock total</span>
-                            </div>
-                            <div class="stat-card">
-                                <span class="stat-number" id="statCA">0 MAD</span>
-                                <span class="stat-label">Chiffre d'affaires</span>
-                            </div>
+                    <div class="page-header">
+                        <div class="header-title">
+                            <i class="fas fa-chart-pie"></i>
+                            <h2>Tableau de bord</h2>
+                        </div>
+                    </div>
+                    <div class="dashboard-stats" id="dashboardStats">
+                        <div class="stat-card">
+                            <span class="stat-number" id="statCategories">0</span>
+                            <span class="stat-label">Catégories</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number" id="statProducts">0</span>
+                            <span class="stat-label">Produits</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number" id="statStock">0</span>
+                            <span class="stat-label">Stock total</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number" id="statCA">0 MAD</span>
+                            <span class="stat-label">Chiffre d'affaires</span>
                         </div>
                     </div>
                     <div style="display:flex; gap:1rem; margin-top:1rem; flex-wrap:wrap;">
@@ -144,8 +150,13 @@
 
                 <!-- Gestion Catégories -->
                 <div id="categoriesPanel" class="admin-page">
+                    <div class="page-header">
+                        <div class="header-title">
+                            <i class="fas fa-tags"></i>
+                            <h2>Gestion des Catégories</h2>
+                        </div>
+                    </div>
                     <div class="admin-panel-header">
-                        <h2><i class="fas fa-tags"></i> Gestion des Catégories</h2>
                         <button class="btn-primary-small" id="btnAddCategory"><i class="fas fa-plus"></i> Ajouter</button>
                     </div>
                     <div class="table-container">
@@ -169,8 +180,13 @@
 
                 <!-- Gestion Produits -->
                 <div id="productsPanel" class="admin-page">
+                    <div class="page-header">
+                        <div class="header-title">
+                            <i class="fas fa-box"></i>
+                            <h2>Gestion des Produits</h2>
+                        </div>
+                    </div>
                     <div class="admin-panel-header">
-                        <h2><i class="fas fa-box"></i> Gestion des Produits</h2>
                         <button class="btn-primary-small" id="btnAddProduct"><i class="fas fa-plus"></i> Ajouter</button>
                     </div>
                     <div class="table-container">
@@ -197,19 +213,50 @@
                     </div>
                 </div>
 
-                <div id="ordersPanel" class="admin-page">
-                    <div class="admin-panel-header">
-                        <h2><i class="fas fa-shopping-cart"></i> Commandes</h2>
+                <!-- Ventes -->
+                <div id="ventesPanel" class="admin-page">
+                    <div class="page-header">
+                        <div class="header-title">
+                            <i class="fas fa-cash-register"></i>
+                            <h2>Ventes</h2>
+                        </div>
                     </div>
-                    <div class="placeholder-content">
-                        <i class="fas fa-shopping-cart" style="font-size: 3rem; color: #e8a87c;"></i>
-                        <p>Gestion des commandes à venir</p>
+                    <div class="content-card">
+                        <div class="card-header">
+                            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                                <input type="text" id="ventesSearchInput" placeholder="🔍 Rechercher..." style="padding:14px 18px; border:2px solid #e2e8f0; border-radius:8px; width:280px; font-size:24px !important; height:56px;">
+                                <select id="ventesPeriodSelect" style="padding:14px 18px; border:2px solid #e2e8f0; border-radius:8px; font-size:24px !important; height:56px;">
+                                    <option value="all">Toutes</option>
+                                    <option value="today">Aujourd'hui</option>
+                                    <option value="week">Cette semaine</option>
+                                    <option value="month">Ce mois</option>
+                                </select>
+                                <button class="btn-add" onclick="loadVentes()" style="font-size:24px !important; padding:14px 20px; height:56px;"><i class="fas fa-sync"></i> Actualiser</button>
+                            </div>
+                        </div>
+                        <div id="ventesTableContainer"></div>
+                        <div id="ventesPagination" style="margin-top:10px;"></div>
                     </div>
                 </div>
 
+                <!-- Crédits -->
+                <div id="creditsPanel" class="admin-page">
+                    <div class="page-header">
+                        <div class="header-title">
+                            <i class="fas fa-credit-card"></i>
+                            <h2>Crédits</h2>
+                        </div>
+                    </div>
+                    <div id="creditsContainer"></div>
+                </div>
+
+                <!-- Clients -->
                 <div id="clientsPanel" class="admin-page">
-                    <div class="admin-panel-header">
-                        <h2><i class="fas fa-users"></i> Clients</h2>
+                    <div class="page-header">
+                        <div class="header-title">
+                            <i class="fas fa-users"></i>
+                            <h2>Clients</h2>
+                        </div>
                     </div>
                     <div class="placeholder-content">
                         <i class="fas fa-users" style="font-size: 3rem; color: #e8a87c;"></i>
