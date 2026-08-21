@@ -1,51 +1,50 @@
 // ============================================================
-// ADMIN.JS - Gestion des catégories et produits
+// ADMIN.JS - Gestion avec images en Base64 (SANS Firebase Storage)
 // ============================================================
 import { 
     collection, doc, setDoc, getDocs, updateDoc, deleteDoc,
     query, orderBy, serverTimestamp
 } from "firebase/firestore";
-import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "firebase/storage";
-import { db, app } from "./script.js";
+import { db } from "./script.js";
 
-const storage = getStorage(app);
+// ============================================================
+// VARIABLES GLOBALES
+// ============================================================
 let categoriesData = [];
 let productsData = [];
 const CURRENCY = 'MAD';
+const MAX_IMAGE_SIZE = 800 * 1024; // 800 KB
 
-function formatPrice(p) { return (p === undefined || p === null) ? '0 ' + CURRENCY : Number(p).toFixed(2) + ' ' + CURRENCY; }
-
-// ============================================================
-// UPLOAD IMAGE
-// ============================================================
-async function uploadImage(file, path) {
-    if (!file) return null;
-    return new Promise((resolve, reject) => {
-        try {
-            const fileName = Date.now() + '_' + file.name;
-            const storageRef = ref(storage, `${path}/${fileName}`);
-            const uploadTask = uploadBytesResumable(storageRef, file, { contentType: file.type || 'image/jpeg' });
-            uploadTask.on('state_changed', null,
-                (error) => {
-                    console.error('Upload error:', error);
-                    if (error.message.includes('CORS') || error.message.includes('403')) {
-                        const url = prompt('❌ Upload impossible. Entrez une URL d\'image externe:');
-                        if (url && url.startsWith('http')) resolve(url);
-                        else resolve(null);
-                    } else reject(error);
-                },
-                async () => {
-                    const url = await getDownloadURL(uploadTask.snapshot.ref);
-                    resolve(url);
-                }
-            );
-        } catch (e) { reject(e); }
-    });
+function formatPrice(p) {
+    if (p === undefined || p === null) return '0 ' + CURRENCY;
+    return Number(p).toFixed(2) + ' ' + CURRENCY;
 }
 
-async function deleteImage(url) {
-    if (!url || !url.includes('firebasestorage')) return;
-    try { await deleteObject(ref(storage, url)); } catch (e) {}
+// ============================================================
+// UPLOAD IMAGE EN BASE64 (SANS API EXTERNE)
+// ============================================================
+async function uploadImage(file) {
+    if (!file) return null;
+
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const base64 = e.target.result;
+            // Vérifier la taille
+            const sizeInBytes = base64.length * 0.75; // approximation
+            if (sizeInBytes > MAX_IMAGE_SIZE) {
+                window.showToast('⚠️ Image trop grande (max 800 KB)', true);
+                resolve(null);
+            } else {
+                resolve(base64);
+            }
+        };
+        reader.onerror = function(error) {
+            console.error('Erreur lecture fichier:', error);
+            reject(error);
+        };
+        reader.readAsDataURL(file);
+    });
 }
 
 // ============================================================
@@ -117,6 +116,7 @@ export async function loadCategories() {
         renderCategories();
     } catch (e) { console.error(e); }
 }
+
 function renderCategories() {
     const container = document.getElementById('categoriesContainer');
     if (!container) return;
@@ -174,8 +174,6 @@ window.editCategory = function(id) {
 window.deleteCategory = async function(id) {
     if (!confirm('Supprimer cette catégorie ?')) return;
     try {
-        const data = categoriesData.find(c => c.id === id);
-        if (data?.image) await deleteImage(data.image);
         await deleteDoc(doc(db, 'categories', id));
         window.showToast('✅ Catégorie supprimée');
         loadCategories(); loadCategoriesTable(); updateDashboard();
@@ -193,6 +191,7 @@ export async function loadProducts() {
         renderProducts();
     } catch (e) { console.error(e); }
 }
+
 function renderProducts() {
     const container = document.getElementById('productsContainer');
     if (!container) return;
@@ -265,7 +264,6 @@ window.editProduct = function(id) {
     document.getElementById('productModalTitle').textContent = 'Modifier le produit';
     const preview = document.getElementById('prodImagePreview');
     preview.innerHTML = data.image ? `<img src="${data.image}">` : '';
-    // Charger les catégories dans le select
     loadCategoriesForSelect(data.category);
     document.getElementById('productModal').classList.add('active');
 };
@@ -273,8 +271,6 @@ window.editProduct = function(id) {
 window.deleteProduct = async function(id) {
     if (!confirm('Supprimer ce produit ?')) return;
     try {
-        const data = productsData.find(p => p.id === id);
-        if (data?.image) await deleteImage(data.image);
         await deleteDoc(doc(db, 'products', id));
         window.showToast('✅ Produit supprimé');
         loadProducts(); loadProductsTable(); updateDashboard();
@@ -297,9 +293,6 @@ export async function updateDashboard() {
     } catch (e) { console.error(e); }
 }
 
-// ============================================================
-// LOAD CATEGORIES FOR SELECT
-// ============================================================
 async function loadCategoriesForSelect(selectedId) {
     const select = document.getElementById('prodCategory');
     select.innerHTML = '<option value="">Sélectionner</option>';
@@ -351,7 +344,7 @@ document.getElementById('categoryForm').addEventListener('submit', async functio
     const file = document.getElementById('catImageInput').files[0];
     let imageUrl = document.getElementById('catImage').value;
     if (file) {
-        const uploaded = await uploadImage(file, 'categories');
+        const uploaded = await uploadImage(file);
         if (uploaded) imageUrl = uploaded;
     }
     const data = {
@@ -411,7 +404,7 @@ document.getElementById('productForm').addEventListener('submit', async function
     const file = document.getElementById('prodImageInput').files[0];
     let imageUrl = document.getElementById('prodImage').value;
     if (file) {
-        const uploaded = await uploadImage(file, 'products');
+        const uploaded = await uploadImage(file);
         if (uploaded) imageUrl = uploaded;
     }
     const data = {
@@ -447,5 +440,5 @@ document.getElementById('importDataBtn').addEventListener('click', () => {
 document.getElementById('importFile').addEventListener('change', window.importData);
 document.getElementById('deleteAllBtn').addEventListener('click', window.deleteAllData);
 
-console.log('📊 Admin.js chargé - Gestion Catégories & Produits');
+console.log('📊 Admin.js chargé - Upload en Base64');
 console.log('💱 Devise: ' + CURRENCY);
