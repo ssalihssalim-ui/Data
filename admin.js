@@ -26,14 +26,11 @@ import { db, app } from "./script.js";
 // ============================================================
 const storage = getStorage(app);
 
-// ============================================================
-// VARIABLES GLOBALES
-// ============================================================
 let categoriesData = [];
 let productsData = [];
 
 // ============================================================
-// FONCTIONS UPLOAD IMAGE (CORRIGÉES)
+// FONCTION UPLOAD IMAGE AVEC GESTION D'ERREUR CORS
 // ============================================================
 async function uploadImage(file, path) {
     if (!file) return null;
@@ -44,6 +41,8 @@ async function uploadImage(file, path) {
         const storageRef = ref(storage, `${path}/${fileName}`);
         
         console.log('📤 Upload en cours...', fileName);
+        
+        // Tentative d'upload
         const snapshot = await uploadBytes(storageRef, file);
         console.log('✅ Upload terminé:', snapshot.metadata.fullPath);
         
@@ -52,7 +51,24 @@ async function uploadImage(file, path) {
         
         return url;
     } catch (error) {
-        console.error('❌ Erreur upload image:', error);
+        console.error('❌ Erreur upload:', error);
+        
+        // Si erreur CORS, on propose une alternative
+        if (error.code === 'storage/unauthorized' || error.message.includes('CORS')) {
+            window.showToast('⚠️ Problème CORS. Essayez avec une image URL externe.', true);
+            
+            // Proposer d'utiliser une URL externe
+            const url = prompt(
+                'Le téléchargement direct ne fonctionne pas.\n' +
+                'Entrez une URL d\'image existante (ou annulez pour ignorer):'
+            );
+            
+            if (url && url.startsWith('http')) {
+                return url;
+            }
+            return null;
+        }
+        
         window.showToast('⚠️ Erreur upload: ' + error.message, true);
         return null;
     }
@@ -114,14 +130,12 @@ window.importData = async function(event) {
         
         let imported = 0;
         
-        // Importer les catégories
         for (const cat of data.categories) {
             const { id, ...catData } = cat;
             await setDoc(doc(db, 'categories', id || doc(collection(db, 'categories')).id), catData);
             imported++;
         }
         
-        // Importer les produits
         for (const prod of data.products) {
             const { id, ...prodData } = prod;
             await setDoc(doc(db, 'products', id || doc(collection(db, 'products')).id), prodData);
@@ -129,7 +143,6 @@ window.importData = async function(event) {
         }
         
         window.showToast(`✅ ${imported} éléments importés avec succès !`);
-        // Rafraîchir les données
         loadCategories();
         loadProducts();
         loadCategoriesTable();
@@ -142,7 +155,7 @@ window.importData = async function(event) {
 };
 
 // ============================================================
-// CRUD CATÉGORIES
+// CRUD CATÉGORIES (inchangé)
 // ============================================================
 export async function loadCategories() {
     try {
