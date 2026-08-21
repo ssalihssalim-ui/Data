@@ -20,13 +20,12 @@ function formatPrice(p) {
     return Number(p).toFixed(2) + ' ' + CURRENCY;
 }
 
-// Exporter pour que script.js puisse récupérer les produits
 export function getProductsData() {
     return productsData;
 }
 
 // ============================================================
-// UPLOAD IMAGE EN BASE64 (SANS API EXTERNE)
+// UPLOAD IMAGE EN BASE64
 // ============================================================
 async function uploadImage(file) {
     if (!file) return null;
@@ -314,7 +313,6 @@ async function loadCategoriesForSelect(selectedId) {
 // ============================================================
 // MODALS EVENTS
 // ============================================================
-// Category Modal
 document.getElementById('btnAddCategory').addEventListener('click', () => {
     document.getElementById('categoryId').value = '';
     document.getElementById('catName').value = '';
@@ -367,7 +365,6 @@ document.getElementById('categoryForm').addEventListener('submit', async functio
     } catch (e) { window.showToast('⚠️ ' + e.message, true); }
 });
 
-// Product Modal
 document.getElementById('btnAddProduct').addEventListener('click', async () => {
     document.getElementById('productId').value = '';
     document.getElementById('prodName').value = '';
@@ -434,9 +431,6 @@ document.getElementById('productForm').addEventListener('submit', async function
     } catch (e) { window.showToast('⚠️ ' + e.message, true); }
 });
 
-// ============================================================
-// IMPORT/EXPORT EVENTS
-// ============================================================
 document.getElementById('exportDataBtn').addEventListener('click', window.exportData);
 document.getElementById('importDataBtn').addEventListener('click', () => {
     document.getElementById('importFile').click();
