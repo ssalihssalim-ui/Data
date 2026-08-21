@@ -26,11 +26,24 @@ import { db, app } from "./script.js";
 // ============================================================
 const storage = getStorage(app);
 
+// ============================================================
+// VARIABLES GLOBALES
+// ============================================================
 let categoriesData = [];
 let productsData = [];
 
 // ============================================================
-// FONCTION UPLOAD IMAGE AVEC GESTION D'ERREUR CORS
+// CURRENCY MAD
+// ============================================================
+const CURRENCY = 'MAD';
+
+function formatPrice(price) {
+    if (price === undefined || price === null) return '0 ' + CURRENCY;
+    return Number(price).toFixed(2) + ' ' + CURRENCY;
+}
+
+// ============================================================
+// FONCTIONS UPLOAD IMAGE
 // ============================================================
 async function uploadImage(file, path) {
     if (!file) return null;
@@ -41,8 +54,6 @@ async function uploadImage(file, path) {
         const storageRef = ref(storage, `${path}/${fileName}`);
         
         console.log('📤 Upload en cours...', fileName);
-        
-        // Tentative d'upload
         const snapshot = await uploadBytes(storageRef, file);
         console.log('✅ Upload terminé:', snapshot.metadata.fullPath);
         
@@ -51,24 +62,7 @@ async function uploadImage(file, path) {
         
         return url;
     } catch (error) {
-        console.error('❌ Erreur upload:', error);
-        
-        // Si erreur CORS, on propose une alternative
-        if (error.code === 'storage/unauthorized' || error.message.includes('CORS')) {
-            window.showToast('⚠️ Problème CORS. Essayez avec une image URL externe.', true);
-            
-            // Proposer d'utiliser une URL externe
-            const url = prompt(
-                'Le téléchargement direct ne fonctionne pas.\n' +
-                'Entrez une URL d\'image existante (ou annulez pour ignorer):'
-            );
-            
-            if (url && url.startsWith('http')) {
-                return url;
-            }
-            return null;
-        }
-        
+        console.error('❌ Erreur upload image:', error);
         window.showToast('⚠️ Erreur upload: ' + error.message, true);
         return null;
     }
@@ -155,7 +149,7 @@ window.importData = async function(event) {
 };
 
 // ============================================================
-// CRUD CATÉGORIES (inchangé)
+// CRUD CATÉGORIES
 // ============================================================
 export async function loadCategories() {
     try {
@@ -202,8 +196,8 @@ export async function loadCategoriesTable() {
                 <td><strong>${data.name || ''}</strong></td>
                 <td>${data.description || '-'}</td>
                 <td>${data.order || 0}</td>
-                <td>${data.ca || 0} €</td>
-                <td>${data.profit || 0} €</td>
+                <td>${formatPrice(data.ca || 0)}</td>
+                <td>${formatPrice(data.profit || 0)}</td>
                 <td>${data.productCount || 0}</td>
                 <td>
                     <div class="action-btns">
@@ -285,7 +279,7 @@ function renderProducts() {
             <div class="product-info">
                 <h4>${prod.name || ''}</h4>
                 <span class="product-category">${prod.category || ''}</span>
-                <div class="product-price">${promo ? `<span>${prod.sellPrice}€</span> ${prod.promoPrice}€` : (prod.sellPrice || 0) + '€'}</div>
+                <div class="product-price">${promo ? `<span>${formatPrice(prod.sellPrice)}</span> ${formatPrice(prod.promoPrice)}` : formatPrice(prod.sellPrice || 0)}</div>
                 <div style="font-size:0.6rem;color:#999;">Stock: ${prod.stock || 0}</div>
             </div>
         `;
@@ -307,14 +301,14 @@ export async function loadProductsTable() {
                 <td><strong>${data.name || ''}</strong></td>
                 <td>${data.category || '-'}</td>
                 <td>${data.brand || '-'}</td>
-                <td>${data.buyPrice || 0} €</td>
-                <td>${data.sellPrice || 0} €</td>
-                <td style="color:${profit >= 0 ? '#27ae60' : '#e74c3c'}">${profit.toFixed(2)} €</td>
+                <td>${formatPrice(data.buyPrice || 0)}</td>
+                <td>${formatPrice(data.sellPrice || 0)}</td>
+                <td style="color:${profit >= 0 ? '#27ae60' : '#e74c3c'}">${formatPrice(profit)}</td>
                 <td>${data.stock || 0}</td>
-                <td>${data.promoPrice && data.promoPrice > 0 ? data.promoPrice + ' €' : '-'}</td>
+                <td>${data.promoPrice && data.promoPrice > 0 ? formatPrice(data.promoPrice) : '-'}</td>
                 <td>${data.supplier || '-'}</td>
-                <td>${data.ca || 0} €</td>
-                <td>${data.profit || 0} €</td>
+                <td>${formatPrice(data.ca || 0)}</td>
+                <td>${formatPrice(data.profit || 0)}</td>
                 <td>
                     <div class="action-btns">
                         <button class="btn-edit-small" onclick="window.editProduct('${doc.id}')"><i class="fas fa-edit"></i></button>
@@ -382,17 +376,19 @@ export async function updateDashboard() {
         
         let totalStock = 0;
         let totalCA = 0;
+        let totalProfit = 0;
         
         prodSnapshot.forEach(doc => {
             const data = doc.data();
             totalStock += data.stock || 0;
             totalCA += data.ca || 0;
+            totalProfit += data.profit || 0;
         });
         
         document.getElementById('statCategories').textContent = catSnapshot.size;
         document.getElementById('statProducts').textContent = prodSnapshot.size;
         document.getElementById('statStock').textContent = totalStock;
-        document.getElementById('statCA').textContent = totalCA.toFixed(2) + ' €';
+        document.getElementById('statCA').textContent = formatPrice(totalCA);
     } catch (error) {
         console.error('Erreur dashboard:', error);
     }
@@ -454,6 +450,9 @@ document.getElementById('categoryForm').addEventListener('submit', async functio
         description: document.getElementById('catDescription').value.trim(),
         image: imageUrl || '',
         order: parseInt(document.getElementById('catOrder').value) || 0,
+        ca: parseFloat(document.getElementById('catCA')?.value) || 0,
+        profit: parseFloat(document.getElementById('catProfit')?.value) || 0,
+        productCount: parseInt(document.getElementById('catProductCount')?.value) || 0,
         updatedAt: serverTimestamp()
     };
 
@@ -579,6 +578,46 @@ document.getElementById('productForm').addEventListener('submit', async function
 });
 
 // ============================================================
+// SUPPRIMER TOUTES LES DONNÉES (BOUTON)
+// ============================================================
+window.deleteAllData = async function() {
+    if (!confirm('⚠️ Êtes-vous sûr de vouloir supprimer TOUTES les catégories et TOUS les produits ?')) {
+        return;
+    }
+    if (!confirm('⚠️ CONFIRMATION FINALE : Cette action est IRRÉVERSIBLE !')) {
+        return;
+    }
+    
+    try {
+        window.showToast('🗑️ Suppression en cours...', false);
+        
+        // Supprimer les produits
+        const prodSnapshot = await getDocs(collection(db, 'products'));
+        for (const docSnap of prodSnapshot.docs) {
+            await deleteDoc(doc(db, 'products', docSnap.id));
+        }
+        
+        // Supprimer les catégories
+        const catSnapshot = await getDocs(collection(db, 'categories'));
+        for (const docSnap of catSnapshot.docs) {
+            await deleteDoc(doc(db, 'categories', docSnap.id));
+        }
+        
+        window.showToast(`✅ ${prodSnapshot.size + catSnapshot.size} éléments supprimés !`);
+        
+        loadCategories();
+        loadProducts();
+        loadCategoriesTable();
+        loadProductsTable();
+        updateDashboard();
+        
+    } catch (error) {
+        console.error('Erreur suppression:', error);
+        window.showToast('⚠️ ' + error.message, true);
+    }
+};
+
+// ============================================================
 // IMPORT/EXPORT EVENTS
 // ============================================================
 document.getElementById('exportDataBtn').addEventListener('click', window.exportData);
@@ -588,3 +627,4 @@ document.getElementById('importDataBtn').addEventListener('click', () => {
 document.getElementById('importFile').addEventListener('change', window.importData);
 
 console.log('📊 Admin.js chargé - Gestion Catégories & Produits avec Firebase Storage');
+console.log('💱 Devise: ' + CURRENCY);
