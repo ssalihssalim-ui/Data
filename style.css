@@ -1,6 +1,10 @@
 /* ============================================================
    MANORA · BEAUTY & WELLNESS - STYLE COMPLET
+   FONT: Kaisei + Montserrat (fallback)
    ============================================================ */
+
+/* ===== FONT IMPORTS ===== */
+@import url('https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@400;500;700&display=swap');
 
 /* ===== RESET & BASE ===== */
 *,
@@ -14,7 +18,7 @@ html {
     scroll-behavior: smooth;
 }
 body {
-    font-family: 'Montserrat', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Kaisei Decol', 'Montserrat', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: #fcfcf7;
     color: #1a1a1a;
     line-height: 1.5;
@@ -148,7 +152,7 @@ img {
     align-items: center;
     justify-content: center;
     pointer-events: none;
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Kaisei Decol', sans-serif;
 }
 .cart-badge.hidden { display: none; }
 
@@ -431,7 +435,7 @@ img {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Kaisei Decol', sans-serif;
 }
 .cart-badge-header.hidden { display: none; }
 
@@ -1094,25 +1098,39 @@ img {
         font-size: 0.8rem;
         padding: 0.8rem 0.5rem;
     }
+    
+    /* ===== HERO - MODIFICATIONS DEMANDÉES ===== */
+    .hero {
+        height: 320px;
+    }
     .hero h1 {
-        font-size: 2.8rem;
+        font-size: 2.4rem;
+        margin-top: 10px;
     }
     .hero .hero-sub {
-        font-size: 1.2rem;
+        font-size: 1rem;
     }
     .hero .hero-tag {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
+        padding: 0.3rem 1rem;
+    }
+    .hero .hero-note {
+        width: 90%;
+        gap: 0.5rem;
+        justify-content: center;
     }
     .hero .hero-note span {
-        font-size: 0.8rem;
-        padding: 0.4rem 1.2rem;
+        font-size: 0.7rem;
+        padding: 0.3rem 1rem;
     }
+    /* ===== FIN HERO ===== */
+    
     .btn-primary {
-        padding: 1.2rem 3rem;
+        padding: 1.2rem 2.5rem;
         font-size: 1rem;
     }
     .btn-secondary {
-        padding: 1rem 2.5rem;
+        padding: 1rem 2rem;
         font-size: 0.9rem;
     }
     .btn-primary-small {
@@ -1254,12 +1272,14 @@ img {
     }
     .hero h1 {
         font-size: 2rem;
+        margin-top: 8px;
     }
     .hero .hero-sub {
         font-size: 0.85rem;
     }
-    .hero .hero-note {
-        display: none;
+    .hero .hero-note span {
+        font-size: 0.6rem;
+        padding: 0.2rem 0.8rem;
     }
     .store-products {
         grid-template-columns: repeat(2, 1fr);
