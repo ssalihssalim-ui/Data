@@ -7,29 +7,36 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <link rel="stylesheet" href="style.css" />
     <style>
-        /* ===== AUGMENTATION LÉGÈRE DES TAILLES DANS LA BOUTIQUE ===== */
-        /* Catégories de la boutique */
+        /* ===== AUGMENTATION DES TAILLES DANS LA BOUTIQUE ===== */
+        /* Catégories */
         .store-category-btn {
-            font-size: 0.9rem !important;
-            padding: 0.6rem 1.6rem !important;
+            font-size: 1rem !important;
+            padding: 0.7rem 1.8rem !important;
         }
-        /* Nom des produits */
+        /* Nom du produit */
         .product-card .product-info h4 {
-            font-size: 0.95rem !important;
-        }
-        /* Prix des produits */
-        .product-card .product-info .product-price {
             font-size: 1.1rem !important;
+            font-weight: 500 !important;
+        }
+        /* Prix du produit */
+        .product-card .product-info .product-price {
+            font-size: 1.3rem !important;
+        }
+        /* Hauteur de l'image du produit */
+        .product-card img {
+            height: 210px !important;
+            object-fit: cover !important;
         }
         /* Boutons Ajouter et Détails */
         .product-actions .btn-store-add,
         .product-actions .btn-store-detail {
-            font-size: 0.65rem !important;
-            padding: 0.5rem 0.8rem !important;
+            font-size: 0.8rem !important;
+            padding: 0.6rem 1rem !important;
+            border-radius: 6px !important;
         }
         /* ======================================================== */
 
-        /* Ajustements héro et navbar */
+        /* Héro et navbar (conservation des demandes précédentes) */
         .hero .hero-tag {
             font-size: 1rem !important;
             letter-spacing: 0.3em;
@@ -56,6 +63,23 @@
         }
         .user-status {
             font-size: 0.75rem !important;
+        }
+
+        /* Responsive : ajuster les hauteurs sur mobile */
+        @media (max-width: 700px) {
+            .product-card img {
+                height: 170px !important;
+            }
+            .product-actions .btn-store-add,
+            .product-actions .btn-store-detail {
+                font-size: 0.7rem !important;
+                padding: 0.5rem 0.8rem !important;
+            }
+        }
+        @media (max-width: 480px) {
+            .product-card img {
+                height: 140px !important;
+            }
         }
     </style>
 </head>
