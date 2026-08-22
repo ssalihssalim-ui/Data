@@ -1,9 +1,9 @@
 // ============================================================
-// ADMIN.JS - Gestion avec images en Base64 (SANS Firebase Storage)
+// ADMIN.JS - Gestion complète (Catégories, Produits, Utilisateurs)
 // ============================================================
 import { 
     collection, doc, setDoc, getDocs, updateDoc, deleteDoc,
-    query, orderBy, serverTimestamp
+    query, orderBy, serverTimestamp, where
 } from "firebase/firestore";
 import { db } from "./script.js";
 
@@ -12,9 +12,9 @@ import { db } from "./script.js";
 // ============================================================
 let categoriesData = [];
 let productsData = [];
+let usersData = [];
 const CURRENCY = 'MAD';
 const MAX_IMAGE_SIZE = 800 * 1024; // 800 KB
-let categoriesMap = {};
 
 function formatPrice(p) {
     if (p === undefined || p === null) return '0 ' + CURRENCY;
@@ -23,21 +23,6 @@ function formatPrice(p) {
 
 export function getProductsData() {
     return productsData;
-}
-
-// ============================================================
-// CHARGER LES CATÉGORIES DANS LA MAP (pour affichage des noms)
-// ============================================================
-async function loadCategoriesMap() {
-    try {
-        const snap = await getDocs(collection(db, 'categories'));
-        categoriesMap = {};
-        snap.forEach(doc => {
-            categoriesMap[doc.id] = doc.data().name || doc.id;
-        });
-    } catch (e) {
-        console.error('Erreur chargement catégories map:', e);
-    }
 }
 
 // ============================================================
@@ -133,8 +118,6 @@ export async function loadCategories() {
         categoriesData = [];
         snap.forEach(d => categoriesData.push({ id: d.id, ...d.data() }));
         renderCategories();
-        // Mettre à jour la map des catégories pour l'utiliser dans les produits
-        await loadCategoriesMap();
     } catch (e) { console.error(e); }
 }
 
@@ -236,18 +219,19 @@ function renderProducts() {
 }
 
 export async function loadProductsTable() {
-    // S'assurer que la map des catégories est chargée
-    if (Object.keys(categoriesMap).length === 0) {
-        await loadCategoriesMap();
-    }
     try {
         const snap = await getDocs(collection(db, 'products'));
         const tbody = document.getElementById('productsTableBody');
         tbody.innerHTML = '';
+        // Récupérer les catégories pour le mapping nom
+        const catSnap = await getDocs(collection(db, 'categories'));
+        const catMap = {};
+        catSnap.forEach(d => catMap[d.id] = d.data().name || d.id);
+
         snap.forEach(d => {
             const data = d.data();
             const profit = (data.sellPrice || 0) - (data.buyPrice || 0);
-            const categoryName = categoriesMap[data.category] || data.category || '-';
+            const categoryName = catMap[data.category] || data.category || '-';
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${data.image ? `<img src="${data.image}" class="table-img">` : '-'}</td>
@@ -332,6 +316,53 @@ async function loadCategoriesForSelect(selectedId) {
         select.appendChild(opt);
     });
 }
+
+// ============================================================
+// UTILISATEURS
+// ============================================================
+export async function loadUsersTable() {
+    try {
+        const q = query(collection(db, 'users'));
+        const snap = await getDocs(q);
+        const tbody = document.getElementById('usersTableBody');
+        tbody.innerHTML = '';
+        snap.forEach(d => {
+            const data = d.data();
+            // Ne pas afficher l'admin principal ? On affiche tous
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${data.email || '-'}</td>
+                <td>${data.name || '-'}</td>
+                <td>${data.role || 'client'}</td>
+                <td>${data.approved ? '✅ Approuvé' : '⏳ En attente'}</td>
+                <td>
+                    ${!data.approved && data.role !== 'admin' ? `
+                        <button class="btn-edit-small" onclick="window.approveUser('${d.id}')"><i class="fas fa-check"></i> Approuver</button>
+                        <button class="btn-danger-small" onclick="window.rejectUser('${d.id}')"><i class="fas fa-times"></i> Rejeter</button>
+                    ` : '-'}
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch (e) { console.error(e); }
+}
+
+window.approveUser = async function(uid) {
+    try {
+        await updateDoc(doc(db, 'users', uid), { approved: true });
+        window.showToast('✅ Utilisateur approuvé');
+        loadUsersTable();
+    } catch (e) { window.showToast('⚠️ ' + e.message, true); }
+};
+
+window.rejectUser = async function(uid) {
+    if (!confirm('Rejeter cet utilisateur ?')) return;
+    try {
+        await deleteDoc(doc(db, 'users', uid));
+        window.showToast('🗑️ Utilisateur rejeté et supprimé');
+        loadUsersTable();
+    } catch (e) { window.showToast('⚠️ ' + e.message, true); }
+};
 
 // ============================================================
 // MODALS EVENTS
@@ -454,6 +485,9 @@ document.getElementById('productForm').addEventListener('submit', async function
     } catch (e) { window.showToast('⚠️ ' + e.message, true); }
 });
 
+// ============================================================
+// IMPORT/EXPORT EVENTS
+// ============================================================
 document.getElementById('exportDataBtn').addEventListener('click', window.exportData);
 document.getElementById('importDataBtn').addEventListener('click', () => {
     document.getElementById('importFile').click();
