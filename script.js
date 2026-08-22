@@ -9,7 +9,7 @@ import {
     onAuthStateChanged, signOut, setPersistence,
     browserLocalPersistence, updateProfile
 } from "firebase/auth";
-import { getFirestore, collection, getDocs, query, orderBy } from "firebase/firestore";
+import { getFirestore, collection, getDocs, query, orderBy, doc, getDoc, setDoc, updateDoc, deleteDoc, where } from "firebase/firestore";
 
 // ============================================================
 // CONFIGURATION FIREBASE
@@ -389,7 +389,6 @@ async function loadPublicData() {
             const data = doc.data();
             const card = document.createElement('div');
             card.className = 'product-card';
-            // On ajoute un data attribute pour l'id produit
             card.dataset.productId = doc.id;
             const promo = data.promoPrice && data.promoPrice > 0 && data.promoPrice < data.sellPrice;
             const imgSrc = data.image || 'https://via.placeholder.com/200x200?text=MANORA';
@@ -405,12 +404,12 @@ async function loadPublicData() {
             prodContainer.appendChild(card);
         });
 
-        // Ajouter un événement de clic sur chaque carte pour ouvrir la boutique
-        document.querySelectorAll('#productsContainer .product-card').forEach(card => {
-            card.style.cursor = 'pointer';
+        // Cliquer sur un produit → ouvrir la boutique
+        prodContainer.querySelectorAll('.product-card').forEach(card => {
             card.addEventListener('click', function() {
                 openStore();
             });
+            card.style.cursor = 'pointer';
         });
 
     } catch (error) {
@@ -440,7 +439,6 @@ function closeStore() {
 
 async function loadStoreData() {
     try {
-        // Charger catégories
         const catSnapshot = await getDocs(query(collection(db, 'categories'), orderBy('order', 'asc')));
         const catContainer = document.getElementById('storeCategories');
         catContainer.innerHTML = '<button class="store-category-btn active" data-category="all">📋 Tous</button>';
@@ -453,7 +451,6 @@ async function loadStoreData() {
             catContainer.appendChild(btn);
         });
 
-        // Charger produits
         const prodSnapshot = await getDocs(collection(db, 'products'));
         const prodContainer = document.getElementById('storeProducts');
         prodContainer.innerHTML = '';
@@ -486,7 +483,7 @@ async function loadStoreData() {
                 prodContainer.appendChild(card);
             });
 
-            // Attacher les événements sur les boutons de chaque carte
+            // Attacher les événements
             prodContainer.querySelectorAll('.btn-store-add').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -505,7 +502,7 @@ async function loadStoreData() {
                 });
             });
 
-            // Stocker les produits dans une Map pour accès facile
+            // Stocker les produits dans une Map
             window._storeProductsMap = new Map();
             prodSnapshot.forEach(doc => {
                 const product = { id: doc.id, ...doc.data() };
@@ -513,7 +510,7 @@ async function loadStoreData() {
             });
         }
 
-        // Filtrage par catégorie
+        // Filtrage
         document.querySelectorAll('.store-category-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.querySelectorAll('.store-category-btn').forEach(b => b.classList.remove('active'));
@@ -542,25 +539,66 @@ function updateUI(user) {
     const navDashboard = document.getElementById('navDashboard');
     const navCategories = document.getElementById('navCategories');
     const navProducts = document.getElementById('navProducts');
+    const navUsers = document.getElementById('navUsers');
 
     if (user) {
         const displayName = user.displayName || user.email || 'Utilisateur';
         userStatus.textContent = '👤 ' + displayName.split('@')[0];
         userStatus.className = 'user-status logged-in';
         userIcon.style.color = '#4caf50';
-        if (navDashboard) navDashboard.style.display = 'inline';
-        if (navCategories) navCategories.style.display = 'inline';
-        if (navProducts) navProducts.style.display = 'inline';
-        openAdminPanel(user);
+
+        // Récupérer le rôle et le statut d'approbation depuis Firestore
+        const userRef = doc(db, 'users', user.uid);
+        getDoc(userRef).then(docSnap => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                const role = data.role || 'client';
+                const approved = data.approved || false;
+
+                // Afficher les liens admin si rôle admin
+                if (role === 'admin') {
+                    navDashboard.style.display = 'inline';
+                    navCategories.style.display = 'inline';
+                    navProducts.style.display = 'inline';
+                    navUsers.style.display = 'inline';
+                    openAdminPanel(user);
+                } else {
+                    navDashboard.style.display = 'none';
+                    navCategories.style.display = 'none';
+                    navProducts.style.display = 'none';
+                    navUsers.style.display = 'none';
+                    if (role === 'vendeur' || role === 'client') {
+                        if (approved) {
+                            // Afficher la page placeholder
+                            showRolePlaceholder(role);
+                        } else {
+                            window.showToast('⏳ Votre compte est en attente d\'approbation.', false);
+                        }
+                    }
+                    // Fermer admin panel si ouvert
+                    closeAdminPanel();
+                }
+            }
+        }).catch(err => console.error('Erreur lecture rôle:', err));
     } else {
         userStatus.textContent = '';
         userStatus.className = 'user-status';
         userIcon.style.color = '';
-        if (navDashboard) navDashboard.style.display = 'none';
-        if (navCategories) navCategories.style.display = 'none';
-        if (navProducts) navProducts.style.display = 'none';
+        navDashboard.style.display = 'none';
+        navCategories.style.display = 'none';
+        navProducts.style.display = 'none';
+        navUsers.style.display = 'none';
         closeAdminPanel();
     }
+}
+
+function showRolePlaceholder(role) {
+    const modal = document.getElementById('rolePlaceholderModal');
+    const title = role === 'vendeur' ? 'Espace Vendeur' : 'Espace Client';
+    const icon = role === 'vendeur' ? 'fa-store' : 'fa-user';
+    document.querySelector('#rolePlaceholderModal .modal-content h2').textContent = title;
+    document.querySelector('#rolePlaceholderModal .modal-content i').className = `fas ${icon}`;
+    modal.classList.add('active');
 }
 
 // ============================================================
@@ -587,6 +625,7 @@ function openAdminPanel(user) {
             module.updateDashboard();
             module.loadCategoriesTable();
             module.loadProductsTable();
+            module.loadUsersTable();
         });
     }
 }
@@ -622,7 +661,8 @@ document.querySelectorAll('.sidebar-link').forEach(link => {
         const targetMap = {
             'dashboard': 'dashboardPanel',
             'categories': 'categoriesPanel',
-            'products': 'productsPanel'
+            'products': 'productsPanel',
+            'users': 'usersPanel'
         };
         const target = document.getElementById(targetMap[page]);
         if (target) target.classList.add('active');
@@ -632,6 +672,8 @@ document.querySelectorAll('.sidebar-link').forEach(link => {
             import('./admin.js').then(module => module.loadProductsTable());
         } else if (page === 'dashboard') {
             import('./admin.js').then(module => module.updateDashboard());
+        } else if (page === 'users') {
+            import('./admin.js').then(module => module.loadUsersTable());
         }
     });
 });
@@ -747,10 +789,13 @@ registerForm.addEventListener('submit', function(e) {
     const name = document.getElementById('registerName').value.trim();
     const email = document.getElementById('registerEmail').value.trim();
     const phone = document.getElementById('registerPhone').value.trim();
+    const role = document.getElementById('registerRole').value;
     const password = document.getElementById('registerPassword').value;
     const confirm = document.getElementById('registerConfirm').value;
     const errorDiv = document.getElementById('registerError');
     errorDiv.classList.add('hidden');
+
+    // Validation
     if (!name || name.length < 2) {
         errorDiv.classList.remove('hidden'); errorDiv.textContent = '⚠️ Nom invalide'; return;
     }
@@ -763,13 +808,37 @@ registerForm.addEventListener('submit', function(e) {
     if (password !== confirm) {
         errorDiv.classList.remove('hidden'); errorDiv.textContent = '⚠️ Les mots de passe ne correspondent pas'; return;
     }
+
+    // Interdire l'inscription en admin sauf pour salim@gmail.com
+    if (role === 'admin' && email !== 'salim@gmail.com') {
+        errorDiv.classList.remove('hidden'); errorDiv.textContent = '⚠️ Seul l\'admin préexistant peut choisir ce rôle.';
+        return;
+    }
+
+    // Si l'email est salim@gmail.com, forcer le rôle admin
+    const finalRole = email === 'salim@gmail.com' ? 'admin' : role;
+    const approved = finalRole === 'admin'; // admin est approuvé d'office
+
     const registerBtn = document.getElementById('registerBtn');
     registerBtn.disabled = true;
     registerBtn.textContent = 'Création...';
+
     createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
             const user = userCredential.user;
-            return updateProfile(user, { displayName: name }).then(() => user);
+            // Mise à jour du profil
+            return updateProfile(user, { displayName: name }).then(() => {
+                // Enregistrer les données utilisateur dans Firestore
+                return setDoc(doc(db, 'users', user.uid), {
+                    uid: user.uid,
+                    name: name,
+                    email: email,
+                    phone: phone || '',
+                    role: finalRole,
+                    approved: approved,
+                    createdAt: new Date().toISOString()
+                });
+            });
         })
         .then(() => {
             window.showToast('🎉 Bienvenue ' + name + ' !');
@@ -825,6 +894,18 @@ document.querySelectorAll('.footer-links a').forEach(link => {
 });
 document.querySelectorAll('.footer-social i').forEach(icon => {
     icon.addEventListener('click', () => window.showToast('📱 Bientôt disponible'));
+});
+
+// ============================================================
+// FERMETURE DU MODAL PLACEHOLDER
+// ============================================================
+document.getElementById('closeRolePlaceholder').addEventListener('click', () => {
+    document.getElementById('rolePlaceholderModal').classList.remove('active');
+});
+document.getElementById('rolePlaceholderModal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) {
+        document.getElementById('rolePlaceholderModal').classList.remove('active');
+    }
 });
 
 // ============================================================
