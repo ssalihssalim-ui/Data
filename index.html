@@ -25,6 +25,7 @@
                 <a href="#" data-page="dashboard" id="navDashboard">Dashboard</a>
                 <a href="#" data-page="categories" id="navCategories">Catégories</a>
                 <a href="#" data-page="products" id="navProducts">Produits</a>
+                <a href="#" data-page="users" id="navUsers">Utilisateurs</a>
             </nav>
             <div class="header-icons">
                 <i class="fas fa-search"></i>
@@ -119,6 +120,7 @@
                     <a href="#" data-page="dashboard" class="sidebar-link active" id="sideDashboard"><i class="fas fa-chart-pie"></i> Dashboard</a>
                     <a href="#" data-page="categories" class="sidebar-link" id="sideCategories"><i class="fas fa-tags"></i> Catégories</a>
                     <a href="#" data-page="products" class="sidebar-link" id="sideProducts"><i class="fas fa-box"></i> Produits</a>
+                    <a href="#" data-page="users" class="sidebar-link" id="sideUsers"><i class="fas fa-users"></i> Utilisateurs</a>
                     <a href="#" class="sidebar-link logout" id="sideLogout"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
                 </nav>
             </div>
@@ -176,6 +178,21 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- Utilisateurs -->
+                <div id="usersPanel" class="admin-page">
+                    <div class="admin-panel-header">
+                        <h2><i class="fas fa-users"></i> Gestion des Utilisateurs</h2>
+                    </div>
+                    <div class="table-container">
+                        <table class="admin-table">
+                            <thead><tr>
+                                <th>Email</th><th>Nom</th><th>Rôle</th><th>Statut</th><th>Actions</th>
+                            </tr></thead>
+                            <tbody id="usersTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -212,7 +229,7 @@
                     <input type="file" id="catImageInput" accept="image/*" />
                     <div id="catImagePreview"></div>
                     <input type="hidden" id="catImage" />
-                    <small>Choisissez une image (max 800KB). Elle sera stockée en Base64 dans Firestore.</small>
+                    <small>Choisissez une image (max 800KB).</small>
                 </div>
                 <div class="form-group">
                     <label>Ordre d'affichage</label>
@@ -275,7 +292,7 @@
                     <input type="file" id="prodImageInput" accept="image/*" />
                     <div id="prodImagePreview"></div>
                     <input type="hidden" id="prodImage" />
-                    <small>Choisissez une image (max 800KB). Elle sera stockée en Base64 dans Firestore.</small>
+                    <small>Choisissez une image (max 800KB).</small>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -331,6 +348,15 @@
                     <input type="tel" id="registerPhone" placeholder="06 12 34 56 78" />
                 </div>
                 <div class="form-group">
+                    <label>Rôle</label>
+                    <select id="registerRole" required>
+                        <option value="client">Client</option>
+                        <option value="vendeur">Vendeur</option>
+                        <option value="admin">Admin (réservé)</option>
+                    </select>
+                    <small>Seul l'admin préexistant peut choisir ce rôle.</small>
+                </div>
+                <div class="form-group">
                     <label>Mot de passe</label>
                     <input type="password" id="registerPassword" placeholder="••••••••" required />
                     <small>Minimum 6 caractères</small>
@@ -352,6 +378,19 @@
             <button class="modal-close" id="closeProductDetails"><i class="fas fa-times"></i></button>
             <div id="productDetailsContent">
                 <!-- Rempli dynamiquement -->
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGES PLACEHOLDER POUR VENDEUR ET CLIENT -->
+    <div class="modal-overlay" id="rolePlaceholderModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeRolePlaceholder"><i class="fas fa-times"></i></button>
+            <div style="text-align:center;padding:1rem;">
+                <i class="fas fa-construction" style="font-size:3rem;color:#e8a87c;margin-bottom:1rem;"></i>
+                <h2 style="font-weight:300;">Page en construction</h2>
+                <p style="color:#999;margin-top:0.5rem;">Cette section sera disponible prochainement.</p>
+                <button class="btn-primary" onclick="document.getElementById('rolePlaceholderModal').classList.remove('active')" style="margin-top:1rem;">Fermer</button>
             </div>
         </div>
     </div>
