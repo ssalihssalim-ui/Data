@@ -19,9 +19,12 @@
         .product-card .product-info .product-price {
             font-size: 1.3rem !important;
         }
+        /* AUGMENTATION DE LA HAUTEUR DE L'IMAGE ET PASSAGE À contain */
         .product-card img {
-            height: 210px !important;
-            object-fit: cover !important;
+            height: 260px !important;        /* hauteur augmentée */
+            object-fit: contain !important;  /* image complète, sans recadrage */
+            background: #f8f8f8;             /* fond neutre si image plus petite */
+            padding: 4px;                    /* petit espace */
         }
         .product-actions .btn-store-add,
         .product-actions .btn-store-detail {
@@ -66,22 +69,17 @@
 
         @media (max-width: 700px) {
             .product-card img {
-                height: 170px !important;
+                height: 200px !important;
             }
             .product-actions .btn-store-add,
             .product-actions .btn-store-detail {
                 font-size: 0.7rem !important;
                 padding: 0.5rem 0.8rem !important;
             }
-            /* Suppression du stock sur mobile aussi */
-            .products-grid .product-card .product-info .stock-display,
-            #storeProducts .product-card .product-info .stock-display {
-                display: none !important;
-            }
         }
         @media (max-width: 480px) {
             .product-card img {
-                height: 140px !important;
+                height: 160px !important;
             }
         }
     </style>
