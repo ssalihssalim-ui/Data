@@ -1,5 +1,5 @@
 // ============================================================
-// MANORA - script.js (modifié pour masquer stock, fournisseur, prix achat)
+// MANORA - script.js (corrigé : détails produit sans stock, fournisseur, prix achat, marge)
 // ============================================================
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
@@ -310,14 +310,20 @@ window.showToast = function(msg, isError = false) {
 };
 
 // ============================================================
-// PRODUCT DETAILS MODAL
+// PRODUCT DETAILS MODAL (CORRIGÉ : plus de stock, fournisseur, prix achat, marge)
 // ============================================================
 function showProductDetails(product) {
     const modal = document.getElementById('productDetailsModal');
     const content = document.getElementById('productDetailsContent');
     const promo = product.promoPrice && product.promoPrice > 0 && product.promoPrice < product.sellPrice;
     const imgSrc = product.image || 'https://via.placeholder.com/400x300?text=MANORA';
-    
+
+    // Construction de la description (si elle existe)
+    let descriptionHtml = '';
+    if (product.description) {
+        descriptionHtml = `<div style="margin-top:0.8rem;font-size:0.9rem;color:#555;line-height:1.6;">${product.description}</div>`;
+    }
+
     content.innerHTML = `
         <img src="${imgSrc}" alt="${product.name}" class="detail-image">
         <h2 class="detail-name">${product.name || 'Sans nom'}</h2>
@@ -325,11 +331,8 @@ function showProductDetails(product) {
         <div class="detail-price">
             ${promo ? `<span>${product.sellPrice} MAD</span> ${product.promoPrice} MAD` : (product.sellPrice || 0) + ' MAD'}
         </div>
-        <div class="detail-row"><span class="label">Marque</span><span class="value">${product.brand || '-'}</span></div>
-        <div class="detail-row"><span class="label">Stock</span><span class="value">${product.stock || 0}</span></div>
-        <div class="detail-row"><span class="label">Fournisseur</span><span class="value">${product.supplier || '-'}</span></div>
-        <div class="detail-row"><span class="label">Prix d'achat</span><span class="value">${product.buyPrice || 0} MAD</span></div>
-        <div class="detail-row"><span class="label">Marge</span><span class="value">${((product.sellPrice || 0) - (product.buyPrice || 0)).toFixed(2)} MAD</span></div>
+        ${product.brand ? `<div class="detail-row"><span class="label">Marque</span><span class="value">${product.brand}</span></div>` : ''}
+        ${descriptionHtml}
         <div style="margin-top:1.2rem; display:flex; gap:0.8rem; flex-wrap:wrap;">
             <button class="btn-primary" onclick="addToCart(window._currentDetailProduct); closeProductDetailsModal();" style="flex:1; padding:0.8rem; font-size:0.8rem;">
                 <i class="fas fa-cart-plus"></i> Ajouter au panier
@@ -397,7 +400,6 @@ async function loadPublicData() {
             prodContainer.appendChild(card);
         });
 
-        // Cliquer sur un produit → ouvrir la boutique
         prodContainer.querySelectorAll('.product-card').forEach(card => {
             card.addEventListener('click', function() {
                 openStore();
