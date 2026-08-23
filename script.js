@@ -1,5 +1,5 @@
 // ============================================================
-// MANORA - script.js (Auth + Store + UI + Panier persistant)
+// MANORA - script.js (modifié pour masquer stock, fournisseur, prix achat)
 // ============================================================
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
@@ -9,7 +9,7 @@ import {
     onAuthStateChanged, signOut, setPersistence,
     browserLocalPersistence, updateProfile
 } from "firebase/auth";
-import { getFirestore, collection, getDocs, query, orderBy, doc, getDoc, setDoc, updateDoc, deleteDoc, where } from "firebase/firestore";
+import { getFirestore, collection, getDocs, query, orderBy, doc, getDoc, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
 
 // ============================================================
 // CONFIGURATION FIREBASE
@@ -24,9 +24,6 @@ const firebaseConfig = {
     measurementId: "G-3HF31CC37B"
 };
 
-// ============================================================
-// INITIALISATION
-// ============================================================
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
@@ -37,7 +34,7 @@ setPersistence(auth, browserLocalPersistence).catch(() => {});
 export { app, auth, db };
 
 // ============================================================
-// PANIER (Cart) - PERSISTANT DANS localStorage
+// PANIER
 // ============================================================
 const CART_KEY = 'manora_cart';
 
@@ -114,9 +111,6 @@ function getCartTotal() {
     return cart.reduce((sum, item) => sum + (item.sellPrice || 0) * item.quantity, 0);
 }
 
-// ============================================================
-// AFFICHAGE DU PANIER (Modal)
-// ============================================================
 function renderCart() {
     const container = document.getElementById('cartContent');
     if (!container) return;
@@ -173,7 +167,7 @@ function renderCart() {
 }
 
 // ============================================================
-// CODE PROMO (Simulation)
+// CODE PROMO
 // ============================================================
 let promoApplied = false;
 let promoDiscount = 0;
@@ -249,9 +243,7 @@ Merci pour votre commande ! 🌿
     window.showToast('✅ Commande validée ! Merci.');
 };
 
-// ============================================================
-// EXPOSER LES FONCTIONS DU PANIER AU GLOBAL
-// ============================================================
+// Exposer les fonctions du panier
 window.addToCart = addToCart;
 window.removeFromCart = removeFromCart;
 window.updateQuantity = updateQuantity;
@@ -363,7 +355,7 @@ document.getElementById('productDetailsModal').addEventListener('click', (e) => 
 });
 
 // ============================================================
-// LOAD PUBLIC DATA (page d'accueil)
+// LOAD PUBLIC DATA (page d'accueil) - SANS STOCK, FOURNISSEUR, PRIX ACHAT
 // ============================================================
 async function loadPublicData() {
     try {
@@ -398,7 +390,8 @@ async function loadPublicData() {
                     <h4>${data.name || ''}</h4>
                     <span class="product-category">${data.category || ''}</span>
                     <div class="product-price">${promo ? `<span>${data.sellPrice} MAD</span> ${data.promoPrice} MAD` : (data.sellPrice || 0) + ' MAD'}</div>
-                    <div style="font-size:0.6rem;color:#999;">📦 Stock: ${data.stock || 0}</div>
+                    ${data.brand ? `<div style="font-size:0.7rem;color:#999;margin-top:0.2rem;">${data.brand}</div>` : ''}
+                    ${data.description ? `<div style="font-size:0.7rem;color:#666;margin-top:0.2rem;">${data.description}</div>` : ''}
                 </div>
             `;
             prodContainer.appendChild(card);
@@ -418,7 +411,7 @@ async function loadPublicData() {
 }
 
 // ============================================================
-// STORE PAGE (boutique modale)
+// STORE PAGE (boutique modale) - SANS STOCK, FOURNISSEUR, PRIX ACHAT
 // ============================================================
 const storePage = document.getElementById('storePage');
 document.getElementById('shopNowBtn').addEventListener('click', () => openStore());
@@ -472,8 +465,8 @@ async function loadStoreData() {
                         <h4>${product.name || 'Sans nom'}</h4>
                         <span class="product-category">${product.category || 'Non catégorisé'}</span>
                         <div class="product-price">${promo ? `<span>${product.sellPrice} MAD</span> ${product.promoPrice} MAD` : (product.sellPrice || 0) + ' MAD'}</div>
-                        <div style="font-size:0.6rem;color:#999;">📦 Stock: ${product.stock || 0}</div>
-                        ${product.brand ? `<div style="font-size:0.6rem;color:#999;">🏷️ ${product.brand}</div>` : ''}
+                        ${product.brand ? `<div style="font-size:0.7rem;color:#999;margin-top:0.2rem;">${product.brand}</div>` : ''}
+                        ${product.description ? `<div style="font-size:0.7rem;color:#666;margin-top:0.2rem;">${product.description}</div>` : ''}
                         <div class="product-actions">
                             <button class="btn-store-add" data-product-id="${product.id}"><i class="fas fa-cart-plus"></i> Ajouter</button>
                             <button class="btn-store-detail" data-product-id="${product.id}"><i class="fas fa-eye"></i> Détails</button>
@@ -483,7 +476,6 @@ async function loadStoreData() {
                 prodContainer.appendChild(card);
             });
 
-            // Attacher les événements
             prodContainer.querySelectorAll('.btn-store-add').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -502,7 +494,6 @@ async function loadStoreData() {
                 });
             });
 
-            // Stocker les produits dans une Map
             window._storeProductsMap = new Map();
             prodSnapshot.forEach(doc => {
                 const product = { id: doc.id, ...doc.data() };
@@ -510,7 +501,6 @@ async function loadStoreData() {
             });
         }
 
-        // Filtrage
         document.querySelectorAll('.store-category-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.querySelectorAll('.store-category-btn').forEach(b => b.classList.remove('active'));
@@ -547,7 +537,6 @@ function updateUI(user) {
         userStatus.className = 'user-status logged-in';
         userIcon.style.color = '#4caf50';
 
-        // Récupérer le rôle et le statut d'approbation depuis Firestore
         const userRef = doc(db, 'users', user.uid);
         getDoc(userRef).then(docSnap => {
             if (docSnap.exists()) {
@@ -555,7 +544,6 @@ function updateUI(user) {
                 const role = data.role || 'client';
                 const approved = data.approved || false;
 
-                // Afficher les liens admin si rôle admin
                 if (role === 'admin') {
                     navDashboard.style.display = 'inline';
                     navCategories.style.display = 'inline';
@@ -569,13 +557,11 @@ function updateUI(user) {
                     navUsers.style.display = 'none';
                     if (role === 'vendeur' || role === 'client') {
                         if (approved) {
-                            // Afficher la page placeholder
                             showRolePlaceholder(role);
                         } else {
                             window.showToast('⏳ Votre compte est en attente d\'approbation.', false);
                         }
                     }
-                    // Fermer admin panel si ouvert
                     closeAdminPanel();
                 }
             }
@@ -795,7 +781,6 @@ registerForm.addEventListener('submit', function(e) {
     const errorDiv = document.getElementById('registerError');
     errorDiv.classList.add('hidden');
 
-    // Validation
     if (!name || name.length < 2) {
         errorDiv.classList.remove('hidden'); errorDiv.textContent = '⚠️ Nom invalide'; return;
     }
@@ -809,15 +794,13 @@ registerForm.addEventListener('submit', function(e) {
         errorDiv.classList.remove('hidden'); errorDiv.textContent = '⚠️ Les mots de passe ne correspondent pas'; return;
     }
 
-    // Interdire l'inscription en admin sauf pour salim@gmail.com
     if (role === 'admin' && email !== 'salim@gmail.com') {
         errorDiv.classList.remove('hidden'); errorDiv.textContent = '⚠️ Seul l\'admin préexistant peut choisir ce rôle.';
         return;
     }
 
-    // Si l'email est salim@gmail.com, forcer le rôle admin
     const finalRole = email === 'salim@gmail.com' ? 'admin' : role;
-    const approved = finalRole === 'admin'; // admin est approuvé d'office
+    const approved = finalRole === 'admin';
 
     const registerBtn = document.getElementById('registerBtn');
     registerBtn.disabled = true;
@@ -826,9 +809,7 @@ registerForm.addEventListener('submit', function(e) {
     createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
             const user = userCredential.user;
-            // Mise à jour du profil
             return updateProfile(user, { displayName: name }).then(() => {
-                // Enregistrer les données utilisateur dans Firestore
                 return setDoc(doc(db, 'users', user.uid), {
                     uid: user.uid,
                     name: name,
@@ -897,7 +878,7 @@ document.querySelectorAll('.footer-social i').forEach(icon => {
 });
 
 // ============================================================
-// FERMETURE DU MODAL PLACEHOLDER
+// FERMETURE PLACEHOLDER
 // ============================================================
 document.getElementById('closeRolePlaceholder').addEventListener('click', () => {
     document.getElementById('rolePlaceholderModal').classList.remove('active');
